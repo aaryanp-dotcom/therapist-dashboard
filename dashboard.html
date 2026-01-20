@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+</head>
+
+<body>
+  <h2>Available Therapists</h2>
+  <ul id="therapistList">
+    <li>Loading therapists...</li>
+  </ul>
+
+  <h2>My Bookings</h2>
+  <ul id="bookings-list">
+    <li>Loading bookings...</li>
+  </ul>
+
+  <h2>Dashboard</h2>
+  <p id="status">Loading...</p>
+
+  <button onclick="logout()">Logout</button>
+
+  <!-- IMPORTANT: Supabase FIRST -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- THEN your app.js -->
+  <script src="app.js"></script>
+</body>
+
+</html>
