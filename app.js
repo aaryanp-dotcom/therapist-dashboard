@@ -1,5 +1,4 @@
 
-console.log("app.js loaded");
 
 // ---------- SUPABASE CLIENT ----------
 const SUPABASE_URL = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
@@ -10,17 +9,19 @@ const supabaseClient = supabase.createClient(
   SUPABASE_ANON_KEY
 );
 
-// 2️⃣ Run when page loads
+// ================== PAGE LOAD ==================
 document.addEventListener("DOMContentLoaded", async () => {
+  console.log("app.js loaded");
   await loadTherapists();
   await loadBookings();
 });
 
-// ---------------- THERAPISTS ----------------
+// ================== LOAD THERAPISTS ==================
 async function loadTherapists() {
   console.log("Loading therapists...");
 
   const list = document.getElementById("therapistList");
+  if (!list) return;
 
   const { data, error } = await supabaseClient
     .from("Therapists")
@@ -41,23 +42,29 @@ async function loadTherapists() {
   });
 }
 
-// ---------------- BOOKINGS ----------------
+// ================== LOAD BOOKINGS ==================
 async function loadBookings() {
   console.log("Loading bookings...");
 
   const list = document.getElementById("bookings-list");
+  if (!list) return;
 
-  // Supabase v2 auth
-  const { data: { user } } = await supabaseClient.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabaseClient.auth.getUser();
 
-  if (!user) {
+  if (authError || !user) {
     list.innerHTML = "<li>Please log in</li>";
     return;
   }
 
   const { data, error } = await supabaseClient
     .from("Bookings")
-    .select("session_date")
+    .select(`
+      session_date,
+      Therapists ( Name )
+    `)
     .eq("user_id", user.id)
     .order("session_date", { ascending: true });
 
@@ -76,13 +83,14 @@ async function loadBookings() {
 
   data.forEach((b) => {
     const li = document.createElement("li");
-    li.textContent = `${b.session_date} — pending`;
+    li.textContent = `${b.Therapists.Name} — ${b.session_date} — pending`;
     list.appendChild(li);
   });
 }
 
-// ---------------- LOGOUT ----------------
+// ================== LOGOUT ==================
 async function logout() {
   await supabaseClient.auth.signOut();
-  window.location.href = "index.html";
+  window.location.href = "login.html";
 }
+
