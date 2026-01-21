@@ -74,14 +74,14 @@ function bookSession(therapistId, userId) {
   }
 
   var sessionDate = dateInput.value;
-  var sessionTime = timeInput.value;
+  var startTime = timeInput.value;
 
   if (!sessionDate) {
     alert("Please select a date");
     return;
   }
 
-  if (!sessionTime) {
+  if (!startTime) {
     alert("Please select a time");
     return;
   }
@@ -90,7 +90,7 @@ function bookSession(therapistId, userId) {
     user_id: userId,
     therapist_id: therapistId,
     session_date: sessionDate,
-    session_time: sessionTime,
+    start_time: startTime,
     status: "pending"
   };
 
@@ -138,7 +138,7 @@ function loadBookings(userId) {
           html += '<div class="booking-card" style="border:1px solid #ddd; padding:10px; margin:10px 0; border-radius:5px; background:#f9f9f9;">';
           html += '<strong>' + therapistName + '</strong><br>';
           html += 'Date: ' + booking.session_date + '<br>';
-          html += 'Time: ' + booking.session_time + '<br>';
+          html += 'Time: ' + booking.start_time + '<br>';
           html += 'Status: ' + (booking.status || "pending") + '<br>';
           html += '<button onclick="cancelBooking(\'' + booking.id + '\', \'' + userId + '\')" style="background:#f44336; color:white; padding:5px 10px; border:none; border-radius:3px; cursor:pointer; margin-top:5px;">Cancel</button>';
           html += '</div>';
