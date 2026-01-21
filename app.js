@@ -2,7 +2,6 @@
 const SUPABASE_URL = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
 
-
 const supabaseClient =
   window.supabaseClient ||
   window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -88,9 +87,56 @@ async function loadTherapists() {
 
   data.forEach((t) => {
     const li = document.createElement("li");
-    li.textContent = t.Name;
+
+    const text = document.createElement("span");
+    text.textContent = t.Name;
+
+    const btn = document.createElement("button");
+    btn.textContent = "Book";
+    btn.style.marginLeft = "10px";
+
+    btn.addEventListener("click", () => bookTherapist(t.id));
+
+    li.appendChild(text);
+    li.appendChild(btn);
     list.appendChild(li);
   });
+}
+
+// ================== BOOK THERAPIST ==================
+async function bookTherapist(therapistId) {
+  const sessionDate = prompt("Enter session date (YYYY-MM-DD)");
+  if (!sessionDate) return;
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(sessionDate)) {
+    alert("Invalid date format");
+    return;
+  }
+
+  const {
+    data: { user },
+  } = await supabaseClient.auth.getUser();
+
+  const { error } = await supabaseClient
+    .from("Bookings")
+    .insert({
+      user_id: user.id,
+      therapist_id: therapistId,
+      session_date: sessionDate,
+    });
+
+  if (error) {
+    if (error.code === "23505") {
+      alert("You already have a booking on this date.");
+    } else {
+      console.error(error);
+      alert("Could not create booking");
+    }
+    return;
+  }
+
+  alert("Booking created");
+  loadBookings();
 }
 
 // ================== LOAD BOOKINGS ==================
@@ -104,14 +150,9 @@ async function loadBookings() {
     data: { user },
   } = await supabaseClient.auth.getUser();
 
-  if (!user) {
-    list.innerHTML = "<li>Please log in</li>";
-    return;
-  }
-
   const { data, error } = await supabaseClient
     .from("Bookings")
-    .select("session_date, Therapists(Name)")
+    .select("id, session_date, Therapists(Name)")
     .eq("user_id", user.id)
     .order("session_date", { ascending: true });
 
@@ -130,7 +171,34 @@ async function loadBookings() {
 
   data.forEach((b) => {
     const li = document.createElement("li");
-    li.textContent = `${b.Therapists.Name} — ${b.session_date}`;
+
+    const text = document.createElement("span");
+    text.textContent = `${b.Therapists.Name} — ${b.session_date}`;
+
+    const btn = document.createElement("button");
+    btn.textContent = "Cancel";
+    btn.style.marginLeft = "10px";
+
+    btn.addEventListener("click", async () => {
+      const confirmCancel = confirm("Cancel this booking?");
+      if (!confirmCancel) return;
+
+      const { error: deleteError } = await supabaseClient
+        .from("Bookings")
+        .delete()
+        .eq("id", b.id);
+
+      if (deleteError) {
+        console.error(deleteError);
+        alert("Could not cancel booking");
+        return;
+      }
+
+      loadBookings();
+    });
+
+    li.appendChild(text);
+    li.appendChild(btn);
     list.appendChild(li);
   });
 }
