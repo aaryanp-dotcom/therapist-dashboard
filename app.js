@@ -6,26 +6,23 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
-  SUPABASE_ANON_KEY
+  SUPABASE_KEY
 );
 
-// ===== AUTH GUARD =====
-async function requireAuth() {
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (!session) {
-    window.location.replace("login.html");
-  }
+// ---------- AUTH HELPERS ----------
+async function getSession() {
+  const { data } = await supabase.auth.getSession();
+  return data.session;
 }
 
-// ===== LOGIN =====
+// ---------- LOGIN ----------
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
-    password
+    password,
   });
 
   if (error) {
@@ -33,24 +30,36 @@ async function login() {
     return;
   }
 
-  window.location.replace("dashboard.html");
+  window.location.href = "dashboard.html";
 }
 
-// ===== LOGOUT =====
+// ---------- LOGOUT (THIS FIXES YOUR STUCK LOGIN) ----------
 async function logout() {
   await supabase.auth.signOut();
-  localStorage.clear();
+  localStorage.clear(); // force clear
   sessionStorage.clear();
-  window.location.replace("login.html");
+  window.location.href = "login.html";
 }
 
-// ===== DASHBOARD DATA =====
+// ---------- DASHBOARD LOAD ----------
 async function loadDashboard() {
-  await requireAuth();
+  const session = await getSession();
+  if (!session) {
+    window.location.href = "login.html";
+    return;
+  }
 
-  // Therapists
-  const { data: therapists, error } = await supabase
-    .from("therapists")
+  loadTherapists();
+  loadBookings();
+}
+
+// ---------- LOAD THERAPISTS ----------
+async function loadTherapists() {
+  const list = document.getElementById("therapistList");
+  list.innerHTML = "";
+
+  const { data, error } = await supabase
+    .from("Therapists") // CAPITAL T (your table name)
     .select("*");
 
   if (error) {
@@ -58,66 +67,60 @@ async function loadDashboard() {
     return;
   }
 
-  const list = document.getElementById("therapists");
-  list.innerHTML = "";
-
-  therapists.forEach(t => {
+  data.forEach((t) => {
     const li = document.createElement("li");
     li.innerHTML = `
-      <strong>${t.name}</strong>
+      ${t.name}
       <input type="date" id="date-${t.id}">
       <button onclick="book('${t.id}')">Book</button>
     `;
     list.appendChild(li);
   });
-
-  loadBookings();
 }
 
-// ===== BOOKINGS =====
+// ---------- LOAD BOOKINGS ----------
 async function loadBookings() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const list = document.getElementById("bookingList");
+  list.innerHTML = "";
+
+  const session = await getSession();
 
   const { data, error } = await supabase
-    .from("bookings")
-    .select("id, session_date, therapists(name)")
-    .eq("user_id", session.user.id)
-    .order("session_date");
+    .from("Bookings")
+    .select("id, session_date, Therapists(name)")
+    .eq("user_id", session.user.id);
 
   if (error) {
     console.error(error);
     return;
   }
 
-  const list = document.getElementById("bookings");
-  list.innerHTML = "";
-
-  data.forEach(b => {
+  data.forEach((b) => {
     const li = document.createElement("li");
     li.innerHTML = `
-      ${b.therapists.name} — ${b.session_date}
-      <button onclick="cancelBooking('${b.id}')">Cancel</button>
+      ${b.Therapists.name} — ${b.session_date}
+      <button onclick="cancel('${b.id}')">Cancel</button>
     `;
     list.appendChild(li);
   });
 }
 
-// ===== BOOK =====
+// ---------- BOOK ----------
 async function book(therapistId) {
-  const dateInput = document.getElementById(`date-${therapistId}`);
-  const date = dateInput.value;
+  const input = document.getElementById(`date-${therapistId}`);
+  const date = input.value;
 
   if (!date) {
     alert("Select a date");
     return;
   }
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const session = await getSession();
 
-  const { error } = await supabase.from("bookings").insert({
+  const { error } = await supabase.from("Bookings").insert({
     therapist_id: therapistId,
     user_id: session.user.id,
-    session_date: date
+    session_date: date,
   });
 
   if (error) {
@@ -128,8 +131,9 @@ async function book(therapistId) {
   loadBookings();
 }
 
-// ===== CANCEL =====
-async function cancelBooking(id) {
-  await supabase.from("bookings").delete().eq("id", id);
+// ---------- CANCEL ----------
+async function cancel(id) {
+  await supabase.from("Bookings").delete().eq("id", id);
   loadBookings();
 }
+
