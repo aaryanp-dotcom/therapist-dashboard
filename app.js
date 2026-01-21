@@ -1,14 +1,10 @@
 // ==============================
 // SUPABASE CLIENT (SINGLE LOAD)
 // ==============================
-if (!window.__supabaseClient) {
-  window.__supabaseClient = supabase.createClient(
+const client = supabase.createClient(
     "https://hviqxpfnvjsqbdjfbttm.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs"
   );
-}
-
-const client = window.__supabaseClient;
 
 // ==============================
 // LOGIN
@@ -38,57 +34,65 @@ window.loadDashboard = async function () {
   const { data } = await client.auth.getSession();
   if (!data.session) return (window.location.href = "login.html");
 
-  await loadTherapists();
-  await loadBookings();
+  loadTherapists();
+  loadBookings();
 };
 
 // ==============================
-// LOAD THERAPISTS + BOOK
+// LOAD THERAPISTS
 // ==============================
 async function loadTherapists() {
   const ul = document.getElementById("therapists");
   ul.innerHTML = "";
 
-  const { data: therapists, error } = await client
-    .from("Therapists")
-    .select("id, Name")
-    .eq("Active", true);
-
+  const { data, error } = await client.from("Therapists").select("id,name");
   if (error) return console.error(error.message);
 
-  const { data: userData } = await client.auth.getUser();
-  const user = userData.user;
-
-  therapists.forEach(t => {
+  data.forEach(t => {
     const li = document.createElement("li");
 
-    const name = document.createTextNode(t.Name + " ");
-    const dateInput = document.createElement("input");
-    dateInput.type = "date";
+    li.innerHTML = `
+      ${t.name}
+      <input type="date" id="date-${t.id}">
+      <select id="time-${t.id}">
+        <option>10:00 AM</option>
+        <option>12:00 PM</option>
+        <option>3:00 PM</option>
+      </select>
+      <button onclick="bookSession('${t.id}')">Book</button>
+    `;
 
-    const bookBtn = document.createElement("button");
-    bookBtn.textContent = "Book";
-
-    bookBtn.onclick = async () => {
-      if (!dateInput.value) return alert("Select a date");
-
-      const { error } = await client.from("bookings").insert({
-        user_id: user.id,
-        therapist_id: t.id,
-        session_date: dateInput.value   // ✅ ONLY THIS COLUMN
-      });
-
-      if (error) return alert(error.message);
-      loadBookings();
-    };
-
-    li.append(name, dateInput, bookBtn);
     ul.appendChild(li);
   });
 }
 
 // ==============================
-// LOAD BOOKINGS + CANCEL
+// BOOK SESSION
+// ==============================
+window.bookSession = async function (therapistId) {
+  const date = document.getElementById(`date-${therapistId}`).value;
+  const time = document.getElementById(`time-${therapistId}`).value;
+
+  if (!date) return alert("Select a date");
+
+  const { data: userData } = await client.auth.getUser();
+  const user = userData.user;
+
+  const { error } = await client.from("bookings").insert({
+    therapist_id: therapistId,
+    user_id: user.id,
+    session_date: date,
+    session_time: time,
+    status: "booked"
+  });
+
+  if (error) return alert(error.message);
+
+  loadBookings();
+};
+
+// ==============================
+// LOAD BOOKINGS
 // ==============================
 async function loadBookings() {
   const ul = document.getElementById("bookings");
@@ -97,32 +101,33 @@ async function loadBookings() {
   const { data: userData } = await client.auth.getUser();
   const user = userData.user;
 
-  const { data: bookings, error } = await client
+  const { data, error } = await client
     .from("bookings")
-    .select("id, session_date")   // ✅ NO `date`
+    .select("id, session_date, session_time, status")
     .eq("user_id", user.id)
     .order("session_date", { ascending: true });
 
   if (error) return console.error(error.message);
 
-  if (bookings.length === 0) {
+  if (!data.length) {
     ul.innerHTML = "<li>No bookings yet</li>";
     return;
   }
 
-  bookings.forEach(b => {
+  data.forEach(b => {
     const li = document.createElement("li");
-    li.textContent = b.session_date + " ";
-
-    const cancelBtn = document.createElement("button");
-    cancelBtn.textContent = "Cancel";
-
-    cancelBtn.onclick = async () => {
-      await client.from("bookings").delete().eq("id", b.id);
-      loadBookings();
-    };
-
-    li.appendChild(cancelBtn);
+    li.innerHTML = `
+      ${b.session_date} at ${b.session_time}
+      <button onclick="cancelBooking('${b.id}')">Cancel</button>
+    `;
     ul.appendChild(li);
   });
 }
+
+// ==============================
+// CANCEL BOOKING
+// ==============================
+window.cancelBooking = async function (id) {
+  await client.from("bookings").delete().eq("id", id);
+  loadBookings();
+};
