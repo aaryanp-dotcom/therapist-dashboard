@@ -2,19 +2,18 @@
 <html>
 <head>
   <title>Dashboard</title>
+  <script src="https://unpkg.com/@supabase/supabase-js"></script>
+  <script defer src="app.js"></script>
 </head>
-<body>
+<body onload="loadDashboard()">
 
-<h2>Available Therapists</h2>
-<ul id="therapistList"></ul>
+  <h2>Available Therapists</h2>
+  <ul id="therapistList"></ul>
 
-<h2>My Bookings</h2>
-<ul id="bookingList"></ul>
+  <h2>My Bookings</h2>
+  <ul id="bookingList"></ul>
 
-<button onclick="logout()">Logout</button>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
+  <button onclick="logout()">Logout</button>
 
 </body>
 </html>
