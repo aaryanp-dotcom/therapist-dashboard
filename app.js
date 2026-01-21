@@ -6,156 +6,48 @@ var supabaseUrl =     "https://hviqxpfnvjsqbdjfbttm.supabase.co",
 var supabaseUrl = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
 var client = supabase.createClient(supabaseUrl, supabaseKey);
 
+// Check authentication and load dashboard
+function loadDashboard() {
+  client.auth.getSession().then(function(response) {
+    if (!response.data.session) {
+      window.location.href = "login.html";
+      return;
+    }
 
-// ==============================
-// LOGIN
-// ==============================
-function login() {
-  var email = document.getElementById("email").value;
-  var password = document.getElementById("password").value;
-
-  client.auth.signInWithPassword({ email, password })
-    .then(({ error }) => {
-      if (error) {
-        alert(error.message);
-        return;
-      }
-      window.location.href = "dashboard.html";
-    });
-}
-
-// ==============================
-// LOGOUT
-// ==============================
-function logout() {
-  client.auth.signOut().then(() => {
+    var userId = response.data.session.user.id;
+    loadTherapists(userId);
+    loadBookings(userId);
+  }).catch(function(error) {
+    console.error("Session error:", error);
     window.location.href = "login.html";
   });
 }
 
-// ==============================
-// DASHBOARD LOAD
-// ==============================
-function loadDashboard() {
-  client.auth.getSession().then(({ data }) => {
-    if (!data.session) {
-      window.location.href = "login.html";
+// Load therapists from Supabase
+function loadTherapists(userId) {
+  client.from("Therapists").select("*").then(function(response) {
+    if (response.error) {
+      console.error("Error loading therapists:", response.error);
+      document.getElementById("therapist-list").innerHTML = "<p>Error loading therapists</p>";
       return;
     }
-    loadTherapists();
-    loadBookings();
-  });
-}
 
-// ==============================
-// LOAD THERAPISTS
-// ==============================
-function loadTherapists() {
-  var ul = document.getElementById("therapists");
-  ul.innerHTML = "";
+    var therapists = response.data;
+    var html = "";
 
-  client.from("Therapists")
-    .select("id, full_name")
-    .then(({ data, error }) => {
-      if (error) {
-        console.error(error.message);
-        return;
-      }
+    for (var i = 0; i < therapists.length; i++) {
+      var therapist = therapists[i];
+      var therapistId = therapist.id;
+      var therapistName = therapist.name || therapist.therapist_name || "Unknown Therapist";
 
-      data.forEach(t => {
-        var li = document.createElement("li");
-        li.innerHTML =
-          t.full_name +
-          ' <button onclick="bookSession(\'' + t.id + '\')">Book</button>';
-        ul.appendChild(li);
-      });
-    });
-}
-
-// ==============================
-// BOOK SESSION
-// ==============================
-async function bookSession(therapistId) {
-  const { data: userData } = await client.auth.getUser();
-  const user = userData.user;
-  if (!user) {
-    alert("Not logged in");
-    return;
-  }
-
-  const dateInput = document.getElementById(`date-${therapistId}`);
-  const timeInput = document.getElementById(`time-${therapistId}`);
-
-  const sessionDate = dateInput.value;
-  const sessionTime = timeInput.value;
-
-  if (!sessionDate || !sessionTime) {
-    alert("Please select date and time");
-    return;
-  }
-
-  const { error } = await client.from("bookings").insert({
-    therapist_id: therapistId,
-    user_id: user.id,
-    session_date: sessionDate,
-    session_time: sessionTime,
-    status: "booked"
-  });
-
-  if (error) {
-    alert(error.message);
-    console.error(error);
-    return;
-  }
-
-  alert("Booking successful");
-  loadBookings();
-}
-
-// ==============================
-// LOAD BOOKINGS
-// ==============================
-function loadBookings() {
-  var ul = document.getElementById("bookings");
-  ul.innerHTML = "";
-
-  client.auth.getUser().then(({ data }) => {
-    var user = data.user;
-    if (!user) return;
-
-    client.from("bookings")
-      .select("id, created_at, status")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (error) {
-          console.error(error.message);
-          return;
-        }
-
-        if (data.length === 0) {
-          ul.innerHTML = "<li>No bookings yet</li>";
-          return;
-        }
-
-        data.forEach(b => {
-          var li = document.createElement("li");
-          li.innerHTML =
-            new Date(b.created_at).toLocaleString() +
-            " (" + b.status + ") " +
-            '<button onclick="cancelBooking(\'' + b.id + '\')">Cancel</button>';
-          ul.appendChild(li);
-        });
-      });
-  });
-}
-
-// ==============================
-// CANCEL BOOKING
-// ==============================
-function cancelBooking(id) {
-  client.from("bookings")
-    .delete()
-    .eq("id", id)
-    .then(() => loadBookings());
-}
+      html += '<div class="therapist-card" style="border:1px solid #ccc; padding:15px; margin:10px 0; border-radius:5px;">';
+      html += '<h3>' + therapistName + '</h3>';
+      html += '<div style="margin:10px 0;">';
+      html += '<label>Date: <input type="date" id="date-' + therapistId + '" style="margin:0 10px;"></label>';
+      html += '<label>Time: <select id="time-' + therapistId + '" style="margin:0 10px;">';
+      html += '<option value="">Select time</option>';
+      html += '<option value="09:00">09:00 AM</option>';
+      html += '<option value="10:00">10:00 AM</option>';
+      html += '<option value="11:00">11:00 AM</option>';
+      html += '<option value="14:00">02:00 PM</option>';
+      html += '<option value="15:00">03:00 PM</opti
