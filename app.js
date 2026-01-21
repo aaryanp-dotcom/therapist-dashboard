@@ -44,8 +44,18 @@ async function login() {
 }
 
 async function logout() {
-  await supabase.auth.signOut();
-  window.location.href = "login.html";
+  try {
+    await supabase.auth.signOut();
+  } catch (e) {
+    console.warn("Logout error, clearing manually");
+  }
+
+  // HARD CLEAR (important for GitHub Pages)
+  localStorage.clear();
+  sessionStorage.clear();
+
+  window.location.replace("login.html");
+
 }
 
 // ======================
