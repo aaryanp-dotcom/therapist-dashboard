@@ -63,17 +63,17 @@ async function loadTherapists() {
   ul.innerHTML = "";
 
   const { data, error } = await client
-    .from("Therapists")
-    .select("*");
+    .from("Therapists")   // ✅ correct case
+    .select("Name");      // ✅ correct case
 
   if (error) {
-    console.error("Therapist error:", error.message);
+    console.error("Therapists error:", error.message);
     return;
   }
 
   data.forEach(t => {
     const li = document.createElement("li");
-    li.textContent = t.name;
+    li.textContent = t.Name; // ✅ exact column name
     ul.appendChild(li);
   });
 }
@@ -91,18 +91,18 @@ async function loadBookings() {
   if (!user) return;
 
   const { data, error } = await client
-    .from("bookings")
-    .select("*")
+    .from("bookings")           // ✅ lowercase
+    .select("session_date")     // ✅ correct column
     .eq("user_id", user.id);
 
   if (error) {
-    console.error("Booking error:", error.message);
+    console.error("Bookings error:", error.message);
     return;
   }
 
   data.forEach(b => {
     const li = document.createElement("li");
-    li.textContent = b.date;
+    li.textContent = b.session_date; // ✅ exact
     ul.appendChild(li);
   });
 }
