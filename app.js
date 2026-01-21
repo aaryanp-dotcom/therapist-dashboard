@@ -54,7 +54,7 @@ async function loadTherapists() {
     .select("*");
 
   if (error) {
-    console.error(error);
+    console.error("Therapist fetch error:", error);
     return;
   }
 
@@ -63,10 +63,18 @@ async function loadTherapists() {
 
   data.forEach(t => {
     const li = document.createElement("li");
-    li.textContent = t.name;
+
+    // USE WHATEVER EXISTS
+    li.textContent =
+      t.full_name ||
+      t.name ||
+      t.email ||
+      JSON.stringify(t);
+
     ul.appendChild(li);
   });
 }
+
 
 // ===== BOOKINGS =====
 async function loadBookings() {
