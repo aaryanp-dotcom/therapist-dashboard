@@ -18,11 +18,7 @@ window.login = async function () {
   const password = document.getElementById("password").value;
 
   const { error } = await client.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
+  if (error) return alert(error.message);
 
   window.location.href = "dashboard.html";
 };
@@ -40,11 +36,7 @@ window.logout = async function () {
 // ==============================
 window.loadDashboard = async function () {
   const { data } = await client.auth.getSession();
-
-  if (!data.session) {
-    window.location.href = "login.html";
-    return;
-  }
+  if (!data.session) return (window.location.href = "login.html");
 
   await loadTherapists();
   await loadBookings();
@@ -62,10 +54,7 @@ async function loadTherapists() {
     .select("id, Name")
     .eq("Active", true);
 
-  if (error) {
-    console.error(error.message);
-    return;
-  }
+  if (error) return console.error(error.message);
 
   const { data: userData } = await client.auth.getUser();
   const user = userData.user;
@@ -73,9 +62,7 @@ async function loadTherapists() {
   therapists.forEach(t => {
     const li = document.createElement("li");
 
-    const name = document.createElement("span");
-    name.textContent = t.Name + " ";
-
+    const name = document.createTextNode(t.Name + " ");
     const dateInput = document.createElement("input");
     dateInput.type = "date";
 
@@ -83,28 +70,19 @@ async function loadTherapists() {
     bookBtn.textContent = "Book";
 
     bookBtn.onclick = async () => {
-      if (!dateInput.value) {
-        alert("Select a date");
-        return;
-      }
+      if (!dateInput.value) return alert("Select a date");
 
       const { error } = await client.from("bookings").insert({
         user_id: user.id,
         therapist_id: t.id,
-        session_date: dateInput.value
+        date: dateInput.value   // ✅ REAL COLUMN NAME
       });
 
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
+      if (error) return alert(error.message);
       loadBookings();
     };
 
-    li.appendChild(name);
-    li.appendChild(dateInput);
-    li.appendChild(bookBtn);
+    li.append(name, dateInput, bookBtn);
     ul.appendChild(li);
   });
 }
@@ -121,25 +99,20 @@ async function loadBookings() {
 
   const { data: bookings, error } = await client
     .from("bookings")
-    .select("id, session_date")
+    .select("id, date")
     .eq("user_id", user.id)
-    .order("session_date", { ascending: true });
+    .order("date", { ascending: true });
 
-  if (error) {
-    console.error(error.message);
-    return;
-  }
+  if (error) return console.error(error.message);
 
   if (bookings.length === 0) {
-    const li = document.createElement("li");
-    li.textContent = "No bookings yet";
-    ul.appendChild(li);
+    ul.innerHTML = "<li>No bookings yet</li>";
     return;
   }
 
   bookings.forEach(b => {
     const li = document.createElement("li");
-    li.textContent = b.session_date + " ";
+    li.textContent = b.date + " ";
 
     const cancelBtn = document.createElement("button");
     cancelBtn.textContent = "Cancel";
