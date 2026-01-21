@@ -43,7 +43,7 @@ window.loadDashboard = async function () {
 };
 
 // ==============================
-// LOAD THERAPISTS
+// LOAD THERAPISTS + BOOK
 // ==============================
 async function loadTherapists() {
   const ul = document.getElementById("therapists");
@@ -75,7 +75,7 @@ async function loadTherapists() {
       const { error } = await client.from("bookings").insert({
         user_id: user.id,
         therapist_id: t.id,
-        date: dateInput.value   // ✅ REAL COLUMN NAME
+        session_date: dateInput.value   // ✅ ONLY THIS COLUMN
       });
 
       if (error) return alert(error.message);
@@ -88,7 +88,7 @@ async function loadTherapists() {
 }
 
 // ==============================
-// LOAD BOOKINGS
+// LOAD BOOKINGS + CANCEL
 // ==============================
 async function loadBookings() {
   const ul = document.getElementById("bookings");
@@ -99,9 +99,9 @@ async function loadBookings() {
 
   const { data: bookings, error } = await client
     .from("bookings")
-    .select("id, date")
+    .select("id, session_date")   // ✅ NO `date`
     .eq("user_id", user.id)
-    .order("date", { ascending: true });
+    .order("session_date", { ascending: true });
 
   if (error) return console.error(error.message);
 
@@ -112,7 +112,7 @@ async function loadBookings() {
 
   bookings.forEach(b => {
     const li = document.createElement("li");
-    li.textContent = b.date + " ";
+    li.textContent = b.session_date + " ";
 
     const cancelBtn = document.createElement("button");
     cancelBtn.textContent = "Cancel";
