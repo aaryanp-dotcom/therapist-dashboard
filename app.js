@@ -1,21 +1,20 @@
 
-  const SUPABASE_URL = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
+// --- Supabase client (guarded) ---
+if (!window.__supabase) {
+  window.__supabase = supabase.createClient(
+    "https://hviqxpfvnjsqbdjfbttm.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
+):
+}
 
+const client = window.__supabase;
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-// ----------------------------
-// AUTH
-// ----------------------------
-async function login() {
+// --- LOGIN ---
+window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error } = await client.auth.signInWithPassword({
     email,
     password,
   });
@@ -25,38 +24,35 @@ async function login() {
     return;
   }
 
-  window.location.href = "dashboard.html";
-}
+  location.href = "dashboard.html";
+};
 
-async function logout() {
-  await supabase.auth.signOut();
+// --- LOGOUT ---
+window.logout = async function () {
+  await client.auth.signOut();
   localStorage.clear();
-  window.location.href = "login.html";
-}
+  location.href = "login.html";
+};
 
-// ----------------------------
-// DASHBOARD
-// ----------------------------
-async function loadDashboard() {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+// --- DASHBOARD ---
+window.loadDashboard = async function () {
+  const { data } = await client.auth.getSession();
 
-  if (!session) {
-    window.location.href = "login.html";
+  if (!data.session) {
+    location.href = "login.html";
     return;
   }
 
   loadTherapists();
   loadBookings();
-}
+};
 
 async function loadTherapists() {
-  const list = document.getElementById("therapists");
-  list.innerHTML = "";
+  const ul = document.getElementById("therapists");
+  ul.innerHTML = "";
 
-  const { data, error } = await supabase
-    .from("Therapists")   // CAPITAL T — THIS MATTERS
+  const { data, error } = await client
+    .from("Therapists") // CAPITAL T (your table)
     .select("*");
 
   if (error) {
@@ -67,22 +63,20 @@ async function loadTherapists() {
   data.forEach(t => {
     const li = document.createElement("li");
     li.textContent = t.name;
-    list.appendChild(li);
+    ul.appendChild(li);
   });
 }
 
 async function loadBookings() {
-  const list = document.getElementById("bookings");
-  list.innerHTML = "";
+  const ul = document.getElementById("bookings");
+  ul.innerHTML = "";
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: user } = await client.auth.getUser();
 
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("bookings")
     .select("*")
-    .eq("user_id", user.id);
+    .eq("user_id", user.user.id);
 
   if (error) {
     console.error(error);
@@ -91,8 +85,8 @@ async function loadBookings() {
 
   data.forEach(b => {
     const li = document.createElement("li");
-    li.textContent = `${b.date}`;
-    list.appendChild(li);
+    li.textContent = b.date;
+    ul.appendChild(li);
   });
 }
 
