@@ -1,21 +1,33 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <title>Login</title>
 </head>
-
 <body>
-  <h1>Login</h1>
 
-  <input id="email" type="email" placeholder="Email"><br><br>
-  <input id="password" type="password" placeholder="Password"><br><br>
+<h1>Login</h1>
 
-  <button id="loginBtn">Login</button>
+<form id="login-form">
+  <input
+    type="email"
+    id="email"
+    placeholder="Email"
+    required
+  /><br><br>
 
-  <!-- LOAD SUPABASE ONCE -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <input
+    type="password"
+    id="password"
+    placeholder="Password"
+    required
+  /><br><br>
 
-  <!-- APP LOGIC -->
-  <script src="./app.js"></script>
+  <button type="submit">Login</button>
+</form>
+
+<p id="error" style="color:red;"></p>
+
+<script src="app.js"></script>
 </body>
 </html>
