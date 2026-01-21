@@ -4,7 +4,7 @@
 if (!window.__supabaseClient) {
   window.__supabaseClient = supabase.createClient(
     "https://hviqxpfvnjsqbdjfbttm.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs"
   );
 }
 
@@ -18,8 +18,8 @@ window.login = async function () {
   const password = document.getElementById("password").value;
 
   const { error } = await client.auth.signInWithPassword({
-    email: email,
-    password: password
+    email,
+    password
   });
 
   if (error) {
@@ -36,6 +36,7 @@ window.login = async function () {
 window.logout = async function () {
   await client.auth.signOut();
   localStorage.clear();
+  sessionStorage.clear();
   window.location.href = "login.html";
 };
 
@@ -50,8 +51,8 @@ window.loadDashboard = async function () {
     return;
   }
 
-  loadTherapists();
-  loadBookings();
+  await loadTherapists();
+  await loadBookings();
 };
 
 // ==============================
@@ -66,11 +67,11 @@ async function loadTherapists() {
     .select("*");
 
   if (error) {
-    console.error(error);
+    console.error("Therapist error:", error.message);
     return;
   }
 
-  data.forEach(function (t) {
+  data.forEach(t => {
     const li = document.createElement("li");
     li.textContent = t.name;
     ul.appendChild(li);
@@ -84,8 +85,8 @@ async function loadBookings() {
   const ul = document.getElementById("bookings");
   ul.innerHTML = "";
 
-  const userRes = await client.auth.getUser();
-  const user = userRes.data.user;
+  const { data: userData } = await client.auth.getUser();
+  const user = userData.user;
 
   if (!user) return;
 
@@ -95,15 +96,13 @@ async function loadBookings() {
     .eq("user_id", user.id);
 
   if (error) {
-    console.error(error);
+    console.error("Booking error:", error.message);
     return;
   }
 
-  data.forEach(function (b) {
+  data.forEach(b => {
     const li = document.createElement("li");
     li.textContent = b.date;
     ul.appendChild(li);
   });
 }
-
-
