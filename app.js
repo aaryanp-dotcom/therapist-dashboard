@@ -1,22 +1,25 @@
-
-// --- Supabase client (guarded) ---
-if (!window.__supabase) {
-  window.__supabase = supabase.createClient(
+// ==============================
+// SUPABASE CLIENT (SINGLE LOAD)
+// ==============================
+if (!window.__supabaseClient) {
+  window.__supabaseClient = supabase.createClient(
     "https://hviqxpfvnjsqbdjfbttm.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
-):
+  );
 }
 
-const client = window.__supabase;
+const client = window.__supabaseClient;
 
-// --- LOGIN ---
+// ==============================
+// LOGIN
+// ==============================
 window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   const { error } = await client.auth.signInWithPassword({
-    email,
-    password,
+    email: email,
+    password: password
   });
 
   if (error) {
@@ -24,22 +27,26 @@ window.login = async function () {
     return;
   }
 
-  location.href = "dashboard.html";
+  window.location.href = "dashboard.html";
 };
 
-// --- LOGOUT ---
+// ==============================
+// LOGOUT
+// ==============================
 window.logout = async function () {
   await client.auth.signOut();
   localStorage.clear();
-  location.href = "login.html";
+  window.location.href = "login.html";
 };
 
-// --- DASHBOARD ---
+// ==============================
+// DASHBOARD LOAD
+// ==============================
 window.loadDashboard = async function () {
   const { data } = await client.auth.getSession();
 
-  if (!data.session) {
-    location.href = "login.html";
+  if (!data || !data.session) {
+    window.location.href = "login.html";
     return;
   }
 
@@ -47,12 +54,15 @@ window.loadDashboard = async function () {
   loadBookings();
 };
 
+// ==============================
+// LOAD THERAPISTS
+// ==============================
 async function loadTherapists() {
   const ul = document.getElementById("therapists");
   ul.innerHTML = "";
 
   const { data, error } = await client
-    .from("Therapists") // CAPITAL T (your table)
+    .from("Therapists")
     .select("*");
 
   if (error) {
@@ -60,30 +70,36 @@ async function loadTherapists() {
     return;
   }
 
-  data.forEach(t => {
+  data.forEach(function (t) {
     const li = document.createElement("li");
     li.textContent = t.name;
     ul.appendChild(li);
   });
 }
 
+// ==============================
+// LOAD BOOKINGS
+// ==============================
 async function loadBookings() {
   const ul = document.getElementById("bookings");
   ul.innerHTML = "";
 
-  const { data: user } = await client.auth.getUser();
+  const userRes = await client.auth.getUser();
+  const user = userRes.data.user;
+
+  if (!user) return;
 
   const { data, error } = await client
     .from("bookings")
     .select("*")
-    .eq("user_id", user.user.id);
+    .eq("user_id", user.id);
 
   if (error) {
     console.error(error);
     return;
   }
 
-  data.forEach(b => {
+  data.forEach(function (b) {
     const li = document.createElement("li");
     li.textContent = b.date;
     ul.appendChild(li);
