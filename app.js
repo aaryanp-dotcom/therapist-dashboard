@@ -1,14 +1,10 @@
+
 // ==============================
 // SUPABASE CLIENT (SINGLE LOAD)
 // ==============================
-if (!window.__supabaseClient) {
-  window.__supabaseClient = supabase.createClient(
-    "https://hviqxpfnvjsqbdjfbttm.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs"
-  );
-
-}
-const client = window.__supabaseClient;
+const supabaseUrl =     "https://hviqxpfnvjsqbdjfbttm.supabase.co",
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
+const client = supabase.createClient(supabaseUrl, supabaseKey);
 
 // ==============================
 // LOGIN
@@ -17,8 +13,15 @@ window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await client.auth.signInWithPassword({ email, password });
-  if (error) return alert(error.message);
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
   window.location.href = "dashboard.html";
 };
@@ -36,6 +39,7 @@ window.logout = async function () {
 // ==============================
 window.loadDashboard = async function () {
   const { data } = await client.auth.getSession();
+
   if (!data.session) {
     window.location.href = "login.html";
     return;
@@ -54,35 +58,39 @@ async function loadTherapists() {
 
   const { data, error } = await client
     .from("Therapists")
-    .select('id,"Name"');
+    .select("id, full_name");
 
   if (error) {
     console.error(error.message);
     return;
   }
 
-  data.forEach(t => {
+  data.forEach((t) => {
     const li = document.createElement("li");
     li.innerHTML = `
-      ${t.Name}
-      <button onclick="bookTherapist('${t.id}')">Book</button>
+      ${t.full_name}
+      <button onclick="bookSession('${t.id}')">Book</button>
     `;
     ul.appendChild(li);
   });
 }
 
 // ==============================
-// BOOK THERAPIST
+// BOOK SESSION
 // ==============================
-window.bookTherapist = async function (therapistId) {
+window.bookSession = async function (therapistId) {
   const { data: userData } = await client.auth.getUser();
   const user = userData.user;
-  if (!user) return;
+
+  if (!user) {
+    alert("Not logged in");
+    return;
+  }
 
   const { error } = await client.from("bookings").insert({
-    user_id: user.id,
     therapist_id: therapistId,
-    status: "booked"
+    user_id: user.id,
+    status: "booked",
   });
 
   if (error) {
@@ -90,7 +98,7 @@ window.bookTherapist = async function (therapistId) {
     return;
   }
 
-  loadBookings();
+  await loadBookings();
 };
 
 // ==============================
@@ -102,12 +110,14 @@ async function loadBookings() {
 
   const { data: userData } = await client.auth.getUser();
   const user = userData.user;
+
   if (!user) return;
 
   const { data, error } = await client
     .from("bookings")
-    .select("id, therapist_id")
-    .eq("user_id", user.id);
+    .select("id, created_at, status")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error(error.message);
@@ -119,10 +129,12 @@ async function loadBookings() {
     return;
   }
 
-  data.forEach(b => {
+  data.forEach((b) => {
     const li = document.createElement("li");
+    const date = new Date(b.created_at).toLocaleString();
+
     li.innerHTML = `
-      Booking ID: ${b.id}
+      ${date} (${b.status})
       <button onclick="cancelBooking('${b.id}')">Cancel</button>
     `;
     ul.appendChild(li);
@@ -143,6 +155,6 @@ window.cancelBooking = async function (bookingId) {
     return;
   }
 
-  loadBookings();
+  await loadBookings();
 };
 
