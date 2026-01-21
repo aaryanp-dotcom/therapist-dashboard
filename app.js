@@ -1,3 +1,5 @@
+// v3 – restore Book and Cancel buttons (force Netlify cache bust)
+
 // ================== SUPABASE CLIENT ==================
 const SUPABASE_URL = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
