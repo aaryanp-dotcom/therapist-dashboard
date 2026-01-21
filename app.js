@@ -4,12 +4,16 @@
 const SUPABASE_URL = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
 // v4 – inline booking UI with date picker (stable)
+// v5 – disable already-booked dates in booking UI
 
 const supabaseClient =
   window.supabaseClient ||
   window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 window.supabaseClient = supabaseClient;
+
+// ================== GLOBAL STATE ==================
+let bookedDates = new Set();
 
 // ================== PAGE LOAD ==================
 document.addEventListener("DOMContentLoaded", async () => {
@@ -28,6 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("bookings-list")
   ) {
     await ensureAuthenticated();
+    await loadUserBookedDates();
     await loadTherapists();
     await loadBookings();
   }
@@ -69,6 +74,27 @@ async function login() {
   window.location.href = "dashboard.html";
 }
 
+// ================== LOAD USER BOOKED DATES ==================
+async function loadUserBookedDates() {
+  bookedDates.clear();
+
+  const {
+    data: { user },
+  } = await supabaseClient.auth.getUser();
+
+  const { data, error } = await supabaseClient
+    .from("Bookings")
+    .select("session_date")
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Failed to load booked dates", error);
+    return;
+  }
+
+  data.forEach((b) => bookedDates.add(b.session_date));
+}
+
 // ================== LOAD THERAPISTS ==================
 async function loadTherapists() {
   const list = document.getElementById("therapistList");
@@ -108,6 +134,16 @@ async function loadTherapists() {
     msg.style.fontSize = "14px";
     msg.style.marginTop = "4px";
 
+    dateInput.addEventListener("change", () => {
+      if (bookedDates.has(dateInput.value)) {
+        msg.textContent = "You already have a booking on this date.";
+        bookBtn.disabled = true;
+      } else {
+        msg.textContent = "";
+        bookBtn.disabled = false;
+      }
+    });
+
     bookBtn.addEventListener("click", async () => {
       msg.textContent = "";
       bookBtn.disabled = true;
@@ -119,6 +155,8 @@ async function loadTherapists() {
       }
 
       await bookTherapist(t.id, dateInput.value, msg);
+      await loadUserBookedDates();
+      await loadBookings();
       bookBtn.disabled = false;
     });
 
@@ -156,7 +194,6 @@ async function bookTherapist(therapistId, sessionDate, msgEl) {
   }
 
   msgEl.textContent = "Booking created.";
-  loadBookings();
 }
 
 // ================== LOAD BOOKINGS ==================
@@ -191,7 +228,6 @@ async function loadBookings() {
 
   data.forEach((b) => {
     const li = document.createElement("li");
-    li.style.marginBottom = "8px";
 
     const text = document.createElement("span");
     text.textContent = `${b.Therapists.Name} — ${b.session_date}`;
@@ -214,7 +250,8 @@ async function loadBookings() {
         return;
       }
 
-      loadBookings();
+      await loadUserBookedDates();
+      await loadBookings();
     });
 
     li.appendChild(text);
@@ -228,4 +265,5 @@ async function logout() {
   await supabaseClient.auth.signOut();
   window.location.href = "login.html";
 }
+
 
