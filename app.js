@@ -1,11 +1,13 @@
-// ---------- SUPABASE CLIENT ----------
+// ================== SUPABASE CLIENT (INIT ONCE) ==================
 const SUPABASE_URL = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+// IMPORTANT: do NOT redeclare if already exists
+window.supabaseClient =
+  window.supabaseClient ||
+  window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const supabaseClient = window.supabaseClient;
 
 // ================== PAGE LOAD ==================
 document.addEventListener("DOMContentLoaded", async () => {
@@ -21,7 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ================== LOGIN ==================
-async function login() {
+window.login = async function login() {
   const email = document.getElementById("email")?.value;
   const password = document.getElementById("password")?.value;
 
@@ -30,7 +32,7 @@ async function login() {
     return;
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabaseClient.auth.signInWithPassword({
     email,
     password,
   });
@@ -42,16 +44,14 @@ async function login() {
   }
 
   window.location.href = "dashboard.html";
-}
+};
 
 // ================== LOAD THERAPISTS ==================
 async function loadTherapists() {
-  console.log("Loading therapists...");
-
   const list = document.getElementById("therapistList");
   if (!list) return;
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("Therapists")
     .select("id, Name");
 
@@ -62,7 +62,6 @@ async function loadTherapists() {
   }
 
   list.innerHTML = "";
-
   data.forEach((t) => {
     const li = document.createElement("li");
     li.textContent = t.Name;
@@ -72,27 +71,22 @@ async function loadTherapists() {
 
 // ================== LOAD BOOKINGS ==================
 async function loadBookings() {
-  console.log("Loading bookings...");
-
   const list = document.getElementById("bookings-list");
   if (!list) return;
 
   const {
     data: { user },
     error: authError,
-  } = await supabase.auth.getUser();
+  } = await supabaseClient.auth.getUser();
 
   if (authError || !user) {
     list.innerHTML = "<li>Please log in</li>";
     return;
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("Bookings")
-    .select(`
-      session_date,
-      Therapists ( Name )
-    `)
+    .select(`session_date, Therapists ( Name )`)
     .eq("user_id", user.id)
     .order("session_date", { ascending: true });
 
@@ -102,22 +96,4 @@ async function loadBookings() {
     return;
   }
 
-  if (!data || data.length === 0) {
-    list.innerHTML = "<li>No bookings yet</li>";
-    return;
-  }
-
-  list.innerHTML = "";
-
-  data.forEach((b) => {
-    const li = document.createElement("li");
-    li.textContent = `${b.Therapists.Name} — ${b.session_date}`;
-    list.appendChild(li);
-  });
-}
-
-// ================== LOGOUT ==================
-async function logout() {
-  await supabase.auth.signOut();
-  window.location.href = "login.html";
-}
+  if (!data || data.length
