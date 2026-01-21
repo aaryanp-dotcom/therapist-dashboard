@@ -42,12 +42,19 @@ async function logout() {
 }
 
 // ---------- DASHBOARD LOAD ----------
-async function loadDashboard() {
-  const session = await getSession();
-  if (!session) {
-    window.location.href = "login.html";
-    return;
-  }
+function loadDashboard() {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (!session) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    // user is authenticated
+    loadTherapists();
+    loadBookings();
+  });
+}
+
 
   loadTherapists();
   loadBookings();
