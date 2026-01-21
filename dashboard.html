@@ -1,24 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
   <title>Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
   <h2>Available Therapists</h2>
-  <ul id="therapistList">
-    <li>Loading therapists...</li>
-  </ul>
+  <ul id="therapistList"></ul>
 
   <h2>My Bookings</h2>
-  <ul id="bookings-list">
-    <li>Loading bookings...</li>
-  </ul>
+  <ul id="bookings-list"></ul>
 
   <button onclick="logout()">Logout</button>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>
