@@ -1,5 +1,6 @@
+// ================== SUPABASE CLIENT ==================
 const SUPABASE_URL = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_KEY";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
 
 const supabaseClient =
   window.supabaseClient ||
@@ -7,28 +8,25 @@ const supabaseClient =
 
 window.supabaseClient = supabaseClient;
 
-document.addEventListener("DOMContentLoaded", async () => {
+// ================== PAGE LOAD ==================
+document.addEventListener("DOMContentLoaded", () => {
   console.log("app.js loaded");
 
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
     loginBtn.addEventListener("click", login);
   }
-
-  if (document.getElementById("therapistList")) {
-    console.log("Loading therapists...");
-    loadTherapists();
-  }
-
-  if (document.getElementById("bookings-list")) {
-    console.log("Loading bookings...");
-    loadBookings();
-  }
 });
 
+// ================== LOGIN ==================
 async function login() {
   const email = document.getElementById("email")?.value;
   const password = document.getElementById("password")?.value;
+
+  if (!email || !password) {
+    alert("Enter email and password");
+    return;
+  }
 
   const { error } = await supabaseClient.auth.signInWithPassword({
     email,
@@ -41,45 +39,4 @@ async function login() {
   }
 
   window.location.href = "dashboard.html";
-}
-
-async function loadTherapists() {
-  const list = document.getElementById("therapistList");
-  if (!list) return;
-
-  const { data } = await supabaseClient
-    .from("Therapists")
-    .select("Name");
-
-  list.innerHTML = "";
-  data.forEach(t => {
-    const li = document.createElement("li");
-    li.textContent = t.Name;
-    list.appendChild(li);
-  });
-}
-
-async function loadBookings() {
-  const list = document.getElementById("bookings-list");
-  if (!list) return;
-
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) return;
-
-  const { data } = await supabaseClient
-    .from("Bookings")
-    .select("session_date, Therapists(Name)")
-    .eq("user_id", user.id);
-
-  list.innerHTML = "";
-  data.forEach(b => {
-    const li = document.createElement("li");
-    li.textContent = `${b.Therapists.Name} — ${b.session_date}`;
-    list.appendChild(li);
-  });
-}
-
-async function logout() {
-  await supabaseClient.auth.signOut();
-  window.location.href = "login.html";
 }
