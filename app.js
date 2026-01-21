@@ -3,33 +3,13 @@
 // ================== SUPABASE CLIENT ==================
 const SUPABASE_URL = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
-// v4 – inline booking UI with date picker (stable)
-// v5 – disable already-booked dates in booking UI
-// v4 – availability-based slot booking (date + time)
-// v5 – availability-based slot booking (date + time, cache-safe)
-/* =========================
-   SUPABASE INIT (ONLY ONCE)
-========================= */
-const supabase = window.supabase.createClient(
+// ---------- SUPABASE CLIENT ----------
+const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
 
-console.log("app.js loaded");
-
-/* =========================
-   HELPERS
-========================= */
-
-async function getCurrentUser() {
-  const { data } = await supabase.auth.getUser();
-  return data?.user ?? null;
-}
-
-/* =========================
-   LOGIN PAGE LOGIC
-========================= */
-
+// ---------- LOGIN ----------
 document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
 
@@ -43,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       errorEl.textContent = "";
 
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password,
       });
@@ -58,112 +38,111 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-/* =========================
-   DASHBOARD PAGE LOGIC
-========================= */
+// ---------- DASHBOARD ----------
+async function loadDashboard() {
+  const {
+    data: { user },
+  } = await supabaseClient.auth.getUser();
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const therapistList = document.getElementById("therapists");
-  const bookingsList = document.getElementById("bookings");
-  const logoutBtn = document.getElementById("logout");
-
-  if (!therapistList || !bookingsList) return;
-
-  const user = await getCurrentUser();
   if (!user) {
     window.location.href = "login.html";
     return;
   }
 
-  /* ---------- LOGOUT ---------- */
-  if (logoutBtn) {
-    logoutBtn.onclick = async () => {
-      await supabase.auth.signOut();
-      window.location.href = "login.html";
-    };
+  loadTherapists();
+  loadBookings();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("therapistList")) {
+    loadDashboard();
   }
+});
 
-  /* ---------- LOAD THERAPISTS ---------- */
-  const { data: therapists } = await supabase
+// ---------- LOAD THERAPISTS ----------
+async function loadTherapists() {
+  const list = document.getElementById("therapistList");
+  if (!list) return;
+
+  const { data } = await supabaseClient
     .from("Therapists")
-    .select("*");
+    .select("id, Name");
 
-  therapistList.innerHTML = "";
+  list.innerHTML = "";
 
-  therapists.forEach((t) => {
+  data.forEach((t) => {
     const li = document.createElement("li");
+    li.innerHTML = `
+      ${t.Name}
+      <input type="date" id="date-${t.id}" />
+      <button onclick="book('${t.id}')">Book</button>
+    `;
+    list.appendChild(li);
+  });
+}
 
-    const dateInput = document.createElement("input");
-    dateInput.type = "date";
+// ---------- LOAD BOOKINGS ----------
+async function loadBookings() {
+  const list = document.getElementById("bookings-list");
+  if (!list) return;
 
-    const bookBtn = document.createElement("button");
-    bookBtn.textContent = "Book";
+  const {
+    data: { user },
+  } = await supabaseClient.auth.getUser();
 
-    const msg = document.createElement("div");
-    msg.style.fontSize = "12px";
+  const { data } = await supabaseClient
+    .from("Bookings")
+    .select("id, session_date, Therapists(Name)")
+    .eq("user_id", user.id)
+    .order("session_date");
 
-    bookBtn.onclick = async () => {
-      if (!dateInput.value) {
-        msg.textContent = "Select a date first";
-        return;
-      }
+  list.innerHTML = "";
 
-      const { error } = await supabase.from("Bookings").insert({
-        user_id: user.id,
-        therapist_id: t.id,
-        session_date: dateInput.value,
-      });
+  data.forEach((b) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${b.Therapists.Name} — ${b.session_date}
+      <button onclick="cancelBooking('${b.id}')">Cancel</button>
+    `;
+    list.appendChild(li);
+  });
+}
 
-      if (error) {
-        if (error.code === "23505") {
-          msg.textContent = "You already have a booking on this date.";
-        } else {
-          msg.textContent = error.message;
-        }
-        return;
-      }
+// ---------- BOOK ----------
+async function book(therapistId) {
+  const input = document.getElementById(`date-${therapistId}`);
+  const date = input.value;
+  if (!date) return alert("Select a date");
 
-      msg.textContent = "Booking created.";
-      loadBookings();
-    };
+  const {
+    data: { user },
+  } = await supabaseClient.auth.getUser();
 
-    li.innerHTML = `<strong>${t.name}</strong> `;
-    li.appendChild(dateInput);
-    li.appendChild(bookBtn);
-    li.appendChild(msg);
-
-    therapistList.appendChild(li);
+  const { error } = await supabaseClient.from("Bookings").insert({
+    therapist_id: therapistId,
+    user_id: user.id,
+    session_date: date,
   });
 
-  /* ---------- LOAD BOOKINGS ---------- */
-  async function loadBookings() {
-    const { data: bookings } = await supabase
-      .from("Bookings")
-      .select("id, session_date, Therapists(name)")
-      .eq("user_id", user.id)
-      .order("session_date");
-
-    bookingsList.innerHTML = "";
-
-    bookings.forEach((b) => {
-      const li = document.createElement("li");
-
-      const cancelBtn = document.createElement("button");
-      cancelBtn.textContent = "Cancel";
-
-      cancelBtn.onclick = async () => {
-        await supabase.from("Bookings").delete().eq("id", b.id);
-        loadBookings();
-      };
-
-      li.textContent = `${b.Therapists.name} — ${b.session_date} `;
-      li.appendChild(cancelBtn);
-
-      bookingsList.appendChild(li);
-    });
+  if (error) {
+    alert(error.message);
+    return;
   }
 
   loadBookings();
-});
+}
+
+// ---------- CANCEL ----------
+async function cancelBooking(id) {
+  await supabaseClient.from("Bookings").delete().eq("id", id);
+  loadBookings();
+}
+
+// ---------- LOGOUT ----------
+async function logout() {
+  await supabaseClient.auth.signOut();
+  window.location.href = "login.html";
+}
+
 
 
