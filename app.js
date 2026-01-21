@@ -94,7 +94,7 @@ function bookSession(therapistId, userId) {
     status: "pending"
   };
 
-  client.from("bookings").insert([bookingData]).then(function(response) {
+  client.from("Bookings").insert([bookingData]).then(function(response) {
     if (response.error) {
       console.error("Booking error:", response.error);
       alert("Error creating booking: " + response.error.message);
@@ -110,7 +110,7 @@ function bookSession(therapistId, userId) {
 
 // Load user bookings
 function loadBookings(userId) {
-  client.from("bookings")
+  client.from("Bookings")
     .select("*, Therapists(*)")
     .eq("user_id", userId)
     .order("session_date", { ascending: true })
@@ -155,7 +155,7 @@ function cancelBooking(bookingId, userId) {
     return;
   }
 
-  client.from("bookings").delete().eq("id", bookingId).then(function(response) {
+  client.from("Bookings").delete().eq("id", bookingId).then(function(response) {
     if (response.error) {
       console.error("Cancel error:", response.error);
       alert("Error cancelling booking");
