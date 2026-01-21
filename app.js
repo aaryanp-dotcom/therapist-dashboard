@@ -91,24 +91,26 @@ async function loadBookings() {
   if (!user) return;
 
   const { data, error } = await client
-    .from("bookings")
-    .select("*")
-    .eq("user_id", user.id);
+    .from("bookings")           // lowercase – correct
+    .select("session_date")     // correct column
+    .eq("user_id", user.id)
+    .order("session_date", { ascending: true });
 
   if (error) {
     console.error("Booking error:", error.message);
     return;
   }
 
-  if (data.length === 0) {
-    ul.innerHTML = "<li>No bookings yet</li>";
+  if (!data || data.length === 0) {
+    const li = document.createElement("li");
+    li.textContent = "No bookings yet";
+    ul.appendChild(li);
     return;
   }
 
   data.forEach(b => {
     const li = document.createElement("li");
-    li.textContent = `Booking on ${new Date(b.created_at).toLocaleDateString()}`;
+    li.textContent = b.session_date; // ✅ FIX
     ul.appendChild(li);
   });
 }
-
