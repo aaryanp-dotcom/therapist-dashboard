@@ -3,6 +3,7 @@
 // ================== SUPABASE CLIENT ==================
 const SUPABASE_URL = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
+// v4 – inline booking UI with date picker (stable)
 
 const supabaseClient =
   window.supabaseClient ||
@@ -89,32 +90,49 @@ async function loadTherapists() {
 
   data.forEach((t) => {
     const li = document.createElement("li");
+    li.style.marginBottom = "14px";
 
-    const text = document.createElement("span");
-    text.textContent = t.Name;
+    const name = document.createElement("strong");
+    name.textContent = t.Name;
 
-    const btn = document.createElement("button");
-    btn.textContent = "Book";
-    btn.style.marginLeft = "10px";
+    const dateInput = document.createElement("input");
+    dateInput.type = "date";
+    dateInput.style.marginLeft = "10px";
+    dateInput.min = new Date().toISOString().split("T")[0];
 
-    btn.addEventListener("click", () => bookTherapist(t.id));
+    const bookBtn = document.createElement("button");
+    bookBtn.textContent = "Book";
+    bookBtn.style.marginLeft = "6px";
 
-    li.appendChild(text);
-    li.appendChild(btn);
+    const msg = document.createElement("div");
+    msg.style.fontSize = "14px";
+    msg.style.marginTop = "4px";
+
+    bookBtn.addEventListener("click", async () => {
+      msg.textContent = "";
+      bookBtn.disabled = true;
+
+      if (!dateInput.value) {
+        msg.textContent = "Please select a date.";
+        bookBtn.disabled = false;
+        return;
+      }
+
+      await bookTherapist(t.id, dateInput.value, msg);
+      bookBtn.disabled = false;
+    });
+
+    li.appendChild(name);
+    li.appendChild(dateInput);
+    li.appendChild(bookBtn);
+    li.appendChild(msg);
+
     list.appendChild(li);
   });
 }
 
 // ================== BOOK THERAPIST ==================
-async function bookTherapist(therapistId) {
-  const sessionDate = prompt("Enter session date (YYYY-MM-DD)");
-  if (!sessionDate) return;
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(sessionDate)) {
-    alert("Invalid date format");
-    return;
-  }
-
+async function bookTherapist(therapistId, sessionDate, msgEl) {
   const {
     data: { user },
   } = await supabaseClient.auth.getUser();
@@ -129,15 +147,15 @@ async function bookTherapist(therapistId) {
 
   if (error) {
     if (error.code === "23505") {
-      alert("You already have a booking on this date.");
+      msgEl.textContent = "You already have a booking on this date.";
     } else {
       console.error(error);
-      alert("Could not create booking");
+      msgEl.textContent = "Could not create booking.";
     }
     return;
   }
 
-  alert("Booking created");
+  msgEl.textContent = "Booking created.";
   loadBookings();
 }
 
@@ -173,25 +191,25 @@ async function loadBookings() {
 
   data.forEach((b) => {
     const li = document.createElement("li");
+    li.style.marginBottom = "8px";
 
     const text = document.createElement("span");
     text.textContent = `${b.Therapists.Name} — ${b.session_date}`;
 
-    const btn = document.createElement("button");
-    btn.textContent = "Cancel";
-    btn.style.marginLeft = "10px";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.style.marginLeft = "10px";
 
-    btn.addEventListener("click", async () => {
-      const confirmCancel = confirm("Cancel this booking?");
-      if (!confirmCancel) return;
+    cancelBtn.addEventListener("click", async () => {
+      const ok = confirm("Cancel this booking?");
+      if (!ok) return;
 
-      const { error: deleteError } = await supabaseClient
+      const { error: delError } = await supabaseClient
         .from("Bookings")
         .delete()
         .eq("id", b.id);
 
-      if (deleteError) {
-        console.error(deleteError);
+      if (delError) {
         alert("Could not cancel booking");
         return;
       }
@@ -200,7 +218,7 @@ async function loadBookings() {
     });
 
     li.appendChild(text);
-    li.appendChild(btn);
+    li.appendChild(cancelBtn);
     list.appendChild(li);
   });
 }
@@ -210,3 +228,4 @@ async function logout() {
   await supabaseClient.auth.signOut();
   window.location.href = "login.html";
 }
+
