@@ -6,6 +6,8 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // v4 – inline booking UI with date picker (stable)
 // v5 – disable already-booked dates in booking UI
 // v4 – availability-based slot booking (date + time)
+// v5 – availability-based slot booking (date + time, cache-safe)
+
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
@@ -44,39 +46,44 @@ async function loadTherapists() {
     dateInput.type = "date";
 
     const slotSelect = document.createElement("select");
-    slotSelect.disabled = true;
+    slotSelect.style.display = "none";
 
     const bookBtn = document.createElement("button");
     bookBtn.textContent = "Book";
     bookBtn.disabled = true;
 
-    dateInput.onchange = async () => {
+    dateInput.addEventListener("change", async () => {
       slotSelect.innerHTML = "";
-      slotSelect.disabled = true;
+      slotSelect.style.display = "none";
       bookBtn.disabled = true;
 
-      const slots = await getAvailableSlots(t.id, dateInput.value);
+      const dateValue = dateInput.value;
+      if (!dateValue) return;
+
+      const slots = await getAvailableSlots(t.id, dateValue);
 
       if (slots.length === 0) {
         const opt = document.createElement("option");
         opt.textContent = "No slots available";
         slotSelect.appendChild(opt);
-        return;
+      } else {
+        slots.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = `${s.start}|${s.end}`;
+          opt.textContent = `${s.start} – ${s.end}`;
+          slotSelect.appendChild(opt);
+        });
+        bookBtn.disabled = false;
       }
 
-      slots.forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = `${s.start}-${s.end}`;
-        opt.textContent = `${s.start} – ${s.end}`;
-        slotSelect.appendChild(opt);
-      });
-
-      slotSelect.disabled = false;
-      bookBtn.disabled = false;
-    };
+      slotSelect.style.display = "inline-block";
+    });
 
     bookBtn.onclick = async () => {
-      const [start_time, end_time] = slotSelect.value.split("-");
+      const value = slotSelect.value;
+      if (!value) return;
+
+      const [start_time, end_time] = value.split("|");
       await bookSlot(t.id, dateInput.value, start_time, end_time);
     };
 
@@ -94,7 +101,7 @@ async function loadTherapists() {
 
 // ================== SLOT LOGIC ==================
 async function getAvailableSlots(therapist_id, dateStr) {
-  const weekday = new Date(dateStr).getDay();
+  const weekday = new Date(dateStr + "T00:00").getDay();
 
   const { data: availability } = await supabaseClient
     .from("therapist_availability")
@@ -158,13 +165,13 @@ async function bookSlot(therapist_id, date, start_time, end_time) {
     if (error.code === "23505") {
       alert("You already have a booking on this date.");
     } else {
-      alert("Booking failed");
       console.error(error);
+      alert("Booking failed");
     }
     return;
   }
 
-  alert("Booking confirmed");
+  alert("Booking created");
   loadBookings();
 }
 
@@ -196,7 +203,6 @@ async function loadBookings() {
 
     const btn = document.createElement("button");
     btn.textContent = "Cancel";
-
     btn.onclick = async () => {
       await supabaseClient.from("Bookings").delete().eq("id", b.id);
       loadBookings();
@@ -213,3 +219,4 @@ async function logout() {
   await supabaseClient.auth.signOut();
   window.location.href = "login.html";
 }
+
