@@ -75,26 +75,41 @@ function loadTherapists() {
 // ==============================
 // BOOK SESSION
 // ==============================
-function bookSession(therapistId) {
-  client.auth.getUser().then(({ data }) => {
-    var user = data.user;
-    if (!user) {
-      alert("Not logged in");
-      return;
-    }
+async function bookSession(therapistId) {
+  const { data: userData } = await client.auth.getUser();
+  const user = userData.user;
+  if (!user) {
+    alert("Not logged in");
+    return;
+  }
 
-    client.from("bookings").insert({
-      therapist_id: therapistId,
-      user_id: user.id,
-      status: "booked"
-    }).then(({ error }) => {
-      if (error) {
-        alert(error.message);
-        return;
-      }
-      loadBookings();
-    });
+  const dateInput = document.getElementById(`date-${therapistId}`);
+  const timeInput = document.getElementById(`time-${therapistId}`);
+
+  const sessionDate = dateInput.value;
+  const sessionTime = timeInput.value;
+
+  if (!sessionDate || !sessionTime) {
+    alert("Please select date and time");
+    return;
+  }
+
+  const { error } = await client.from("bookings").insert({
+    therapist_id: therapistId,
+    user_id: user.id,
+    session_date: sessionDate,
+    session_time: sessionTime,
+    status: "booked"
   });
+
+  if (error) {
+    alert(error.message);
+    console.error(error);
+    return;
+  }
+
+  alert("Booking successful");
+  loadBookings();
 }
 
 // ==============================
