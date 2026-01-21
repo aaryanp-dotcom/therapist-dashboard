@@ -55,7 +55,7 @@ function loadTherapists(userId) {
       html += '<option value="16:00">04:00 PM</option>';
       html += '</select></label>';
       html += '</div>';
-      html += '<button onclick="bookSession('' + therapistId + '', '' + userId + '')" style="background:#4CAF50; color:white; padding:8px 16px; border:none; border-radius:4px; cursor:pointer;">Book Session</button>';
+      html += '<button onclick="bookSession(\'' + therapistId + '\', \'' + userId + '\')" style="background:#4CAF50; color:white; padding:8px 16px; border:none; border-radius:4px; cursor:pointer;">Book Session</button>';
       html += '</div>';
     }
 
@@ -140,7 +140,7 @@ function loadBookings(userId) {
           html += 'Date: ' + booking.session_date + '<br>';
           html += 'Time: ' + booking.session_time + '<br>';
           html += 'Status: ' + (booking.status || "pending") + '<br>';
-          html += '<button onclick="cancelBooking('' + booking.id + '', '' + userId + '')" style="background:#f44336; color:white; padding:5px 10px; border:none; border-radius:3px; cursor:pointer; margin-top:5px;">Cancel</button>';
+          html += '<button onclick="cancelBooking(\'' + booking.id + '\', \'' + userId + '\')" style="background:#f44336; color:white; padding:5px 10px; border:none; border-radius:3px; cursor:pointer; margin-top:5px;">Cancel</button>';
           html += '</div>';
         }
       }
