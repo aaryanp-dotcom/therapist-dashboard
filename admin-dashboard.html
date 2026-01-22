@@ -474,26 +474,76 @@
             }
         }
 
-        // Load All Bookings
+        // Load All Bookings - FIXED
         async function loadAllBookings() {
             try {
-                const { data, error } = await supabaseClient
+                console.log('Loading bookings...');
+                
+                // First, get all bookings
+                const { data: bookingsData, error: bookingsError } = await supabaseClient
                     .from('Bookings')
-                    .select(`
-                        *,
-                        Therapists(Name),
-                        profiles(full_name)
-                    `)
+                    .select('*')
                     .order('session_date', { ascending: false })
                     .order('start_time', { ascending: false });
 
-                if (error) throw error;
+                if (bookingsError) {
+                    console.error('Bookings error:', bookingsError);
+                    throw bookingsError;
+                }
 
-                displayBookings(data || []);
+                console.log('Bookings loaded:', bookingsData);
+
+                if (!bookingsData || bookingsData.length === 0) {
+                    displayBookings([]);
+                    return;
+                }
+
+                // Get unique therapist IDs and user IDs
+                const therapistIds = [...new Set(bookingsData.map(b => b.therapist_id))];
+                const userIds = [...new Set(bookingsData.map(b => b.user_id))];
+
+                // Fetch therapists data
+                const { data: therapistsData, error: therapistsError } = await supabaseClient
+                    .from('Therapists')
+                    .select('id, Name')
+                    .in('id', therapistIds);
+
+                if (therapistsError) {
+                    console.error('Therapists error:', therapistsError);
+                }
+
+                // Fetch user profiles data
+                const { data: profilesData, error: profilesError } = await supabaseClient
+                    .from('profiles')
+                    .select('id, full_name')
+                    .in('id', userIds);
+
+                if (profilesError) {
+                    console.error('Profiles error:', profilesError);
+                }
+
+                console.log('Therapists:', therapistsData);
+                console.log('Profiles:', profilesData);
+
+                // Merge the data
+                const bookingsWithDetails = bookingsData.map(booking => {
+                    const therapist = therapistsData?.find(t => t.id === booking.therapist_id);
+                    const user = profilesData?.find(p => p.id === booking.user_id);
+                    
+                    return {
+                        ...booking,
+                        therapist_name: therapist?.Name || 'Unknown',
+                        user_name: user?.full_name || 'Unknown'
+                    };
+                });
+
+                console.log('Final bookings with details:', bookingsWithDetails);
+                displayBookings(bookingsWithDetails);
+
             } catch (error) {
                 console.error('Error loading bookings:', error);
                 document.getElementById('bookingsList').innerHTML = 
-                    '<div class="empty-state">Error loading bookings</div>';
+                    '<div class="empty-state">Error loading bookings. Check console for details.</div>';
             }
         }
 
@@ -509,8 +559,6 @@
             container.innerHTML = '';
             
             bookings.forEach(booking => {
-                const therapistName = booking.Therapists ? booking.Therapists.Name : 'Unknown';
-                const userName = booking.profiles ? booking.profiles.full_name : 'Unknown';
                 const date = new Date(booking.session_date).toLocaleDateString('en-IN', {
                     day: 'numeric',
                     month: 'short',
@@ -525,7 +573,7 @@
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div style="font-weight: bold; font-size: 16px; color: #333;">
-                            ${userName} → Dr. ${therapistName}
+                            ${booking.user_name} → Dr. ${booking.therapist_name}
                         </div>
                         <span class="status-badge status-${booking.status}">${booking.status.toUpperCase()}</span>
                     </div>
@@ -561,7 +609,7 @@
             return hour12 + ':' + minutes + ' ' + period;
         }
 
-        // Logout Function - FIXED
+        // Logout Function
         function logout() {
             localStorage.removeItem('user');
             window.location.href = 'login.html';
