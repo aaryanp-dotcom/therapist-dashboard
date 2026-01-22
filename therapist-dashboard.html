@@ -411,34 +411,56 @@
         async function init() {
             const user = JSON.parse(localStorage.getItem('user'));
             
+            console.log('Current User:', user); // DEBUG
+            
             if (!user || user.role !== 'therapist') {
+                alert('⚠️ Access denied. Therapist role required.');
                 window.location.href = 'login.html';
                 return;
             }
 
             currentUser = user;
-            await loadTherapistData();
-            await loadBookings();
-            updateStats();
+            
+            try {
+                await loadTherapistData();
+                await loadBookings();
+                updateStats();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('❌ Error loading dashboard. Check console for details.');
+            }
         }
 
         // Load Therapist Data
         async function loadTherapistData() {
             try {
+                console.log('Looking for therapist with user_id:', currentUser.id); // DEBUG
+                
                 const { data, error } = await supabaseClient
                     .from('Therapists')
                     .select('*')
-                    .eq('user_id', currentUser.id)
-                    .single();
+                    .eq('user_id', currentUser.id);
 
-                if (error) throw error;
+                console.log('Therapist query result:', data, error); // DEBUG
+
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
                 
-                therapistData = data;
-                document.getElementById('therapistName').textContent = `Dr. ${data.Name}`;
+                if (!data || data.length === 0) {
+                    alert('❌ No therapist profile found for this account. Please contact admin.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                therapistData = data[0]; // Get first result
+                document.getElementById('therapistName').textContent = `Dr. ${therapistData.Name}`;
                 displayProfile();
             } catch (error) {
                 console.error('Error loading therapist data:', error);
-                showMessage('Error loading profile data', 'error');
+                alert('❌ Error: ' + error.message);
+                throw error;
             }
         }
 
@@ -664,7 +686,7 @@
                 allBookings.filter(b => b.status === 'completed').length;
         }
 
-        // Switch Tabs - FIXED: Made it globally accessible
+        // Switch Tabs
         window.switchTab = function(tab) {
             // Update tab buttons
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
