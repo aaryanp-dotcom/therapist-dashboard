@@ -39,20 +39,21 @@ function signupUser() {
 
     var userId = response.data.user.id;
 
-    // Update profile with additional info
-    client.from("profiles").update({
-      full_name: fullName,
-      phone: phone,
-      role: 'user',
-      status: 'active'
-    }).eq('id', userId).then(function(profileResponse) {
-      if (profileResponse.error) {
-        console.error("Profile update error:", profileResponse.error);
-      }
+    // Wait a bit for trigger to create profile, then update it
+    setTimeout(function() {
+      client.from("profiles").update({
+        full_name: fullName,
+        phone: phone
+      }).eq('id', userId).then(function(profileResponse) {
+        if (profileResponse.error) {
+          console.error("Profile update error:", profileResponse.error);
+          // Don't show error to user - account was still created
+        }
 
-      alert("Account created successfully! You can now login.");
-      window.location.href = "login.html";
-    });
+        alert("Account created successfully! You can now login.");
+        window.location.href = "login.html";
+      });
+    }, 1000);
   });
 }
 
@@ -95,39 +96,42 @@ function signupTherapist() {
 
     var userId = response.data.user.id;
 
-    // Update profile to therapist role
-    client.from("profiles").update({
-      full_name: fullName,
-      phone: phone,
-      role: 'therapist',
-      status: 'pending'
-    }).eq('id', userId).then(function(profileResponse) {
-      if (profileResponse.error) {
-        console.error("Profile update error:", profileResponse.error);
-      }
-    });
+    // Wait for trigger to create profile
+    setTimeout(function() {
+      // Update profile to therapist role
+      client.from("profiles").update({
+        full_name: fullName,
+        phone: phone,
+        role: 'therapist',
+        status: 'pending'
+      }).eq('id', userId).then(function(profileResponse) {
+        if (profileResponse.error) {
+          console.error("Profile update error:", profileResponse.error);
+        }
+      });
 
-    // Insert therapist application
-    client.from("Therapists").insert([{
-      user_id: userId,
-      Name: fullName,
-      email: email,
-      phone: phone,
-      Specialization: specialization,
-      qualifications: qualifications,
-      bio: bio,
-      approval_status: 'pending',
-      Active: false
-    }]).then(function(therapistResponse) {
-      if (therapistResponse.error) {
-        console.error("Therapist application error:", therapistResponse.error);
-        alert("Error submitting application: " + therapistResponse.error.message);
-        return;
-      }
+      // Insert therapist application
+      client.from("Therapists").insert([{
+        user_id: userId,
+        Name: fullName,
+        email: email,
+        phone: phone,
+        Specialization: specialization,
+        qualifications: qualifications,
+        bio: bio,
+        approval_status: 'pending',
+        Active: false
+      }]).then(function(therapistResponse) {
+        if (therapistResponse.error) {
+          console.error("Therapist application error:", therapistResponse.error);
+          alert("Error submitting application: " + therapistResponse.error.message);
+          return;
+        }
 
-      alert("Application submitted successfully! An admin will review your profile. You'll be notified once approved.");
-      window.location.href = "index.html";
-    });
+        alert("Application submitted successfully! An admin will review your profile. You'll be notified once approved.");
+        window.location.href = "index.html";
+      });
+    }, 1000);
   });
 }
 
