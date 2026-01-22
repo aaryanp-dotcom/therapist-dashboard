@@ -806,8 +806,8 @@
 
                 // Send confirmation email to user
                 emailjs.send('service_95x3tyn', 'template_5ocff0p', {
+                    email: currentUser.email,
                     patient_name: currentUser.full_name,
-                    patient_email: currentUser.email,
                     therapist_name: 'Dr. ' + currentBookingTherapist.Name,
                     session_date: new Date(sessionDate).toLocaleDateString('en-IN', { 
                         weekday: 'long', 
@@ -823,26 +823,28 @@
                     console.error('❌ Patient email failed:', error);
                 });
 
-                // Send notification to therapist
-                emailjs.send('service_95x3tyn', 'template_4xnwjo', {
-                    therapist_name: 'Dr. ' + currentBookingTherapist.Name,
-                    therapist_email: currentBookingTherapist.email,
-                    patient_name: currentUser.full_name,
-                    patient_email: currentUser.email,
-                    session_date: new Date(sessionDate).toLocaleDateString('en-IN', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                    }),
-                    session_time: convertTo12Hour(startTime) + ' - ' + convertTo12Hour(endTime),
-                    booking_id: newBooking.id,
-                    notes: notes || 'None'
-                }).then(() => {
-                    console.log('✅ Therapist email sent');
-                }).catch((error) => {
-                    console.error('❌ Therapist email failed:', error);
-                });
+                // Send notification to therapist (only if email exists)
+                if (currentBookingTherapist.email) {
+                    emailjs.send('service_95x3tyn', 'template_4xnwjo', {
+                        email: currentBookingTherapist.email,
+                        therapist_name: 'Dr. ' + currentBookingTherapist.Name,
+                        patient_name: currentUser.full_name,
+                        patient_email: currentUser.email,
+                        session_date: new Date(sessionDate).toLocaleDateString('en-IN', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        }),
+                        session_time: convertTo12Hour(startTime) + ' - ' + convertTo12Hour(endTime),
+                        booking_id: newBooking.id,
+                        notes: notes || 'None'
+                    }).then(() => {
+                        console.log('✅ Therapist email sent');
+                    }).catch((error) => {
+                        console.error('❌ Therapist email failed:', error);
+                    });
+                }
 
                 showMessage('✅ Booking request submitted successfully! Check your email.', 'success');
                 closeBookingModal();
@@ -905,7 +907,7 @@
                     .from('Reviews')
                     .select('id, rating')
                     .eq('booking_id', bookingId)
-                    .single();
+                    .maybeSingle();
                 
                 return data;
             } catch (error) {
@@ -1115,11 +1117,12 @@
             }
             
             try {
-                const { data: existingReview, error: checkError } = await supabaseClient
+                // Check if review already exists
+                const { data: existingReview } = await supabaseClient
                     .from('Reviews')
                     .select('id')
                     .eq('booking_id', currentReviewBooking.bookingId)
-                    .single();
+                    .maybeSingle();
                 
                 if (existingReview) {
                     alert('⚠️ You have already reviewed this session');
@@ -1127,15 +1130,16 @@
                     return;
                 }
                 
+                // Insert new review
                 const { error } = await supabaseClient
                     .from('Reviews')
-                    .insert([{
+                    .insert({
                         booking_id: currentReviewBooking.bookingId,
                         user_id: currentUser.id,
                         therapist_id: currentReviewBooking.therapistId,
                         rating: rating,
                         review_text: reviewText || null
-                    }]);
+                    });
                 
                 if (error) throw error;
                 
@@ -1146,7 +1150,7 @@
                 
             } catch (error) {
                 console.error('Error submitting review:', error);
-                showMessage('❌ Error submitting review. Please try again.', 'error');
+                showMessage('❌ Error: ' + (error.message || 'Please try again'), 'error');
             }
         }
 
