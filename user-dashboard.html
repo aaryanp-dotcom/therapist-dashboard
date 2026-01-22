@@ -136,66 +136,34 @@
                 <input type="date" id="sessionDate">
             </div>
             <div class="form-group">
-                <label>Start Time</label>
-                <select id="sessionStartTime" class="time-select">
-                    <option value="">Select start time</option>
-                    <option value="08:00:00">8:00 AM</option>
-                    <option value="08:30:00">8:30 AM</option>
-                    <option value="09:00:00">9:00 AM</option>
-                    <option value="09:30:00">9:30 AM</option>
-                    <option value="10:00:00">10:00 AM</option>
-                    <option value="10:30:00">10:30 AM</option>
-                    <option value="11:00:00">11:00 AM</option>
-                    <option value="11:30:00">11:30 AM</option>
-                    <option value="12:00:00">12:00 PM</option>
-                    <option value="12:30:00">12:30 PM</option>
-                    <option value="13:00:00">1:00 PM</option>
-                    <option value="13:30:00">1:30 PM</option>
-                    <option value="14:00:00">2:00 PM</option>
-                    <option value="14:30:00">2:30 PM</option>
-                    <option value="15:00:00">3:00 PM</option>
-                    <option value="15:30:00">3:30 PM</option>
-                    <option value="16:00:00">4:00 PM</option>
-                    <option value="16:30:00">4:30 PM</option>
-                    <option value="17:00:00">5:00 PM</option>
-                    <option value="17:30:00">5:30 PM</option>
-                    <option value="18:00:00">6:00 PM</option>
-                    <option value="18:30:00">6:30 PM</option>
-                    <option value="19:00:00">7:00 PM</option>
-                    <option value="19:30:00">7:30 PM</option>
-                    <option value="20:00:00">8:00 PM</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>End Time</label>
-                <select id="sessionEndTime" class="time-select">
-                    <option value="">Select end time</option>
-                    <option value="08:30:00">8:30 AM</option>
-                    <option value="09:00:00">9:00 AM</option>
-                    <option value="09:30:00">9:30 AM</option>
-                    <option value="10:00:00">10:00 AM</option>
-                    <option value="10:30:00">10:30 AM</option>
-                    <option value="11:00:00">11:00 AM</option>
-                    <option value="11:30:00">11:30 AM</option>
-                    <option value="12:00:00">12:00 PM</option>
-                    <option value="12:30:00">12:30 PM</option>
-                    <option value="13:00:00">1:00 PM</option>
-                    <option value="13:30:00">1:30 PM</option>
-                    <option value="14:00:00">2:00 PM</option>
-                    <option value="14:30:00">2:30 PM</option>
-                    <option value="15:00:00">3:00 PM</option>
-                    <option value="15:30:00">3:30 PM</option>
-                    <option value="16:00:00">4:00 PM</option>
-                    <option value="16:30:00">4:30 PM</option>
-                    <option value="17:00:00">5:00 PM</option>
-                    <option value="17:30:00">5:30 PM</option>
-                    <option value="18:00:00">6:00 PM</option>
-                    <option value="18:30:00">6:30 PM</option>
-                    <option value="19:00:00">7:00 PM</option>
-                    <option value="19:30:00">7:30 PM</option>
-                    <option value="20:00:00">8:00 PM</option>
-                    <option value="20:30:00">8:30 PM</option>
-                    <option value="21:00:00">9:00 PM</option>
+                <label>Select Time Slot (1 Hour Session)</label>
+                <select id="sessionTimeSlot" class="time-select">
+                    <option value="">Choose a time slot</option>
+                    <option value="08:00:00|09:00:00">8:00 AM - 9:00 AM (1 hour)</option>
+                    <option value="08:30:00|09:30:00">8:30 AM - 9:30 AM (1 hour)</option>
+                    <option value="09:00:00|10:00:00">9:00 AM - 10:00 AM (1 hour)</option>
+                    <option value="09:30:00|10:30:00">9:30 AM - 10:30 AM (1 hour)</option>
+                    <option value="10:00:00|11:00:00">10:00 AM - 11:00 AM (1 hour)</option>
+                    <option value="10:30:00|11:30:00">10:30 AM - 11:30 AM (1 hour)</option>
+                    <option value="11:00:00|12:00:00">11:00 AM - 12:00 PM (1 hour)</option>
+                    <option value="11:30:00|12:30:00">11:30 AM - 12:30 PM (1 hour)</option>
+                    <option value="12:00:00|13:00:00">12:00 PM - 1:00 PM (1 hour)</option>
+                    <option value="12:30:00|13:30:00">12:30 PM - 1:30 PM (1 hour)</option>
+                    <option value="13:00:00|14:00:00">1:00 PM - 2:00 PM (1 hour)</option>
+                    <option value="13:30:00|14:30:00">1:30 PM - 2:30 PM (1 hour)</option>
+                    <option value="14:00:00|15:00:00">2:00 PM - 3:00 PM (1 hour)</option>
+                    <option value="14:30:00|15:30:00">2:30 PM - 3:30 PM (1 hour)</option>
+                    <option value="15:00:00|16:00:00">3:00 PM - 4:00 PM (1 hour)</option>
+                    <option value="15:30:00|16:30:00">3:30 PM - 4:30 PM (1 hour)</option>
+                    <option value="16:00:00|17:00:00">4:00 PM - 5:00 PM (1 hour)</option>
+                    <option value="16:30:00|17:30:00">4:30 PM - 5:30 PM (1 hour)</option>
+                    <option value="17:00:00|18:00:00">5:00 PM - 6:00 PM (1 hour)</option>
+                    <option value="17:30:00|18:30:00">5:30 PM - 6:30 PM (1 hour)</option>
+                    <option value="18:00:00|19:00:00">6:00 PM - 7:00 PM (1 hour)</option>
+                    <option value="18:30:00|19:30:00">6:30 PM - 7:30 PM (1 hour)</option>
+                    <option value="19:00:00|20:00:00">7:00 PM - 8:00 PM (1 hour)</option>
+                    <option value="19:30:00|20:30:00">7:30 PM - 8:30 PM (1 hour)</option>
+                    <option value="20:00:00|21:00:00">8:00 PM - 9:00 PM (1 hour)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -304,30 +272,31 @@
         function closeModal() {
             document.getElementById('bookingModal').classList.remove('active');
             document.getElementById('sessionDate').value = '';
-            document.getElementById('sessionStartTime').value = '';
-            document.getElementById('sessionEndTime').value = '';
+            document.getElementById('sessionTimeSlot').value = '';
             document.getElementById('sessionNotes').value = '';
             selectedTherapist = null;
         }
 
+        function formatTime(time24) {
+            const [hours, minutes] = time24.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const hour12 = hour % 12 || 12;
+            return hour12 + ':' + minutes + ' ' + ampm;
+        }
+
         async function confirmBooking() {
             const date = document.getElementById('sessionDate').value;
-            const startTime = document.getElementById('sessionStartTime').value;
-            const endTime = document.getElementById('sessionEndTime').value;
+            const timeSlot = document.getElementById('sessionTimeSlot').value;
             const notes = document.getElementById('sessionNotes').value;
             
-            if (!date || !startTime || !endTime) {
-                alert('Please select date, start time, and end time');
+            if (!date || !timeSlot) {
+                alert('Please select date and time slot');
                 return;
             }
             
-            // Validate that end time is after start time
-            if (endTime <= startTime) {
-                alert('End time must be after start time');
-                return;
-            }
+            const [startTime, endTime] = timeSlot.split('|');
             
-            // Check if USER has any booking that overlaps with this time slot
             const {data: userBookings} = await db
                 .from('Bookings')
                 .select('*')
@@ -340,15 +309,15 @@
                     const existingStart = booking.start_time;
                     const existingEnd = booking.end_time;
                     
-                    // Check for time overlap
                     if (startTime < existingEnd && endTime > existingStart) {
-                        alert('You already have a booking from ' + existingStart + ' to ' + existingEnd + ' on this date. Please choose a different time slot.');
+                        const formattedStart = formatTime(existingStart);
+                        const formattedEnd = formatTime(existingEnd);
+                        alert('⚠️ Time Conflict!\n\nYou already have a booking from ' + formattedStart + ' to ' + formattedEnd + ' on this date.\n\nPlease choose a different time slot.');
                         return;
                     }
                 }
             }
             
-            // Check if THERAPIST has any booking that overlaps with this time slot
             const {data: therapistBookings} = await db
                 .from('Bookings')
                 .select('*')
@@ -361,15 +330,15 @@
                     const existingStart = booking.start_time;
                     const existingEnd = booking.end_time;
                     
-                    // Check for time overlap
                     if (startTime < existingEnd && endTime > existingStart) {
-                        alert('This therapist is already booked from ' + existingStart + ' to ' + existingEnd + ' on this date. Please choose a different time slot.');
+                        const formattedStart = formatTime(existingStart);
+                        const formattedEnd = formatTime(existingEnd);
+                        alert('⚠️ Therapist Not Available!\n\nThis therapist is already booked from ' + formattedStart + ' to ' + formattedEnd + ' on this date.\n\nPlease choose a different time slot or therapist.');
                         return;
                     }
                 }
             }
             
-            // If no conflicts, proceed with booking
             const bookingData = {
                 user_id: currentUser.id,
                 therapist_id: selectedTherapist.id,
@@ -382,11 +351,11 @@
             
             const result = await db.from('Bookings').insert([bookingData]);
             if (result.error) {
-                alert('Booking failed: ' + result.error.message);
+                alert('❌ Booking Failed\n\n' + result.error.message + '\n\nPlease try again or contact support.');
                 return;
             }
             
-            alert('Booking successful! The therapist will confirm shortly.');
+            alert('✅ Booking Successful!\n\nYour session has been booked. The therapist will confirm shortly.');
             closeModal();
         }
 
@@ -404,7 +373,7 @@
             bookingsResult.data.forEach(b => {
                 const therapist = therapistMap[b.therapist_id];
                 const canCancel = b.status === 'pending' || b.status === 'confirmed';
-                const timeDisplay = b.start_time + ' - ' + (b.end_time || 'N/A');
+                const timeDisplay = formatTime(b.start_time) + ' - ' + formatTime(b.end_time || b.start_time);
                 html += '<tr><td>' + (therapist?.Name || 'N/A') + '</td><td>' + (therapist?.Specialization || 'N/A') + '</td><td>' + new Date(b.session_date).toLocaleDateString() + '</td><td>' + timeDisplay + '</td><td><span class="status-badge status-' + b.status + '">' + b.status + '</span></td><td>' + (canCancel ? '<button class="btn btn-cancel" onclick="cancelBooking(\'' + b.id + '\')">Cancel</button>' : '-') + '</td></tr>';
             });
             html += '</tbody></table>';
