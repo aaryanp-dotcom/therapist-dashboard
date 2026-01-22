@@ -447,11 +447,11 @@
             // Event delegation for booking action buttons
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('btn-confirm')) {
-                    const bookingId = parseInt(e.target.getAttribute('data-booking-id'));
+                    const bookingId = e.target.getAttribute('data-booking-id');
                     console.log('Confirm clicked for booking:', bookingId);
                     confirmBooking(bookingId);
                 } else if (e.target.classList.contains('btn-cancel')) {
-                    const bookingId = parseInt(e.target.getAttribute('data-booking-id'));
+                    const bookingId = e.target.getAttribute('data-booking-id');
                     console.log('Cancel clicked for booking:', bookingId);
                     cancelBooking(bookingId);
                 }
@@ -540,7 +540,7 @@
             }
         }
 
-        // Display Bookings
+        // Display Bookings - FIXED: No cloneNode
         function displayBookings() {
             const containers = {
                 all: document.getElementById('allBookingsList'),
@@ -557,16 +557,16 @@
                 return;
             }
 
+            // Render bookings separately for each container
             allBookings.forEach(booking => {
-                const card = createBookingCard(booking);
-                containers.all.appendChild(card.cloneNode(true));
+                containers.all.appendChild(createBookingCard(booking));
 
                 if (booking.status === 'pending') {
-                    containers.pending.appendChild(card.cloneNode(true));
+                    containers.pending.appendChild(createBookingCard(booking));
                 } else if (booking.status === 'confirmed') {
-                    containers.confirmed.appendChild(card.cloneNode(true));
+                    containers.confirmed.appendChild(createBookingCard(booking));
                 } else if (booking.status === 'completed') {
-                    containers.completed.appendChild(card.cloneNode(true));
+                    containers.completed.appendChild(createBookingCard(booking));
                 }
             });
 
@@ -674,7 +674,7 @@
 
         // Confirm Booking
         async function confirmBooking(bookingId) {
-            if (isNaN(bookingId)) {
+            if (!bookingId || bookingId === 'null' || bookingId === 'undefined') {
                 console.error('Invalid booking ID:', bookingId);
                 showMessage('Error: Invalid booking ID', 'error');
                 return;
@@ -701,7 +701,7 @@
 
         // Cancel Booking
         async function cancelBooking(bookingId) {
-            if (isNaN(bookingId)) {
+            if (!bookingId || bookingId === 'null' || bookingId === 'undefined') {
                 console.error('Invalid booking ID:', bookingId);
                 showMessage('Error: Invalid booking ID', 'error');
                 return;
