@@ -270,51 +270,73 @@
             const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
             window.checkAuth = async function() {
-                const { data: { user } } = await db.auth.getUser();
-                
-                if (!user) {
+                try {
+                    // Get session instead of user for better reliability
+                    const { data: { session }, error } = await db.auth.getSession();
+                    
+                    if (error || !session) {
+                        console.log('No active session, redirecting to login');
+                        window.location.href = 'login.html';
+                        return null;
+                    }
+
+                    const user = session.user;
+
+                    const { data: profile, error: profileError } = await db
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single();
+
+                    if (profileError || !profile) {
+                        console.error('Profile error:', profileError);
+                        alert('Error loading profile. Please try again.');
+                        window.location.href = 'login.html';
+                        return null;
+                    }
+
+                    if (profile.role !== 'admin') {
+                        alert('Access denied. Admin only.');
+                        await db.auth.signOut();
+                        window.location.href = 'index.html';
+                        return null;
+                    }
+
+                    return user;
+                } catch (err) {
+                    console.error('Auth check error:', err);
                     window.location.href = 'login.html';
                     return null;
                 }
-
-                const { data: profile } = await db
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
-
-                if (!profile || profile.role !== 'admin') {
-                    alert('Access denied. Admin only.');
-                    window.location.href = 'index.html';
-                    return null;
-                }
-
-                return user;
             };
 
             window.loadStatistics = async function() {
-                const { data: users } = await db
-                    .from('profiles')
-                    .select('*', { count: 'exact' })
-                    .eq('role', 'user');
+                try {
+                    const { data: users } = await db
+                        .from('profiles')
+                        .select('*', { count: 'exact' })
+                        .eq('role', 'user');
 
-                const { data: therapists } = await db
-                    .from('Therapists')
-                    .select('*', { count: 'exact' });
+                    const { data: therapists } = await db
+                        .from('Therapists')
+                        .select('*', { count: 'exact' });
 
-                const { data: pending } = await db
-                    .from('Therapists')
-                    .select('*', { count: 'exact' })
-                    .eq('approval_status', 'pending');
+                    const { data: pending } = await db
+                        .from('Therapists')
+                        .select('*', { count: 'exact' })
+                        .eq('approval_status', 'pending');
 
-                const { data: bookings } = await db
-                    .from('Bookings')
-                    .select('*', { count: 'exact' });
+                    const { data: bookings } = await db
+                        .from('Bookings')
+                        .select('*', { count: 'exact' });
 
-                document.getElementById('totalUsers').textContent = users?.length || 0;
-                document.getElementById('totalTherapists').textContent = therapists?.length || 0;
-                document.getElementById('pendingApps').textContent = pending?.length || 0;
-                document.getElementById('totalBookings').textContent = bookings?.length || 0;
+                    document.getElementById('totalUsers').textContent = users?.length || 0;
+                    document.getElementById('totalTherapists').textContent = therapists?.length || 0;
+                    document.getElementById('pendingApps').textContent = pending?.length || 0;
+                    document.getElementById('totalBookings').textContent = bookings?.length || 0;
+                } catch (err) {
+                    console.error('Error loading statistics:', err);
+                }
             };
 
             window.loadApplications = async function() {
@@ -537,6 +559,9 @@
             };
 
             async function init() {
+                // Wait for auth session to be ready
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
                 const user = await window.checkAuth();
                 if (user) {
                     window.loadStatistics();
