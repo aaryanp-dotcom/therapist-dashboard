@@ -5,356 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard - Book Therapist</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            color: #667eea;
-            font-size: 24px;
-        }
-
-        .header-right {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .user-name {
-            color: #555;
-            font-weight: 500;
-        }
-
-        .logout-btn {
-            background: #ff4757;
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: #ff3838;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            background: white;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-
-        .tab:hover {
-            background: #f0f0f0;
-        }
-
-        .tab.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .section {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .section h2 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 20px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
-
-        .search-bar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .search-bar input,
-        .search-bar select {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .therapist-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .therapist-card {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            border: 2px solid #eee;
-            transition: all 0.3s;
-        }
-
-        .therapist-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-        }
-
-        .therapist-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .therapist-spec {
-            color: #667eea;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .therapist-bio {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            width: 100%;
-        }
-
-        .btn-book {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .btn-book:hover {
-            background: #27ae60;
-        }
-
-        .btn-cancel {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-cancel:hover {
-            background: #c0392b;
-        }
-
-        .bookings-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .bookings-table th,
-        .bookings-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        .bookings-table th {
-            background: #f8f9fa;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-confirmed {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .status-completed {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-cancelled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        .modal-header {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn-modal {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-
-        .btn-secondary {
-            background: #ccc;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #bbb;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-            font-style: italic;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .tabs {
-                flex-wrap: wrap;
-            }
-
-            .therapist-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .dashboard-container { max-width: 1200px; margin: 0 auto; }
+        .header { background: white; padding: 20px 30px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header h1 { color: #667eea; font-size: 24px; }
+        .header-right { display: flex; gap: 10px; align-items: center; }
+        .user-name { color: #555; font-weight: 500; }
+        .logout-btn { background: #ff4757; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-size: 14px; transition: background 0.3s; }
+        .logout-btn:hover { background: #ff3838; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { background: white; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s; border: 2px solid transparent; }
+        .tab:hover { background: #f0f0f0; }
+        .tab.active { background: #667eea; color: white; border-color: #667eea; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .section { background: white; padding: 25px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section h2 { color: #333; margin-bottom: 20px; font-size: 20px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        .search-bar { display: flex; gap: 15px; margin-bottom: 20px; }
+        .search-bar input, .search-bar select { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .therapist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .therapist-card { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 2px solid #eee; transition: all 0.3s; }
+        .therapist-card:hover { border-color: #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); }
+        .therapist-name { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .therapist-spec { color: #667eea; font-weight: 500; margin-bottom: 8px; }
+        .therapist-bio { color: #666; font-size: 14px; margin-bottom: 15px; line-height: 1.5; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: all 0.3s; width: 100%; }
+        .btn-book { background: #2ecc71; color: white; }
+        .btn-book:hover { background: #27ae60; }
+        .btn-cancel { background: #e74c3c; color: white; }
+        .btn-cancel:hover { background: #c0392b; }
+        .bookings-table { width: 100%; border-collapse: collapse; }
+        .bookings-table th, .bookings-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .bookings-table th { background: #f8f9fa; color: #333; font-weight: 600; }
+        .status-badge { padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: 500; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d1ecf1; color: #0c5460; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; }
+        .modal-header { font-size: 20px; font-weight: bold; margin-bottom: 20px; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #555; font-weight: 500; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-secondary { background: #ccc; color: #333; }
+        .btn-secondary:hover { background: #bbb; }
+        .no-data { text-align: center; padding: 40px; color: #999; font-style: italic; }
+        .loading { text-align: center; padding: 40px; color: #666; }
+        @media (max-width: 768px) { .header { flex-direction: column; gap: 15px; } .tabs { flex-wrap: wrap; } .therapist-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -363,7 +67,7 @@
             <h1>👤 User Dashboard</h1>
             <div class="header-right">
                 <span class="user-name" id="userName">Loading...</span>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+                <button class="logout-btn" onclick="doLogout()">Logout</button>
             </div>
         </div>
 
@@ -373,7 +77,6 @@
             <div class="tab" onclick="switchTab('profile')">⚙️ My Profile</div>
         </div>
 
-        <!-- Find Therapists Tab -->
         <div id="therapists" class="tab-content active">
             <div class="section">
                 <h2>Available Therapists</h2>
@@ -389,7 +92,6 @@
             </div>
         </div>
 
-        <!-- My Bookings Tab -->
         <div id="bookings" class="tab-content">
             <div class="section">
                 <h2>My Bookings</h2>
@@ -399,7 +101,6 @@
             </div>
         </div>
 
-        <!-- My Profile Tab -->
         <div id="profile" class="tab-content">
             <div class="section">
                 <h2>My Profile</h2>
@@ -420,7 +121,6 @@
         </div>
     </div>
 
-    <!-- Booking Modal -->
     <div id="bookingModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">Book Session</div>
@@ -455,78 +155,38 @@
         var allTherapists = [];
         var selectedTherapist = null;
 
-        async function checkAuth() {
-    try {
-        const { data: { session }, error: sessionError } = await db.auth.getSession();
-        
-        if (sessionError || !session) {
-            console.error('Session error:', sessionError);
-            window.location.href = 'login.html';
-            return null;
-        }
-
-        const { data: profiles, error: profileError } = await db
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id);
-
-        console.log('Profile query result:', profiles, profileError);
-
-        if (profileError) {
-            console.error('Profile error:', profileError);
-            alert('Error loading profile: ' + profileError.message);
-            return null;
-        }
-
-        if (!profiles || profiles.length === 0) {
-            // Profile doesn't exist - create one
-            const { data: newProfile, error: createError } = await db
-                .from('profiles')
-                .insert([{
-                    id: session.user.id,
-                    email: session.user.email,
-                    role: 'user',
-                    status: 'active',
-                    full_name: session.user.email.split('@')[0]
-                }])
-                .select()
-                .single();
-
-            if (createError) {
-                alert('Error creating profile. Please contact support.');
-                await db.auth.signOut();
-                window.location.href = 'login.html';
-                return null;
-            }
-
-            currentUser = newProfile;
-            document.getElementById('userName').textContent = newProfile.full_name || newProfile.email;
-            return newProfile;
-        }
-
-        const profile = profiles[0];
-
-        if (profile.role && profile.role !== 'user') {
-            alert('Access denied. Users only.');
-            await db.auth.signOut();
-            window.location.href = 'index.html';
-            return null;
-        }
-
-        currentUser = profile;
-        document.getElementById('userName').textContent = profile.full_name || profile.email;
-        return profile;
-
-    } catch (err) {
-        console.error('Auth error:', err);
-        alert('Authentication error: ' + err.message);
-        window.location.href = 'login.html';
-        return null;
-    }
-}
-            currentUser = profile;
-            document.getElementById('userName').textContent = profile.full_name || profile.email;
-            return profile;
+        function checkAuth() {
+            return new Promise(async function(resolve, reject) {
+                try {
+                    const session = await db.auth.getSession();
+                    if (!session.data.session) {
+                        window.location.href = 'login.html';
+                        resolve(null);
+                        return;
+                    }
+                    const profiles = await db.from('profiles').select('*').eq('id', session.data.session.user.id);
+                    if (!profiles.data || profiles.data.length === 0) {
+                        window.location.href = 'login.html';
+                        resolve(null);
+                        return;
+                    }
+                    const profile = profiles.data[0];
+                    if (profile.role && profile.role !== 'user') {
+                        alert('Access denied. Users only.');
+                        await db.auth.signOut();
+                        window.location.href = 'index.html';
+                        resolve(null);
+                        return;
+                    }
+                    currentUser = profile;
+                    document.getElementById('userName').textContent = profile.full_name || profile.email;
+                    resolve(profile);
+                } catch (err) {
+                    console.error('Auth error:', err);
+                    window.location.href = 'login.html';
+                    resolve(null);
+                }
+            });
         }
 
         function switchTab(tabName) {
@@ -534,21 +194,14 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
-            
             if (tabName === 'bookings') loadBookings();
             if (tabName === 'profile') loadProfile();
         }
 
         async function loadTherapists() {
-            const { data: therapists } = await db.from('Therapists')
-                .select('*')
-                .eq('approval_status', 'approved')
-                .eq('Active', true);
-            
-            allTherapists = therapists || [];
-            
-            // Populate specialization filter
-            const specs = [...new Set(therapists?.map(t => t.Specialization) || [])];
+            const result = await db.from('Therapists').select('*').eq('approval_status', 'approved').eq('Active', true);
+            allTherapists = result.data || [];
+            const specs = [...new Set(allTherapists.map(t => t.Specialization))];
             const filterSelect = document.getElementById('filterSpec');
             specs.forEach(spec => {
                 const option = document.createElement('option');
@@ -556,7 +209,6 @@
                 option.textContent = spec;
                 filterSelect.appendChild(option);
             });
-            
             displayTherapists(allTherapists);
         }
 
@@ -566,18 +218,9 @@
                 container.innerHTML = '<div class="no-data">No therapists available</div>';
                 return;
             }
-            
             let html = '';
             therapists.forEach(t => {
-                html += `
-                    <div class="therapist-card">
-                        <div class="therapist-name">${t.Name}</div>
-                        <div class="therapist-spec">🎯 ${t.Specialization}</div>
-                        <div class="therapist-bio">${t.bio || 'Experienced professional ready to help you.'}</div>
-                        <div class="therapist-bio">📞 ${t.phone || 'N/A'}</div>
-                        <button class="btn btn-book" onclick='openBookingModal(${JSON.stringify(t)})'>Book Session</button>
-                    </div>
-                `;
+                html += '<div class="therapist-card"><div class="therapist-name">' + t.Name + '</div><div class="therapist-spec">🎯 ' + t.Specialization + '</div><div class="therapist-bio">' + (t.bio || 'Experienced professional ready to help you.') + '</div><div class="therapist-bio">📞 ' + (t.phone || 'N/A') + '</div><button class="btn btn-book" onclick=\'openBookingModal(' + JSON.stringify(t).replace(/'/g, "\\'") + ')\'>Book Session</button></div>';
             });
             container.innerHTML = html;
         }
@@ -585,13 +228,11 @@
         function filterTherapists() {
             const searchName = document.getElementById('searchName').value.toLowerCase();
             const filterSpec = document.getElementById('filterSpec').value;
-            
             let filtered = allTherapists.filter(t => {
                 const matchName = t.Name.toLowerCase().includes(searchName);
                 const matchSpec = !filterSpec || t.Specialization === filterSpec;
                 return matchName && matchSpec;
             });
-            
             displayTherapists(filtered);
         }
 
@@ -599,8 +240,6 @@
             selectedTherapist = therapist;
             document.getElementById('modalTherapistName').value = therapist.Name;
             document.getElementById('bookingModal').classList.add('active');
-            
-            // Set minimum date to today
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('sessionDate').min = today;
         }
@@ -614,13 +253,11 @@
             const date = document.getElementById('sessionDate').value;
             const time = document.getElementById('sessionTime').value;
             const notes = document.getElementById('sessionNotes').value;
-            
             if (!date || !time) {
                 alert('Please select date and time');
                 return;
             }
-            
-            const { error } = await db.from('Bookings').insert([{
+            const result = await db.from('Bookings').insert([{
                 user_id: currentUser.id,
                 therapist_id: selectedTherapist.id,
                 session_date: date,
@@ -628,12 +265,10 @@
                 status: 'pending',
                 notes: notes
             }]);
-            
-            if (error) {
-                alert('Booking failed: ' + error.message);
+            if (result.error) {
+                alert('Booking failed: ' + result.error.message);
                 return;
             }
-            
             alert('Booking successful! The therapist will confirm shortly.');
             closeModal();
             document.getElementById('sessionDate').value = '';
@@ -642,71 +277,32 @@
         }
 
         async function loadBookings() {
-            const { data: bookings } = await db.from('Bookings')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .order('session_date', { ascending: false });
-            
+            const bookingsResult = await db.from('Bookings').select('*').eq('user_id', currentUser.id).order('session_date', { ascending: false });
             const container = document.getElementById('bookingsList');
-            
-            if (!bookings || bookings.length === 0) {
+            if (!bookingsResult.data || bookingsResult.data.length === 0) {
                 container.innerHTML = '<div class="no-data">No bookings yet</div>';
                 return;
             }
-            
-            // Get therapist details
-            const { data: therapists } = await db.from('Therapists').select('id, Name, Specialization');
+            const therapistsResult = await db.from('Therapists').select('id, Name, Specialization');
             const therapistMap = {};
-            therapists?.forEach(t => { therapistMap[t.id] = t; });
-            
-            let html = `
-                <table class="bookings-table">
-                    <thead>
-                        <tr>
-                            <th>Therapist</th>
-                            <th>Specialization</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            bookings.forEach(b => {
+            therapistsResult.data?.forEach(t => { therapistMap[t.id] = t; });
+            let html = '<table class="bookings-table"><thead><tr><th>Therapist</th><th>Specialization</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr></thead><tbody>';
+            bookingsResult.data.forEach(b => {
                 const therapist = therapistMap[b.therapist_id];
                 const canCancel = b.status === 'pending' || b.status === 'confirmed';
-                html += `
-                    <tr>
-                        <td>${therapist?.Name || 'N/A'}</td>
-                        <td>${therapist?.Specialization || 'N/A'}</td>
-                        <td>${new Date(b.session_date).toLocaleDateString()}</td>
-                        <td>${b.start_time}</td>
-                        <td><span class="status-badge status-${b.status}">${b.status}</span></td>
-                        <td>
-                            ${canCancel ? `<button class="btn btn-cancel" onclick="cancelBooking('${b.id}')">Cancel</button>` : '-'}
-                        </td>
-                    </tr>
-                `;
+                html += '<tr><td>' + (therapist?.Name || 'N/A') + '</td><td>' + (therapist?.Specialization || 'N/A') + '</td><td>' + new Date(b.session_date).toLocaleDateString() + '</td><td>' + b.start_time + '</td><td><span class="status-badge status-' + b.status + '">' + b.status + '</span></td><td>' + (canCancel ? '<button class="btn btn-cancel" onclick="cancelBooking(\'' + b.id + '\')">Cancel</button>' : '-') + '</td></tr>';
             });
-            
             html += '</tbody></table>';
             container.innerHTML = html;
         }
 
         async function cancelBooking(bookingId) {
             if (!confirm('Are you sure you want to cancel this booking?')) return;
-            
-            const { error } = await db.from('Bookings')
-                .update({ status: 'cancelled' })
-                .eq('id', bookingId);
-            
-            if (error) {
-                alert('Error canceling booking: ' + error.message);
+            const result = await db.from('Bookings').update({ status: 'cancelled' }).eq('id', bookingId);
+            if (result.error) {
+                alert('Error canceling booking: ' + result.error.message);
                 return;
             }
-            
             alert('Booking cancelled successfully');
             loadBookings();
         }
@@ -720,29 +316,23 @@
         async function updateProfile() {
             const name = document.getElementById('profileName').value;
             const phone = document.getElementById('profilePhone').value;
-            
             if (!name) {
                 alert('Please enter your name');
                 return;
             }
-            
-            const { error } = await db.from('profiles')
-                .update({ full_name: name, phone: phone })
-                .eq('id', currentUser.id);
-            
-            if (error) {
-                alert('Update failed: ' + error.message);
+            const result = await db.from('profiles').update({ full_name: name, phone: phone }).eq('id', currentUser.id);
+            if (result.error) {
+                alert('Update failed: ' + result.error.message);
                 return;
             }
-            
             currentUser.full_name = name;
             currentUser.phone = phone;
             document.getElementById('userName').textContent = name;
             alert('Profile updated successfully!');
         }
 
-        function logout() {
-            client.auth.signOut().then(() => {
+        function doLogout() {
+            client.auth.signOut().then(function() {
                 window.location.href = 'index.html';
             });
         }
