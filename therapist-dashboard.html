@@ -411,7 +411,7 @@
         async function init() {
             const user = JSON.parse(localStorage.getItem('user'));
             
-            console.log('Current User:', user); // DEBUG
+            console.log('Current User:', user);
             
             if (!user || user.role !== 'therapist') {
                 alert('⚠️ Access denied. Therapist role required.');
@@ -434,14 +434,14 @@
         // Load Therapist Data
         async function loadTherapistData() {
             try {
-                console.log('Looking for therapist with user_id:', currentUser.id); // DEBUG
+                console.log('Looking for therapist with user_id:', currentUser.id);
                 
                 const { data, error } = await supabaseClient
                     .from('Therapists')
                     .select('*')
                     .eq('user_id', currentUser.id);
 
-                console.log('Therapist query result:', data, error); // DEBUG
+                console.log('Therapist query result:', data, error);
 
                 if (error) {
                     console.error('Supabase error:', error);
@@ -454,7 +454,7 @@
                     return;
                 }
                 
-                therapistData = data[0]; // Get first result
+                therapistData = data[0];
                 document.getElementById('therapistName').textContent = `Dr. ${therapistData.Name}`;
                 displayProfile();
             } catch (error) {
@@ -464,7 +464,7 @@
             }
         }
 
-        // Load All Bookings - FIXED VERSION
+        // Load All Bookings
         async function loadBookings() {
             try {
                 // First, get all bookings for this therapist
@@ -578,14 +578,14 @@
             if (booking.status === 'pending') {
                 actions = `
                     <div class="booking-actions">
-                        <button class="btn btn-confirm" onclick="confirmBooking(${booking.id})">✅ Confirm</button>
-                        <button class="btn btn-cancel" onclick="cancelBooking(${booking.id})">❌ Reject</button>
+                        <button class="btn btn-confirm" onclick="window.confirmBooking(${booking.id})">&#x2713; Confirm</button>
+                        <button class="btn btn-cancel" onclick="window.cancelBooking(${booking.id})">&#x2715; Reject</button>
                     </div>
                 `;
             } else if (booking.status === 'confirmed') {
                 actions = `
                     <div class="booking-actions">
-                        <button class="btn btn-cancel" onclick="cancelBooking(${booking.id})">❌ Cancel</button>
+                        <button class="btn btn-cancel" onclick="window.cancelBooking(${booking.id})">&#x2715; Cancel</button>
                     </div>
                 `;
             }
@@ -594,7 +594,7 @@
                 <div class="booking-card">
                     <div class="booking-header">
                         <div>
-                            <div class="booking-patient">👤 ${patient.full_name || 'Patient'}</div>
+                            <div class="booking-patient">&#x1F464; ${patient.full_name || 'Patient'}</div>
                             <div class="booking-date">${date}</div>
                         </div>
                         <span class="status-badge ${statusClass}">${booking.status.toUpperCase()}</span>
@@ -602,29 +602,29 @@
                     <div class="booking-details">
                         <div class="detail-item">
                             <span class="detail-label">Time Slot</span>
-                            <span class="detail-value">🕐 ${startTime} - ${endTime}</span>
+                            <span class="detail-value">&#x1F550; ${startTime} - ${endTime}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Patient Email</span>
-                            <span class="detail-value">📧 ${patient.email || 'N/A'}</span>
+                            <span class="detail-value">&#x1F4E7; ${patient.email || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Patient Phone</span>
-                            <span class="detail-value">📱 ${patient.phone || 'N/A'}</span>
+                            <span class="detail-value">&#x1F4F1; ${patient.phone || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Booking ID</span>
                             <span class="detail-value">#${booking.id}</span>
                         </div>
                     </div>
-                    ${booking.notes ? `<div class="detail-item"><span class="detail-label">Notes</span><span class="detail-value">${booking.notes}</span></div>` : ''}
+                    ${booking.notes ? `<div class="detail-item" style="margin-top: 10px;"><span class="detail-label">Notes</span><span class="detail-value">${booking.notes}</span></div>` : ''}
                     ${actions}
                 </div>
             `;
         }
 
-        // Confirm Booking
-        async function confirmBooking(bookingId) {
+        // Confirm Booking - Make globally accessible
+        window.confirmBooking = async function(bookingId) {
             if (!confirm('⚠️ Confirm this booking?')) return;
 
             try {
@@ -644,8 +644,8 @@
             }
         }
 
-        // Cancel Booking
-        async function cancelBooking(bookingId) {
+        // Cancel Booking - Make globally accessible
+        window.cancelBooking = async function(bookingId) {
             if (!confirm('⚠️ Are you sure you want to cancel this booking?')) return;
 
             try {
