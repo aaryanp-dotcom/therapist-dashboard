@@ -286,81 +286,47 @@
         }
 
         async function confirmBooking() {
-    const date = document.getElementById('sessionDate').value;
-    const timeSlot = document.getElementById('sessionTimeSlot').value;
-    const notes = document.getElementById('sessionNotes').value;
-    
-    if (!date || !timeSlot) {
-        alert('Please select date and time slot');
-        return;
-    }
-    
-    const [startTime, endTime] = timeSlot.split('|');
-    
-    const {data: userBookings} = await db
-        .from('Bookings')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .eq('session_date', date)
-        .neq('status', 'cancelled');
-    
-    if (userBookings && userBookings.length > 0) {
-        for (let booking of userBookings) {
-            const existingStart = booking.start_time;
-            const existingEnd = booking.end_time;
+            const date = document.getElementById('sessionDate').value;
+            const timeSlot = document.getElementById('sessionTimeSlot').value;
+            const notes = document.getElementById('sessionNotes').value;
             
-            if (startTime < existingEnd && endTime > existingStart) {
-                const formattedStart = formatTime(existingStart);
-                const formattedEnd = formatTime(existingEnd);
-                alert('⚠️ Time Conflict!\n\nYou already have a booking from ' + formattedStart + ' to ' + formattedEnd + ' on this date.\n\nPlease choose a different time slot.');
+            if (!date || !timeSlot) {
+                alert('Please select date and time slot');
                 return;
             }
-        }
-    }
-    
-    const {data: therapistBookings} = await db
-        .from('Bookings')
-        .select('*')
-        .eq('therapist_id', selectedTherapist.id)
-        .eq('session_date', date)
-        .neq('status', 'cancelled');
-    
-    if (therapistBookings && therapistBookings.length > 0) {
-        for (let booking of therapistBookings) {
-            const existingStart = booking.start_time;
-            const existingEnd = booking.end_time;
             
-            if (startTime < existingEnd && endTime > existingStart) {
-                const formattedStart = formatTime(existingStart);
-                const formattedEnd = formatTime(existingEnd);
-                alert('⚠️ Therapist Not Available!\n\n' + selectedTherapist.Name + ' is already booked from ' + formattedStart + ' to ' + formattedEnd + ' on this date.\n\nPlease choose a different time slot or therapist.');
-                return;
+            const [startTime, endTime] = timeSlot.split('|');
+            
+            const {data: userBookings} = await db.from('Bookings').select('*').eq('user_id', currentUser.id).eq('session_date', date).neq('status', 'cancelled');
+            
+            if (userBookings && userBookings.length > 0) {
+                for (let booking of userBookings) {
+                    const existingStart = booking.start_time;
+                    const existingEnd = booking.end_time;
+                    if (startTime < existingEnd && endTime > existingStart) {
+                        const formattedStart = formatTime(existingStart);
+                        const formattedEnd = formatTime(existingEnd);
+                        alert('⚠️ Time Conflict!\n\nYou already have a booking from ' + formattedStart + ' to ' + formattedEnd + ' on this date.\n\nPlease choose a different time slot.');
+                        return;
+                    }
+                }
             }
-        }
-    }
-    
-    const bookingData = {
-        user_id: currentUser.id,
-        therapist_id: selectedTherapist.id,
-        session_date: date,
-        start_time: startTime,
-        end_time: endTime,
-        status: 'pending'
-    };
-    if (notes) bookingData.notes = notes;
-    
-    const result = await db.from('Bookings').insert([bookingData]);
-    
-    if (result.error) {
-        const errorMsg = result.error.message || '';
-        
-        if (errorMsg.includes('unique') || errorMsg.includes('duplicate')) {
-            alert('⚠️ Booking Conflict!\n\nThis time slot is already booked. Please choose a different time.');
-        } else {
-            alert('❌ Booking Failed\n\nSomething went wrong. Please try again or contact support.');
-        }
-        console.err
-
+            
+            const {data: therapistBookings} = await db.from('Bookings').select('*').eq('therapist_id', selectedTherapist.id).eq('session_date', date).neq('status', 'cancelled');
+            
+            if (therapistBookings && therapistBookings.length > 0) {
+                for (let booking of therapistBookings) {
+                    const existingStart = booking.start_time;
+                    const existingEnd = booking.end_time;
+                    if (startTime < existingEnd && endTime > existingStart) {
+                        const formattedStart = formatTime(existingStart);
+                        const formattedEnd = formatTime(existingEnd);
+                        alert('⚠️ Therapist Not Available!\n\n' + selectedTherapist.Name + ' is already booked from ' + formattedStart + ' to ' + formattedEnd + ' on this date.\n\nPlease choose a different time slot or therapist.');
+                        return;
+                    }
+                }
+            }
+            
             const bookingData = {
                 user_id: currentUser.id,
                 therapist_id: selectedTherapist.id,
@@ -372,8 +338,15 @@
             if (notes) bookingData.notes = notes;
             
             const result = await db.from('Bookings').insert([bookingData]);
+            
             if (result.error) {
-                alert('❌ Booking Failed\n\n' + result.error.message + '\n\nPlease try again or contact support.');
+                const errorMsg = result.error.message || '';
+                if (errorMsg.includes('unique') || errorMsg.includes('duplicate')) {
+                    alert('⚠️ Booking Conflict!\n\nThis time slot is already booked. Please choose a different time.');
+                } else {
+                    alert('❌ Booking Failed\n\nSomething went wrong. Please try again or contact support.');
+                }
+                console.error('Booking error:', result.error);
                 return;
             }
             
