@@ -259,9 +259,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcyNjQ4NzksImV4cCI6MjA1Mjg0MDg3OX0.r7gqHYqxEJtmEqXDwjr_j7U-JuFr7fB8vZf_6gNnYPo';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Use existing supabase client from auth.js or create new one
+let supabase;
+if (window.supabaseClient) {
+    supabase = window.supabaseClient;
+} else {
+    const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcyNjQ4NzksImV4cCI6MjA1Mjg0MDg3OX0.r7gqHYqxEJtmEqXDwjr_j7U-JuFr7fB8vZf_6gNnYPo';
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
 
         async function checkAuth() {
             const { data: { user } } = await supabase.auth.getUser();
