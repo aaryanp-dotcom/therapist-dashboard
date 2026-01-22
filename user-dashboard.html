@@ -155,38 +155,33 @@
         var allTherapists = [];
         var selectedTherapist = null;
 
-        function checkAuth() {
-            return new Promise(async function(resolve, reject) {
-                try {
-                    const session = await db.auth.getSession();
-                    if (!session.data.session) {
-                        window.location.href = 'login.html';
-                        resolve(null);
-                        return;
-                    }
-                    const profiles = await db.from('profiles').select('*').eq('id', session.data.session.user.id);
-                    if (!profiles.data || profiles.data.length === 0) {
-                        window.location.href = 'login.html';
-                        resolve(null);
-                        return;
-                    }
-                    const profile = profiles.data[0];
-                    if (profile.role && profile.role !== 'user') {
-                        alert('Access denied. Users only.');
-                        await db.auth.signOut();
-                        window.location.href = 'index.html';
-                        resolve(null);
-                        return;
-                    }
-                    currentUser = profile;
-                    document.getElementById('userName').textContent = profile.full_name || profile.email;
-                    resolve(profile);
-                } catch (err) {
-                    console.error('Auth error:', err);
+        async function checkAuth() {
+            try {
+                const {data: {session}} = await db.auth.getSession();
+                if (!session) {
                     window.location.href = 'login.html';
-                    resolve(null);
+                    return null;
                 }
-            });
+                const {data: profiles} = await db.from('profiles').select('*').eq('id', session.user.id);
+                if (!profiles || profiles.length === 0) {
+                    window.location.href = 'login.html';
+                    return null;
+                }
+                const profile = profiles[0];
+                if (profile.role && profile.role !== 'user') {
+                    alert('Access denied. Users only.');
+                    await db.auth.signOut();
+                    window.location.href = 'index.html';
+                    return null;
+                }
+                currentUser = profile;
+                document.getElementById('userName').textContent = profile.full_name || profile.email;
+                return profile;
+            } catch (err) {
+                console.error('Auth error:', err);
+                window.location.href = 'login.html';
+                return null;
+            }
         }
 
         function switchTab(tabName) {
@@ -249,22 +244,24 @@
             selectedTherapist = null;
         }
 
-        const result = await db.from('Bookings').insert([{
-    user_id: currentUser.id,
-    therapist_id: selectedTherapist.id,
-    session_date: date,
-    start_time: time,
-    status: 'pending'
-}]);
+        async function confirmBooking() {
+            const date = document.getElementById('sessionDate').value;
+            const time = document.getElementById('sessionTime').value;
+            const notes = document.getElementById('sessionNotes').value;
+            if (!date || !time) {
+                alert('Please select date and time');
+                return;
             }
-            const result = await db.from('Bookings').insert([{
+            const bookingData = {
                 user_id: currentUser.id,
                 therapist_id: selectedTherapist.id,
                 session_date: date,
                 start_time: time,
-                status: 'pending',
-                notes: notes
-            }]);
+                status: 'pending'
+            };
+            if (notes) bookingData.notes = notes;
+            
+            const result = await db.from('Bookings').insert([bookingData]);
             if (result.error) {
                 alert('Booking failed: ' + result.error.message);
                 return;
