@@ -401,7 +401,7 @@
         // Supabase Configuration
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentUser = null;
         let therapistData = null;
@@ -425,7 +425,7 @@
         // Load Therapist Data
         async function loadTherapistData() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('Therapists')
                     .select('*')
                     .eq('user_id', currentUser.id)
@@ -445,7 +445,7 @@
         // Load All Bookings
         async function loadBookings() {
             try {
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('Bookings')
                     .select(`
                         *,
@@ -576,7 +576,7 @@
             if (!confirm('⚠️ Confirm this booking?')) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('Bookings')
                     .update({ status: 'confirmed' })
                     .eq('id', bookingId);
@@ -597,7 +597,7 @@
             if (!confirm('⚠️ Are you sure you want to cancel this booking?')) return;
 
             try {
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('Bookings')
                     .update({ status: 'cancelled' })
                     .eq('id', bookingId);
@@ -664,8 +664,8 @@
                 allBookings.filter(b => b.status === 'completed').length;
         }
 
-        // Switch Tabs
-        function switchTab(tab) {
+        // Switch Tabs - FIXED: Made it globally accessible
+        window.switchTab = function(tab) {
             // Update tab buttons
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
