@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -578,6 +579,9 @@
             currentUser = user;
             document.getElementById('userName').textContent = 'Welcome, ' + user.full_name;
             
+            // Initialize EmailJS
+            emailjs.init('SuVKfTpN99-jG7y9L');
+            
             await loadTherapists();
             await loadBookings();
             setupEventListeners();
@@ -784,7 +788,7 @@
             const endTime = String(endHour).padStart(2, '0') + ':' + startParts[1];
 
             try {
-                const { error } = await supabaseClient
+                const { data: newBooking, error } = await supabaseClient
                     .from('Bookings')
                     .insert([{
                         user_id: currentUser.id,
@@ -794,11 +798,53 @@
                         end_time: endTime,
                         status: 'pending',
                         notes: notes || null
-                    }]);
+                    }])
+                    .select()
+                    .single();
 
                 if (error) throw error;
 
-                showMessage('✅ Booking request submitted successfully!', 'success');
+                // Send confirmation email to user
+                emailjs.send('service_95x3tyn', 'template_5ocff0p', {
+                    patient_name: currentUser.full_name,
+                    patient_email: currentUser.email,
+                    therapist_name: 'Dr. ' + currentBookingTherapist.Name,
+                    session_date: new Date(sessionDate).toLocaleDateString('en-IN', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    }),
+                    session_time: convertTo12Hour(startTime) + ' - ' + convertTo12Hour(endTime),
+                    booking_id: newBooking.id
+                }).then(() => {
+                    console.log('✅ Patient email sent');
+                }).catch((error) => {
+                    console.error('❌ Patient email failed:', error);
+                });
+
+                // Send notification to therapist
+                emailjs.send('service_95x3tyn', 'template_4xnwjo', {
+                    therapist_name: 'Dr. ' + currentBookingTherapist.Name,
+                    therapist_email: currentBookingTherapist.email,
+                    patient_name: currentUser.full_name,
+                    patient_email: currentUser.email,
+                    session_date: new Date(sessionDate).toLocaleDateString('en-IN', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    }),
+                    session_time: convertTo12Hour(startTime) + ' - ' + convertTo12Hour(endTime),
+                    booking_id: newBooking.id,
+                    notes: notes || 'None'
+                }).then(() => {
+                    console.log('✅ Therapist email sent');
+                }).catch((error) => {
+                    console.error('❌ Therapist email failed:', error);
+                });
+
+                showMessage('✅ Booking request submitted successfully! Check your email.', 'success');
                 closeBookingModal();
                 await loadBookings();
             } catch (error) {
