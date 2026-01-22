@@ -3,12 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Therapist Booking</title>
-  <script>
-    window.location.href = "login.html";
-  </script>
+  <title>Therapist Booking Platform</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .landing-container {
+      max-width: 800px;
+      margin: 100px auto;
+      text-align: center;
+      padding: 40px;
+    }
+    .landing-container h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .landing-container p {
+      font-size: 1.2em;
+      color: #666;
+      margin-bottom: 40px;
+    }
+    .button-group {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .btn-large {
+      padding: 15px 40px;
+      font-size: 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #45a049;
+    }
+    .btn-secondary {
+      background: #2196F3;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #0b7dda;
+    }
+    .divider {
+      margin: 40px 0;
+      color: #999;
+      font-size: 16px;
+    }
+    .signup-section {
+      background: #f9f9f9;
+      padding: 30px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .signup-section h2 {
+      margin-bottom: 20px;
+      color: #555;
+    }
+  </style>
 </head>
 <body>
-  <p>Redirecting to login...</p>
+  <div class="landing-container">
+    <h1>Welcome to Therapist Booking Platform</h1>
+    <p>Book therapy sessions with certified professionals</p>
+
+    <div class="button-group">
+      <a href="login.html" class="btn-large btn-primary">Login</a>
+    </div>
+
+    <div class="divider">── Don't have an account? ──</div>
+
+    <div class="signup-section">
+      <h2>Sign Up As:</h2>
+      <div class="button-group">
+        <a href="signup-user.html" class="btn-large btn-secondary">User / Patient</a>
+        <a href="signup-therapist.html" class="btn-large btn-secondary">Therapist</a>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
