@@ -131,7 +131,7 @@ function signupTherapist() {
   });
 }
 
-// Login with role-based redirect
+// Login with role-based redirect - FIXED VERSION
 function login() {
   var email = document.getElementById("email").value;
   var password = document.getElementById("password").value;
@@ -168,13 +168,16 @@ function login() {
         return;
       }
       
-      if (role === 'admin') {
-        window.location.href = "admin-dashboard.html";
-      } else if (role === 'therapist') {
-        window.location.href = "therapist-dashboard.html";
-      } else {
-        window.location.href = "user-dashboard.html";
-      }
+      // CRITICAL FIX: Wait for session to be saved before redirect
+      setTimeout(function() {
+        if (role === 'admin') {
+          window.location.href = "admin-dashboard.html";
+        } else if (role === 'therapist') {
+          window.location.href = "therapist-dashboard.html";
+        } else {
+          window.location.href = "user-dashboard.html";
+        }
+      }, 1000);
     });
   });
 }
