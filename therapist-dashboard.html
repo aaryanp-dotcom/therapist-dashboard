@@ -108,6 +108,67 @@
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
 
+        .filter-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #667eea;
+        }
+
+        .filter-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            color: #666;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .filter-group input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        .btn-filter {
+            background: #667eea;
+            color: white;
+            padding: 10px 25px;
+        }
+
+        .btn-filter:hover {
+            background: #5568d3;
+        }
+
+        .btn-clear {
+            background: #999;
+            color: white;
+            padding: 10px 25px;
+        }
+
+        .btn-clear:hover {
+            background: #777;
+        }
+
         .tabs {
             display: flex;
             gap: 10px;
@@ -308,6 +369,16 @@
             margin-bottom: 15px;
         }
 
+        .filter-active-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
         @media (max-width: 768px) {
             .header {
                 text-align: center;
@@ -324,6 +395,15 @@
 
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group input {
+                min-width: 100%;
             }
         }
     </style>
@@ -364,6 +444,23 @@
         <!-- Main Content -->
         <div class="main-content">
             <div id="messageBox" class="message"></div>
+
+            <!-- Date Filter Section -->
+            <div class="filter-section">
+                <h3>📅 Filter by Date Range <span id="filterBadge" class="filter-active-badge" style="display: none;">Filter Active</span></h3>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label>From Date</label>
+                        <input type="date" id="fromDate">
+                    </div>
+                    <div class="filter-group">
+                        <label>To Date</label>
+                        <input type="date" id="toDate">
+                    </div>
+                    <button class="btn btn-filter" id="applyFilterBtn">Apply Filter</button>
+                    <button class="btn btn-clear" id="clearFilterBtn">Clear Filter</button>
+                </div>
+            </div>
 
             <!-- Tabs -->
             <div class="tabs">
@@ -406,6 +503,12 @@
         let currentUser = null;
         let therapistData = null;
         let allBookings = [];
+        let filteredBookings = [];
+        let dateFilter = {
+            from: null,
+            to: null,
+            active: false
+        };
 
         // Initialize
         async function init() {
@@ -444,6 +547,10 @@
                 });
             });
             
+            // Filter buttons
+            document.getElementById('applyFilterBtn').addEventListener('click', applyDateFilter);
+            document.getElementById('clearFilterBtn').addEventListener('click', clearDateFilter);
+            
             // Event delegation for booking action buttons
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('btn-confirm')) {
@@ -455,6 +562,77 @@
                     console.log('Cancel clicked for booking:', bookingId);
                     cancelBooking(bookingId);
                 }
+            });
+        }
+
+        // Apply Date Filter
+        function applyDateFilter() {
+            const fromDate = document.getElementById('fromDate').value;
+            const toDate = document.getElementById('toDate').value;
+
+            if (!fromDate && !toDate) {
+                alert('⚠️ Please select at least one date (From or To)');
+                return;
+            }
+
+            if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+                alert('⚠️ From Date cannot be after To Date');
+                return;
+            }
+
+            dateFilter.from = fromDate;
+            dateFilter.to = toDate;
+            dateFilter.active = true;
+
+            // Show filter badge
+            document.getElementById('filterBadge').style.display = 'inline-block';
+
+            // Filter bookings
+            filterBookings();
+            displayBookings();
+            updateStats();
+            
+            showMessage('✅ Date filter applied', 'success');
+        }
+
+        // Clear Date Filter
+        function clearDateFilter() {
+            document.getElementById('fromDate').value = '';
+            document.getElementById('toDate').value = '';
+            
+            dateFilter.from = null;
+            dateFilter.to = null;
+            dateFilter.active = false;
+
+            // Hide filter badge
+            document.getElementById('filterBadge').style.display = 'none';
+
+            // Reset to all bookings
+            filteredBookings = [...allBookings];
+            displayBookings();
+            updateStats();
+            
+            showMessage('✅ Filter cleared', 'success');
+        }
+
+        // Filter Bookings by Date
+        function filterBookings() {
+            filteredBookings = allBookings.filter(booking => {
+                const bookingDate = new Date(booking.session_date);
+                
+                if (dateFilter.from && dateFilter.to) {
+                    const from = new Date(dateFilter.from);
+                    const to = new Date(dateFilter.to);
+                    return bookingDate >= from && bookingDate <= to;
+                } else if (dateFilter.from) {
+                    const from = new Date(dateFilter.from);
+                    return bookingDate >= from;
+                } else if (dateFilter.to) {
+                    const to = new Date(dateFilter.to);
+                    return bookingDate <= to;
+                }
+                
+                return true;
             });
         }
 
@@ -505,6 +683,7 @@
                 
                 if (!bookingsData || bookingsData.length === 0) {
                     allBookings = [];
+                    filteredBookings = [];
                     displayBookings();
                     return;
                 }
@@ -531,16 +710,24 @@
                     });
                 }
 
+                // Apply filter if active
+                if (dateFilter.active) {
+                    filterBookings();
+                } else {
+                    filteredBookings = [...allBookings];
+                }
+
                 displayBookings();
             } catch (error) {
                 console.error('Error loading bookings:', error);
                 showMessage('Error loading bookings', 'error');
                 allBookings = [];
+                filteredBookings = [];
                 displayBookings();
             }
         }
 
-        // Display Bookings - FIXED: No cloneNode
+        // Display Bookings
         function displayBookings() {
             const containers = {
                 all: document.getElementById('allBookingsList'),
@@ -552,13 +739,22 @@
             // Clear all containers
             Object.values(containers).forEach(c => c.innerHTML = '');
 
-            if (allBookings.length === 0) {
-                containers.all.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No bookings yet</p></div>';
+            // Use filtered bookings
+            const bookingsToDisplay = filteredBookings;
+
+            if (bookingsToDisplay.length === 0) {
+                const message = dateFilter.active ? 
+                    '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>No bookings found for selected date range</p></div>' :
+                    '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No bookings yet</p></div>';
+                containers.all.innerHTML = message;
+                containers.pending.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No pending bookings</p></div>';
+                containers.confirmed.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No confirmed bookings</p></div>';
+                containers.completed.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎉</div><p>No completed sessions yet</p></div>';
                 return;
             }
 
             // Render bookings separately for each container
-            allBookings.forEach(booking => {
+            bookingsToDisplay.forEach(booking => {
                 containers.all.appendChild(createBookingCard(booking));
 
                 if (booking.status === 'pending') {
@@ -739,15 +935,16 @@
                 '<div class="profile-field"><label>Status</label><div class="value"><span class="status-badge ' + (therapistData.approval_status === 'approved' ? 'status-confirmed' : 'status-pending') + '">' + therapistData.approval_status.toUpperCase() + '</span></div></div>';
         }
 
-        // Update Statistics
+        // Update Statistics (use filtered bookings)
         function updateStats() {
-            document.getElementById('totalBookings').textContent = allBookings.length;
+            const bookingsToCount = filteredBookings;
+            document.getElementById('totalBookings').textContent = bookingsToCount.length;
             document.getElementById('pendingBookings').textContent = 
-                allBookings.filter(b => b.status === 'pending').length;
+                bookingsToCount.filter(b => b.status === 'pending').length;
             document.getElementById('confirmedBookings').textContent = 
-                allBookings.filter(b => b.status === 'confirmed').length;
+                bookingsToCount.filter(b => b.status === 'confirmed').length;
             document.getElementById('completedBookings').textContent = 
-                allBookings.filter(b => b.status === 'completed').length;
+                bookingsToCount.filter(b => b.status === 'completed').length;
         }
 
         // Switch Tabs
