@@ -265,15 +265,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./auth.js"></script>
     <script>
-        // Admin uses Service Role to bypass RLS (secure for admin operations)
-        const ADMIN_SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
-        const ADMIN_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODg0MzQ3MiwiZXhwIjoyMDg0NDE5NDcyfQ.DqARzqbATxRdK-OT9wSe3tZVWOgSq9T69UWiD7-xPts';
-        const adminDb = window.supabase.createClient(ADMIN_SUPABASE_URL, ADMIN_SERVICE_KEY);
+        var db = client;
 
         async function checkAuth() {
             try {
-                // Check session using regular client (from auth.js)
-                const { data: { session }, error } = await client.auth.getSession();
+                const { data: { session }, error } = await db.auth.getSession();
                 
                 if (error || !session) {
                     console.log('No session found');
@@ -282,13 +278,7 @@
                 }
 
                 const user = session.user;
-
-                // Use admin client to check profile (bypasses RLS)
-                const { data: profile, error: profileError } = await adminDb
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', user.id)
-                    .single();
+                const { data: profile, error: profileError } = await db.from('profiles').select('*').eq('id', user.id).single();
 
                 if (profileError || !profile) {
                     console.error('Profile error:', profileError);
@@ -298,7 +288,7 @@
 
                 if (profile.role !== 'admin') {
                     alert('Access denied. Admin only.');
-                    await client.auth.signOut();
+                    await db.auth.signOut();
                     window.location.href = 'index.html';
                     return null;
                 }
@@ -313,12 +303,12 @@
 
         async function loadStatistics() {
             try {
-                const { data: allProfiles } = await adminDb.from('profiles').select('*');
+                const { data: allProfiles } = await db.from('profiles').select('*');
                 const users = allProfiles?.filter(p => p.role === 'user' || !p.role) || [];
                 
-                const { data: therapists } = await adminDb.from('Therapists').select('*');
-                const { data: pending } = await adminDb.from('Therapists').select('*').eq('approval_status', 'pending');
-                const { data: bookings } = await adminDb.from('Bookings').select('*');
+                const { data: therapists } = await db.from('Therapists').select('*');
+                const { data: pending } = await db.from('Therapists').select('*').eq('approval_status', 'pending');
+                const { data: bookings } = await db.from('Bookings').select('*');
                 
                 document.getElementById('totalUsers').textContent = users.length;
                 document.getElementById('totalTherapists').textContent = therapists?.length || 0;
@@ -330,12 +320,7 @@
         }
 
         async function loadApplications() {
-            const { data: applications, error } = await adminDb
-                .from('Therapists')
-                .select('*')
-                .eq('approval_status', 'pending')
-                .order('created_at', { ascending: false });
-
+            const { data: applications, error } = await db.from('Therapists').select('*').eq('approval_status', 'pending').order('created_at', { ascending: false });
             const container = document.getElementById('applicationsTable');
 
             if (error) {
@@ -385,33 +370,17 @@
         }
 
         async function approveTherapist(therapistId) {
-            const { error: therapistError } = await adminDb
-                .from('Therapists')
-                .update({ 
-                    approval_status: 'approved',
-                    Active: true 
-                })
-                .eq('id', therapistId);
+            const { error: therapistError } = await db.from('Therapists').update({ approval_status: 'approved', Active: true }).eq('id', therapistId);
 
             if (therapistError) {
                 alert('Error approving therapist: ' + therapistError.message);
                 return;
             }
 
-            const { data: therapist } = await adminDb
-                .from('Therapists')
-                .select('user_id')
-                .eq('id', therapistId)
-                .single();
+            const { data: therapist } = await db.from('Therapists').select('user_id').eq('id', therapistId).single();
 
             if (therapist && therapist.user_id) {
-                await adminDb
-                    .from('profiles')
-                    .update({ 
-                        status: 'active',
-                        approved: true 
-                    })
-                    .eq('id', therapist.user_id);
+                await db.from('profiles').update({ status: 'active', approved: true }).eq('id', therapist.user_id);
             }
 
             alert('Therapist approved successfully!');
@@ -420,10 +389,7 @@
         }
 
         async function rejectTherapist(therapistId) {
-            const { error } = await adminDb
-                .from('Therapists')
-                .update({ approval_status: 'rejected' })
-                .eq('id', therapistId);
+            const { error } = await db.from('Therapists').update({ approval_status: 'rejected' }).eq('id', therapistId);
 
             if (error) {
                 alert('Error rejecting therapist: ' + error.message);
@@ -439,10 +405,7 @@
             const container = document.getElementById('bookingsTable');
             
             try {
-                const { data: bookings, error } = await adminDb
-                    .from('Bookings')
-                    .select('*')
-                    .order('session_date', { ascending: false });
+                const { data: bookings, error } = await db.from('Bookings').select('*').order('session_date', { ascending: false });
                 
                 if (error) {
                     console.error('Error loading bookings:', error);
@@ -455,11 +418,11 @@
                     return;
                 }
                 
-                const { data: profiles } = await adminDb.from('profiles').select('id, full_name, email');
+                const { data: profiles } = await db.from('profiles').select('id, full_name, email');
                 const profileMap = {};
                 profiles?.forEach(p => { profileMap[p.id] = p; });
                 
-                const { data: therapists } = await adminDb.from('Therapists').select('id, Name, Specialization');
+                const { data: therapists } = await db.from('Therapists').select('id, Name, Specialization');
                 const therapistMap = {};
                 therapists?.forEach(t => { therapistMap[t.id] = t; });
                 
@@ -502,11 +465,7 @@
         }
 
         async function loadUsers() {
-            const { data: users, error } = await adminDb
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false });
-
+            const { data: users, error } = await db.from('profiles').select('*').order('created_at', { ascending: false });
             const container = document.getElementById('usersTable');
 
             if (error) {
