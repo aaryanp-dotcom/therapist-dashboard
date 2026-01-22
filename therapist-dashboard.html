@@ -447,10 +447,12 @@
             // Event delegation for booking action buttons
             document.addEventListener('click', function(e) {
                 if (e.target.classList.contains('btn-confirm')) {
-                    const bookingId = parseInt(e.target.dataset.bookingId);
+                    const bookingId = parseInt(e.target.getAttribute('data-booking-id'));
+                    console.log('Confirm clicked for booking:', bookingId);
                     confirmBooking(bookingId);
                 } else if (e.target.classList.contains('btn-cancel')) {
-                    const bookingId = parseInt(e.target.dataset.bookingId);
+                    const bookingId = parseInt(e.target.getAttribute('data-booking-id'));
+                    console.log('Cancel clicked for booking:', bookingId);
                     cancelBooking(bookingId);
                 }
             });
@@ -540,42 +542,43 @@
 
         // Display Bookings
         function displayBookings() {
-            const allList = document.getElementById('allBookingsList');
-            const pendingList = document.getElementById('pendingBookingsList');
-            const confirmedList = document.getElementById('confirmedBookingsList');
-            const completedList = document.getElementById('completedBookingsList');
+            const containers = {
+                all: document.getElementById('allBookingsList'),
+                pending: document.getElementById('pendingBookingsList'),
+                confirmed: document.getElementById('confirmedBookingsList'),
+                completed: document.getElementById('completedBookingsList')
+            };
 
-            allList.innerHTML = '';
-            pendingList.innerHTML = '';
-            confirmedList.innerHTML = '';
-            completedList.innerHTML = '';
+            // Clear all containers
+            Object.values(containers).forEach(c => c.innerHTML = '');
 
             if (allBookings.length === 0) {
-                allList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No bookings yet</p></div>';
+                containers.all.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No bookings yet</p></div>';
                 return;
             }
 
             allBookings.forEach(booking => {
                 const card = createBookingCard(booking);
-                allList.appendChild(card);
+                containers.all.appendChild(card.cloneNode(true));
 
                 if (booking.status === 'pending') {
-                    pendingList.appendChild(card.cloneNode(true));
+                    containers.pending.appendChild(card.cloneNode(true));
                 } else if (booking.status === 'confirmed') {
-                    confirmedList.appendChild(card.cloneNode(true));
+                    containers.confirmed.appendChild(card.cloneNode(true));
                 } else if (booking.status === 'completed') {
-                    completedList.appendChild(card.cloneNode(true));
+                    containers.completed.appendChild(card.cloneNode(true));
                 }
             });
 
-            if (pendingList.children.length === 0) {
-                pendingList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No pending bookings</p></div>';
+            // Add empty states
+            if (containers.pending.children.length === 0) {
+                containers.pending.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No pending bookings</p></div>';
             }
-            if (confirmedList.children.length === 0) {
-                confirmedList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No confirmed bookings</p></div>';
+            if (containers.confirmed.children.length === 0) {
+                containers.confirmed.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No confirmed bookings</p></div>';
             }
-            if (completedList.children.length === 0) {
-                completedList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎉</div><p>No completed sessions yet</p></div>';
+            if (containers.completed.children.length === 0) {
+                containers.completed.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎉</div><p>No completed sessions yet</p></div>';
             }
         }
 
@@ -643,12 +646,12 @@
                 const confirmBtn = document.createElement('button');
                 confirmBtn.className = 'btn btn-confirm';
                 confirmBtn.textContent = '✓ Confirm';
-                confirmBtn.dataset.bookingId = booking.id;
+                confirmBtn.setAttribute('data-booking-id', booking.id);
                 
                 const rejectBtn = document.createElement('button');
                 rejectBtn.className = 'btn btn-cancel';
                 rejectBtn.textContent = '✕ Reject';
-                rejectBtn.dataset.bookingId = booking.id;
+                rejectBtn.setAttribute('data-booking-id', booking.id);
                 
                 actionsDiv.appendChild(confirmBtn);
                 actionsDiv.appendChild(rejectBtn);
@@ -660,7 +663,7 @@
                 const cancelBtn = document.createElement('button');
                 cancelBtn.className = 'btn btn-cancel';
                 cancelBtn.textContent = '✕ Cancel';
-                cancelBtn.dataset.bookingId = booking.id;
+                cancelBtn.setAttribute('data-booking-id', booking.id);
                 
                 actionsDiv.appendChild(cancelBtn);
                 card.appendChild(actionsDiv);
@@ -671,6 +674,12 @@
 
         // Confirm Booking
         async function confirmBooking(bookingId) {
+            if (isNaN(bookingId)) {
+                console.error('Invalid booking ID:', bookingId);
+                showMessage('Error: Invalid booking ID', 'error');
+                return;
+            }
+
             if (!confirm('⚠️ Confirm this booking?')) return;
 
             try {
@@ -692,6 +701,12 @@
 
         // Cancel Booking
         async function cancelBooking(bookingId) {
+            if (isNaN(bookingId)) {
+                console.error('Invalid booking ID:', bookingId);
+                showMessage('Error: Invalid booking ID', 'error');
+                return;
+            }
+
             if (!confirm('⚠️ Are you sure you want to cancel this booking?')) return;
 
             try {
