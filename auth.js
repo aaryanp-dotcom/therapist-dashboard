@@ -1,3 +1,5 @@
+
+auth_NO_TRIGGER.js
 // Supabase Configuration
 var supabaseUrl = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
 var supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
@@ -11,7 +13,6 @@ function signupUser() {
   var password = document.getElementById("password").value;
   var confirmPassword = document.getElementById("confirmPassword").value;
 
-  // Validation
   if (!fullName || !email || !password || !confirmPassword) {
     alert("Please fill in all required fields");
     return;
@@ -27,7 +28,6 @@ function signupUser() {
     return;
   }
 
-  // Create user account
   client.auth.signUp({
     email: email,
     password: password
@@ -39,21 +39,22 @@ function signupUser() {
 
     var userId = response.data.user.id;
 
-    // Wait a bit for trigger to create profile, then update it
-    setTimeout(function() {
-      client.from("profiles").update({
-        full_name: fullName,
-        phone: phone
-      }).eq('id', userId).then(function(profileResponse) {
-        if (profileResponse.error) {
-          console.error("Profile update error:", profileResponse.error);
-          // Don't show error to user - account was still created
-        }
+    // Manually create profile (no trigger)
+    client.from("profiles").insert([{
+      id: userId,
+      email: email,
+      full_name: fullName,
+      phone: phone,
+      role: 'user',
+      status: 'active'
+    }]).then(function(profileResponse) {
+      if (profileResponse.error) {
+        console.error("Profile creation error:", profileResponse.error);
+      }
 
-        alert("Account created successfully! You can now login.");
-        window.location.href = "login.html";
-      });
-    }, 1000);
+      alert("Account created successfully! You can now login.");
+      window.location.href = "login.html";
+    });
   });
 }
 
@@ -68,7 +69,6 @@ function signupTherapist() {
   var password = document.getElementById("password").value;
   var confirmPassword = document.getElementById("confirmPassword").value;
 
-  // Validation
   if (!fullName || !email || !phone || !specialization || !qualifications || !password || !confirmPassword) {
     alert("Please fill in all required fields");
     return;
@@ -84,7 +84,6 @@ function signupTherapist() {
     return;
   }
 
-  // Create therapist account
   client.auth.signUp({
     email: email,
     password: password
@@ -96,46 +95,45 @@ function signupTherapist() {
 
     var userId = response.data.user.id;
 
-    // Wait for trigger to create profile
-    setTimeout(function() {
-      // Update profile to therapist role
-      client.from("profiles").update({
-        full_name: fullName,
-        phone: phone,
-        role: 'therapist',
-        status: 'pending'
-      }).eq('id', userId).then(function(profileResponse) {
-        if (profileResponse.error) {
-          console.error("Profile update error:", profileResponse.error);
-        }
-      });
+    // Create profile as therapist
+    client.from("profiles").insert([{
+      id: userId,
+      email: email,
+      full_name: fullName,
+      phone: phone,
+      role: 'therapist',
+      status: 'pending'
+    }]).then(function(profileResponse) {
+      if (profileResponse.error) {
+        console.error("Profile creation error:", profileResponse.error);
+      }
+    });
 
-      // Insert therapist application
-      client.from("Therapists").insert([{
-        user_id: userId,
-        Name: fullName,
-        email: email,
-        phone: phone,
-        Specialization: specialization,
-        qualifications: qualifications,
-        bio: bio,
-        approval_status: 'pending',
-        Active: false
-      }]).then(function(therapistResponse) {
-        if (therapistResponse.error) {
-          console.error("Therapist application error:", therapistResponse.error);
-          alert("Error submitting application: " + therapistResponse.error.message);
-          return;
-        }
+    // Create therapist application
+    client.from("Therapists").insert([{
+      user_id: userId,
+      Name: fullName,
+      email: email,
+      phone: phone,
+      Specialization: specialization,
+      qualifications: qualifications,
+      bio: bio,
+      approval_status: 'pending',
+      Active: false
+    }]).then(function(therapistResponse) {
+      if (therapistResponse.error) {
+        console.error("Therapist application error:", therapistResponse.error);
+        alert("Error: " + therapistResponse.error.message);
+        return;
+      }
 
-        alert("Application submitted successfully! An admin will review your profile. You'll be notified once approved.");
-        window.location.href = "index.html";
-      });
-    }, 1000);
+      alert("Application submitted! Admin will review your profile.");
+      window.location.href = "index.html";
+    });
   });
 }
 
-// Login function with role-based redirect
+// Login with role-based redirect
 function login() {
   var email = document.getElementById("email").value;
   var password = document.getElementById("password").value;
@@ -156,25 +154,22 @@ function login() {
 
     var userId = response.data.user.id;
 
-    // Get user profile to check role
     client.from("profiles").select("role, status").eq("id", userId).single().then(function(profileResponse) {
       if (profileResponse.error) {
-        console.error("Profile fetch error:", profileResponse.error);
-        alert("Error loading profile. Please contact support.");
+        console.error("Profile error:", profileResponse.error);
+        alert("Error loading profile");
         return;
       }
 
       var role = profileResponse.data.role;
       var status = profileResponse.data.status;
 
-      // Check if therapist is still pending approval
       if (role === 'therapist' && status === 'pending') {
-        alert("Your therapist application is still pending admin approval. Please wait for confirmation.");
+        alert("Your therapist application is pending admin approval.");
         client.auth.signOut();
         return;
       }
 
-      // Redirect based on role
       if (role === 'admin') {
         window.location.href = "admin-dashboard.html";
       } else if (role === 'therapist') {
@@ -186,7 +181,6 @@ function login() {
   });
 }
 
-// Logout function
 function logout() {
   client.auth.signOut().then(function() {
     window.location.href = "index.html";
