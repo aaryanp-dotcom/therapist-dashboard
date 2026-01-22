@@ -50,6 +50,9 @@
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; color: #555; font-weight: 500; }
         .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+        .time-select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; background: white; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 35px; }
+        .time-select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .time-select option { padding: 10px; }
         .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
         .btn-modal { flex: 1; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 500; }
         .btn-primary { background: #667eea; color: white; }
@@ -133,8 +136,67 @@
                 <input type="date" id="sessionDate">
             </div>
             <div class="form-group">
-                <label>Session Time</label>
-                <input type="time" id="sessionTime">
+                <label>Start Time</label>
+                <select id="sessionStartTime" class="time-select">
+                    <option value="">Select start time</option>
+                    <option value="08:00:00">8:00 AM</option>
+                    <option value="08:30:00">8:30 AM</option>
+                    <option value="09:00:00">9:00 AM</option>
+                    <option value="09:30:00">9:30 AM</option>
+                    <option value="10:00:00">10:00 AM</option>
+                    <option value="10:30:00">10:30 AM</option>
+                    <option value="11:00:00">11:00 AM</option>
+                    <option value="11:30:00">11:30 AM</option>
+                    <option value="12:00:00">12:00 PM</option>
+                    <option value="12:30:00">12:30 PM</option>
+                    <option value="13:00:00">1:00 PM</option>
+                    <option value="13:30:00">1:30 PM</option>
+                    <option value="14:00:00">2:00 PM</option>
+                    <option value="14:30:00">2:30 PM</option>
+                    <option value="15:00:00">3:00 PM</option>
+                    <option value="15:30:00">3:30 PM</option>
+                    <option value="16:00:00">4:00 PM</option>
+                    <option value="16:30:00">4:30 PM</option>
+                    <option value="17:00:00">5:00 PM</option>
+                    <option value="17:30:00">5:30 PM</option>
+                    <option value="18:00:00">6:00 PM</option>
+                    <option value="18:30:00">6:30 PM</option>
+                    <option value="19:00:00">7:00 PM</option>
+                    <option value="19:30:00">7:30 PM</option>
+                    <option value="20:00:00">8:00 PM</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>End Time</label>
+                <select id="sessionEndTime" class="time-select">
+                    <option value="">Select end time</option>
+                    <option value="08:30:00">8:30 AM</option>
+                    <option value="09:00:00">9:00 AM</option>
+                    <option value="09:30:00">9:30 AM</option>
+                    <option value="10:00:00">10:00 AM</option>
+                    <option value="10:30:00">10:30 AM</option>
+                    <option value="11:00:00">11:00 AM</option>
+                    <option value="11:30:00">11:30 AM</option>
+                    <option value="12:00:00">12:00 PM</option>
+                    <option value="12:30:00">12:30 PM</option>
+                    <option value="13:00:00">1:00 PM</option>
+                    <option value="13:30:00">1:30 PM</option>
+                    <option value="14:00:00">2:00 PM</option>
+                    <option value="14:30:00">2:30 PM</option>
+                    <option value="15:00:00">3:00 PM</option>
+                    <option value="15:30:00">3:30 PM</option>
+                    <option value="16:00:00">4:00 PM</option>
+                    <option value="16:30:00">4:30 PM</option>
+                    <option value="17:00:00">5:00 PM</option>
+                    <option value="17:30:00">5:30 PM</option>
+                    <option value="18:00:00">6:00 PM</option>
+                    <option value="18:30:00">6:30 PM</option>
+                    <option value="19:00:00">7:00 PM</option>
+                    <option value="19:30:00">7:30 PM</option>
+                    <option value="20:00:00">8:00 PM</option>
+                    <option value="20:30:00">8:30 PM</option>
+                    <option value="21:00:00">9:00 PM</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>Notes (Optional)</label>
@@ -241,70 +303,92 @@
 
         function closeModal() {
             document.getElementById('bookingModal').classList.remove('active');
+            document.getElementById('sessionDate').value = '';
+            document.getElementById('sessionStartTime').value = '';
+            document.getElementById('sessionEndTime').value = '';
+            document.getElementById('sessionNotes').value = '';
             selectedTherapist = null;
         }
 
         async function confirmBooking() {
-    const date = document.getElementById('sessionDate').value;
-    const time = document.getElementById('sessionTime').value;
-    const notes = document.getElementById('sessionNotes').value;
-    
-    if (!date || !time) {
-        alert('Please select date and time');
-        return;
-    }
-    
-    // Check if user already has a booking at this time
-    const {data: userConflict} = await db
-        .from('Bookings')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .eq('session_date', date)
-        .eq('start_time', time)
-        .neq('status', 'cancelled');
-    
-    if (userConflict && userConflict.length > 0) {
-        alert('You already have a booking at this time. Please choose a different time slot.');
-        return;
-    }
-    
-    // Check if therapist is already booked at this time
-    const {data: therapistConflict} = await db
-        .from('Bookings')
-        .select('*')
-        .eq('therapist_id', selectedTherapist.id)
-        .eq('session_date', date)
-        .eq('start_time', time)
-        .neq('status', 'cancelled');
-    
-    if (therapistConflict && therapistConflict.length > 0) {
-        alert('This therapist is already booked at this time. Please choose a different time slot.');
-        return;
-    }
-    
-    // If no conflicts, proceed with booking
-    const bookingData = {
-        user_id: currentUser.id,
-        therapist_id: selectedTherapist.id,
-        session_date: date,
-        start_time: time,
-        status: 'pending'
-    };
-    if (notes) bookingData.notes = notes;
-    
-    const result = await db.from('Bookings').insert([bookingData]);
-    if (result.error) {
-        alert('Booking failed: ' + result.error.message);
-        return;
-    }
-    
-    alert('Booking successful! The therapist will confirm shortly.');
-    closeModal();
-    document.getElementById('sessionDate').value = '';
-    document.getElementById('sessionTime').value = '';
-    document.getElementById('sessionNotes').value = '';
-}
-
+            const date = document.getElementById('sessionDate').value;
+            const startTime = document.getElementById('sessionStartTime').value;
+            const endTime = document.getElementById('sessionEndTime').value;
+            const notes = document.getElementById('sessionNotes').value;
+            
+            if (!date || !startTime || !endTime) {
+                alert('Please select date, start time, and end time');
+                return;
+            }
+            
+            // Validate that end time is after start time
+            if (endTime <= startTime) {
+                alert('End time must be after start time');
+                return;
+            }
+            
+            // Check if USER has any booking that overlaps with this time slot
+            const {data: userBookings} = await db
+                .from('Bookings')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .eq('session_date', date)
+                .neq('status', 'cancelled');
+            
+            if (userBookings && userBookings.length > 0) {
+                for (let booking of userBookings) {
+                    const existingStart = booking.start_time;
+                    const existingEnd = booking.end_time;
+                    
+                    // Check for time overlap
+                    if (startTime < existingEnd && endTime > existingStart) {
+                        alert('You already have a booking from ' + existingStart + ' to ' + existingEnd + ' on this date. Please choose a different time slot.');
+                        return;
+                    }
+                }
+            }
+            
+            // Check if THERAPIST has any booking that overlaps with this time slot
+            const {data: therapistBookings} = await db
+                .from('Bookings')
+                .select('*')
+                .eq('therapist_id', selectedTherapist.id)
+                .eq('session_date', date)
+                .neq('status', 'cancelled');
+            
+            if (therapistBookings && therapistBookings.length > 0) {
+                for (let booking of therapistBookings) {
+                    const existingStart = booking.start_time;
+                    const existingEnd = booking.end_time;
+                    
+                    // Check for time overlap
+                    if (startTime < existingEnd && endTime > existingStart) {
+                        alert('This therapist is already booked from ' + existingStart + ' to ' + existingEnd + ' on this date. Please choose a different time slot.');
+                        return;
+                    }
+                }
+            }
+            
+            // If no conflicts, proceed with booking
+            const bookingData = {
+                user_id: currentUser.id,
+                therapist_id: selectedTherapist.id,
+                session_date: date,
+                start_time: startTime,
+                end_time: endTime,
+                status: 'pending'
+            };
+            if (notes) bookingData.notes = notes;
+            
+            const result = await db.from('Bookings').insert([bookingData]);
+            if (result.error) {
+                alert('Booking failed: ' + result.error.message);
+                return;
+            }
+            
+            alert('Booking successful! The therapist will confirm shortly.');
+            closeModal();
+        }
 
         async function loadBookings() {
             const bookingsResult = await db.from('Bookings').select('*').eq('user_id', currentUser.id).order('session_date', { ascending: false });
@@ -320,7 +404,8 @@
             bookingsResult.data.forEach(b => {
                 const therapist = therapistMap[b.therapist_id];
                 const canCancel = b.status === 'pending' || b.status === 'confirmed';
-                html += '<tr><td>' + (therapist?.Name || 'N/A') + '</td><td>' + (therapist?.Specialization || 'N/A') + '</td><td>' + new Date(b.session_date).toLocaleDateString() + '</td><td>' + b.start_time + '</td><td><span class="status-badge status-' + b.status + '">' + b.status + '</span></td><td>' + (canCancel ? '<button class="btn btn-cancel" onclick="cancelBooking(\'' + b.id + '\')">Cancel</button>' : '-') + '</td></tr>';
+                const timeDisplay = b.start_time + ' - ' + (b.end_time || 'N/A');
+                html += '<tr><td>' + (therapist?.Name || 'N/A') + '</td><td>' + (therapist?.Specialization || 'N/A') + '</td><td>' + new Date(b.session_date).toLocaleDateString() + '</td><td>' + timeDisplay + '</td><td><span class="status-badge status-' + b.status + '">' + b.status + '</span></td><td>' + (canCancel ? '<button class="btn btn-cancel" onclick="cancelBooking(\'' + b.id + '\')">Cancel</button>' : '-') + '</td></tr>';
             });
             html += '</tbody></table>';
             container.innerHTML = html;
