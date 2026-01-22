@@ -282,6 +282,15 @@
             background: #d32f2f;
         }
 
+        .btn-complete {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background: #0b7dda;
+        }
+
         .btn-reschedule {
             background: #ff9800;
             color: white;
@@ -322,6 +331,15 @@
         .reschedule-badge {
             background: #fff3cd;
             color: #856404;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .completed-badge {
+            background: #d1ecf1;
+            color: #0c5460;
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 13px;
@@ -819,6 +837,14 @@
             });
         }
 
+        function canCompleteSession(sessionDate) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const session = new Date(sessionDate);
+            session.setHours(0, 0, 0, 0);
+            return session <= today;
+        }
+
         function displayBookings() {
             const containers = {
                 all: document.getElementById('allBookingsList'),
@@ -938,6 +964,14 @@
                 card.appendChild(linkDiv);
             }
 
+            if (booking.completed_at) {
+                const completedDiv = document.createElement('div');
+                completedDiv.className = 'completed-badge';
+                const completedTime = new Date(booking.completed_at).toLocaleString('en-IN');
+                completedDiv.innerHTML = '<strong>✓ Marked Complete:</strong> ' + completedTime;
+                card.appendChild(completedDiv);
+            }
+
             if (booking.reschedule_requested) {
                 const rescheduleDiv = document.createElement('div');
                 rescheduleDiv.className = 'reschedule-badge';
@@ -984,6 +1018,14 @@
                     actionsDiv.appendChild(addLinkBtn);
                 }
                 
+                if (canCompleteSession(booking.session_date)) {
+                    const completeBtn = document.createElement('button');
+                    completeBtn.className = 'btn btn-complete';
+                    completeBtn.textContent = '✓ Mark Complete';
+                    completeBtn.onclick = function() { markSessionComplete(booking.id); };
+                    actionsDiv.appendChild(completeBtn);
+                }
+                
                 const cancelBtn = document.createElement('button');
                 cancelBtn.className = 'btn btn-cancel';
                 cancelBtn.textContent = '✕ Cancel';
@@ -1014,6 +1056,29 @@
             }
             
             return card;
+        }
+
+        async function markSessionComplete(bookingId) {
+            if (!confirm('✅ Mark this session as completed?')) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('Bookings')
+                    .update({ 
+                        status: 'completed',
+                        completed_at: new Date().toISOString()
+                    })
+                    .eq('id', bookingId);
+
+                if (error) throw error;
+
+                showMessage('✅ Session marked as completed!', 'success');
+                await loadBookings();
+                updateStats();
+            } catch (error) {
+                console.error('Error marking session complete:', error);
+                showMessage('❌ Error marking session complete', 'error');
+            }
         }
 
         function openMeetingLinkModal(bookingId) {
