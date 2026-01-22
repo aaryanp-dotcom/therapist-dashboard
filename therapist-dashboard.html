@@ -504,7 +504,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div>
                 <h1>🩺 Therapist Dashboard</h1>
@@ -515,7 +514,6 @@
             </div>
         </div>
 
-        <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="totalBookings">0</div>
@@ -535,11 +533,9 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="main-content">
             <div id="messageBox" class="message"></div>
 
-            <!-- Date Filter Section -->
             <div class="filter-section">
                 <h3>📅 Filter by Date Range <span id="filterBadge" class="filter-active-badge" style="display: none;">Filter Active</span></h3>
                 <div class="filter-controls">
@@ -556,7 +552,6 @@
                 </div>
             </div>
 
-            <!-- Tabs -->
             <div class="tabs">
                 <button class="tab active" data-tab="all">All Bookings</button>
                 <button class="tab" data-tab="pending">Pending</button>
@@ -567,7 +562,6 @@
                 <button class="tab" data-tab="profile">My Profile</button>
             </div>
 
-            <!-- Tab Contents -->
             <div id="allTab" class="tab-content active">
                 <div id="allBookingsList"></div>
             </div>
@@ -610,7 +604,6 @@
         </div>
     </div>
 
-    <!-- Meeting Link Modal -->
     <div id="meetingLinkModal" class="modal">
         <div class="modal-content">
             <h2 class="modal-header">Add Meeting Link</h2>
@@ -627,7 +620,6 @@
     </div>
 
     <script>
-        // Supabase Configuration
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -645,11 +637,8 @@
 
         const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-        // Initialize
         async function init() {
             const user = JSON.parse(localStorage.getItem('user'));
-            
-            console.log('Current User:', user);
             
             if (!user || user.role !== 'therapist') {
                 alert('Access denied. Therapist role required.');
@@ -672,7 +661,6 @@
             }
         }
 
-        // Setup Event Listeners
         function setupEventListeners() {
             document.getElementById('logoutBtn').addEventListener('click', logout);
             
@@ -684,19 +672,8 @@
             
             document.getElementById('applyFilterBtn').addEventListener('click', applyDateFilter);
             document.getElementById('clearFilterBtn').addEventListener('click', clearDateFilter);
-            
-            document.addEventListener('click', function(e) {
-                if (e.target.classList.contains('btn-confirm')) {
-                    const bookingId = e.target.getAttribute('data-booking-id');
-                    openMeetingLinkModal(bookingId);
-                } else if (e.target.classList.contains('btn-cancel')) {
-                    const bookingId = e.target.getAttribute('data-booking-id');
-                    cancelBooking(bookingId);
-                }
-            });
         }
 
-        // Load Therapist Data
         async function loadTherapistData() {
             try {
                 const { data, error } = await supabaseClient
@@ -722,7 +699,6 @@
             }
         }
 
-        // Load Bookings
         async function loadBookings() {
             try {
                 const { data: bookingsData, error: bookingsError } = await supabaseClient
@@ -779,7 +755,6 @@
             }
         }
 
-        // Apply Date Filter
         function applyDateFilter() {
             const fromDate = document.getElementById('fromDate').value;
             const toDate = document.getElementById('toDate').value;
@@ -807,7 +782,6 @@
             showMessage('✅ Date filter applied', 'success');
         }
 
-        // Clear Date Filter
         function clearDateFilter() {
             document.getElementById('fromDate').value = '';
             document.getElementById('toDate').value = '';
@@ -825,7 +799,6 @@
             showMessage('✅ Filter cleared', 'success');
         }
 
-        // Filter Bookings by Date
         function filterBookings() {
             filteredBookings = allBookings.filter(booking => {
                 const bookingDate = new Date(booking.session_date);
@@ -846,7 +819,6 @@
             });
         }
 
-        // Display Bookings
         function displayBookings() {
             const containers = {
                 all: document.getElementById('allBookingsList'),
@@ -902,7 +874,6 @@
             }
         }
 
-        // Create Booking Card
         function createBookingCard(booking) {
             const patient = booking.profiles || {};
             const statusClass = 'status-' + booking.status;
@@ -967,7 +938,6 @@
                 card.appendChild(linkDiv);
             }
 
-            // Reschedule request display
             if (booking.reschedule_requested) {
                 const rescheduleDiv = document.createElement('div');
                 rescheduleDiv.className = 'reschedule-badge';
@@ -985,7 +955,6 @@
                 card.appendChild(rescheduleDiv);
             }
             
-            // Action buttons
             if (booking.status === 'pending' && !booking.reschedule_requested) {
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = 'booking-actions';
@@ -993,12 +962,12 @@
                 const confirmBtn = document.createElement('button');
                 confirmBtn.className = 'btn btn-confirm';
                 confirmBtn.textContent = '✓ Confirm & Add Link';
-                confirmBtn.setAttribute('data-booking-id', booking.id);
+                confirmBtn.onclick = function() { openMeetingLinkModal(booking.id); };
                 
                 const rejectBtn = document.createElement('button');
                 rejectBtn.className = 'btn btn-cancel';
                 rejectBtn.textContent = '✕ Reject';
-                rejectBtn.setAttribute('data-booking-id', booking.id);
+                rejectBtn.onclick = function() { cancelBooking(booking.id); };
                 
                 actionsDiv.appendChild(confirmBtn);
                 actionsDiv.appendChild(rejectBtn);
@@ -1007,16 +976,23 @@
                 const actionsDiv = document.createElement('div');
                 actionsDiv.className = 'booking-actions';
                 
+                if (!booking.meeting_link) {
+                    const addLinkBtn = document.createElement('button');
+                    addLinkBtn.className = 'btn btn-confirm';
+                    addLinkBtn.textContent = '🎥 Add Meeting Link';
+                    addLinkBtn.onclick = function() { openMeetingLinkModal(booking.id); };
+                    actionsDiv.appendChild(addLinkBtn);
+                }
+                
                 const cancelBtn = document.createElement('button');
                 cancelBtn.className = 'btn btn-cancel';
                 cancelBtn.textContent = '✕ Cancel';
-                cancelBtn.setAttribute('data-booking-id', booking.id);
+                cancelBtn.onclick = function() { cancelBooking(booking.id); };
                 
                 actionsDiv.appendChild(cancelBtn);
                 card.appendChild(actionsDiv);
             }
 
-            // Reschedule approve/reject buttons
             if (booking.reschedule_requested) {
                 const rescheduleActions = document.createElement('div');
                 rescheduleActions.className = 'booking-actions';
@@ -1025,12 +1001,12 @@
                 const approveBtn = document.createElement('button');
                 approveBtn.className = 'btn btn-confirm';
                 approveBtn.textContent = '✓ Approve Reschedule';
-                approveBtn.onclick = () => approveReschedule(booking.id);
+                approveBtn.onclick = function() { approveReschedule(booking.id); };
                 
                 const rejectBtn = document.createElement('button');
                 rejectBtn.className = 'btn btn-cancel';
                 rejectBtn.textContent = '✕ Reject Reschedule';
-                rejectBtn.onclick = () => rejectReschedule(booking.id);
+                rejectBtn.onclick = function() { rejectReschedule(booking.id); };
                 
                 rescheduleActions.appendChild(approveBtn);
                 rescheduleActions.appendChild(rejectBtn);
@@ -1040,8 +1016,8 @@
             return card;
         }
 
-        // Meeting Link Modal
         function openMeetingLinkModal(bookingId) {
+            console.log('Opening meeting link modal for booking:', bookingId);
             currentBookingForMeeting = bookingId;
             document.getElementById('meetingLinkInput').value = '';
             document.getElementById('meetingLinkModal').style.display = 'flex';
@@ -1065,35 +1041,50 @@
                 return;
             }
 
+            if (!currentBookingForMeeting) {
+                alert('❌ Error: No booking selected');
+                closeMeetingLinkModal();
+                return;
+            }
+
             try {
+                console.log('Saving meeting link for booking:', currentBookingForMeeting);
+                
+                const currentBooking = filteredBookings.find(b => b.id === currentBookingForMeeting);
+                
+                const updateData = {
+                    meeting_link: meetingLink
+                };
+                
+                if (currentBooking && currentBooking.status === 'pending') {
+                    updateData.status = 'confirmed';
+                }
+                
                 const { error } = await supabaseClient
                     .from('Bookings')
-                    .update({ 
-                        status: 'confirmed',
-                        meeting_link: meetingLink
-                    })
+                    .update(updateData)
                     .eq('id', currentBookingForMeeting);
 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
 
-                showMessage('✅ Booking confirmed and meeting link saved!', 'success');
+                const message = currentBooking && currentBooking.status === 'pending' 
+                    ? '✅ Booking confirmed and meeting link saved!' 
+                    : '✅ Meeting link added successfully!';
+                    
+                showMessage(message, 'success');
                 closeMeetingLinkModal();
                 await loadBookings();
                 updateStats();
             } catch (error) {
                 console.error('Error saving meeting link:', error);
-                showMessage('❌ Error saving meeting link', 'error');
+                showMessage('❌ Error saving meeting link: ' + (error.message || 'Unknown error'), 'error');
             }
         }
 
-        // Cancel Booking
         async function cancelBooking(bookingId) {
-            if (!bookingId || bookingId === 'null' || bookingId === 'undefined') {
-                console.error('Invalid booking ID:', bookingId);
-                showMessage('Error: Invalid booking ID', 'error');
-                return;
-            }
-
             if (!confirm('⚠️ Are you sure you want to cancel this booking?')) return;
 
             try {
@@ -1113,7 +1104,6 @@
             }
         }
 
-        // Approve Reschedule
         async function approveReschedule(bookingId) {
             if (!confirm('✅ Approve this reschedule request?')) return;
 
@@ -1145,7 +1135,6 @@
             }
         }
 
-        // Reject Reschedule
         async function rejectReschedule(bookingId) {
             if (!confirm('❌ Reject this reschedule request?')) return;
 
@@ -1172,7 +1161,6 @@
             }
         }
 
-        // Load Availability
         async function loadAvailability() {
             try {
                 const { data, error } = await supabaseClient
@@ -1188,7 +1176,6 @@
             }
         }
 
-        // Display Availability
         function displayAvailability(availability) {
             const grid = document.getElementById('availabilityGrid');
             grid.innerHTML = '';
@@ -1199,39 +1186,34 @@
                 const card = document.createElement('div');
                 card.className = 'day-card';
                 
-                card.innerHTML = `
-                    <h4>${day}</h4>
-                    <div class="time-slot">
-                        <input type="checkbox" id="available_${index}" ${daySlot ? 'checked' : ''}>
-                        <label for="available_${index}" style="margin: 0;">Available</label>
-                    </div>
-                    <div class="time-slot">
-                        <input type="time" id="start_${index}" value="${daySlot ? daySlot.start_time : '09:00'}">
-                        <span>to</span>
-                        <input type="time" id="end_${index}" value="${daySlot ? daySlot.end_time : '17:00'}">
-                    </div>
-                `;
+                card.innerHTML = '<h4>' + day + '</h4>' +
+                    '<div class="time-slot">' +
+                    '<input type="checkbox" id="available_' + index + '" ' + (daySlot ? 'checked' : '') + '>' +
+                    '<label for="available_' + index + '" style="margin: 0;">Available</label>' +
+                    '</div>' +
+                    '<div class="time-slot">' +
+                    '<input type="time" id="start_' + index + '" value="' + (daySlot ? daySlot.start_time : '09:00') + '">' +
+                    '<span>to</span>' +
+                    '<input type="time" id="end_' + index + '" value="' + (daySlot ? daySlot.end_time : '17:00') + '">' +
+                    '</div>';
                 
                 grid.appendChild(card);
             });
         }
 
-        // Save Availability
         async function saveAvailability() {
             try {
-                // Delete existing availability
                 await supabaseClient
                     .from('TherapistAvailability')
                     .delete()
                     .eq('therapist_id', therapistData.id);
 
-                // Insert new availability
                 const availabilityData = [];
                 DAYS.forEach((day, index) => {
-                    const available = document.getElementById(`available_${index}`).checked;
+                    const available = document.getElementById('available_' + index).checked;
                     if (available) {
-                        const startTime = document.getElementById(`start_${index}`).value;
-                        const endTime = document.getElementById(`end_${index}`).value;
+                        const startTime = document.getElementById('start_' + index).value;
+                        const endTime = document.getElementById('end_' + index).value;
                         
                         availabilityData.push({
                             therapist_id: therapistData.id,
@@ -1258,7 +1240,6 @@
             }
         }
 
-        // Load Blocked Dates
         async function loadBlockedDates() {
             try {
                 const { data, error } = await supabaseClient
@@ -1275,7 +1256,6 @@
             }
         }
 
-        // Display Blocked Dates
         function displayBlockedDates(blockedDates) {
             const container = document.getElementById('blockedDatesList');
             
@@ -1294,18 +1274,15 @@
                 
                 const item = document.createElement('div');
                 item.className = 'blocked-date-item';
-                item.innerHTML = `
-                    <div>
-                        <strong>${date}</strong>
-                        ${bd.reason ? '<br><span style="color: #666; font-size: 13px;">' + bd.reason + '</span>' : ''}
-                    </div>
-                    <button class="btn btn-cancel" onclick="removeBlockedDate(${bd.id})" style="padding: 5px 15px; font-size: 12px;">Remove</button>
-                `;
+                item.innerHTML = '<div>' +
+                    '<strong>' + date + '</strong>' +
+                    (bd.reason ? '<br><span style="color: #666; font-size: 13px;">' + bd.reason + '</span>' : '') +
+                    '</div>' +
+                    '<button class="btn btn-cancel" onclick="removeBlockedDate(' + bd.id + ')" style="padding: 5px 15px; font-size: 12px;">Remove</button>';
                 container.appendChild(item);
             });
         }
 
-        // Add Blocked Date
         async function addBlockedDate() {
             const date = document.getElementById('blockDate').value;
             const reason = document.getElementById('blockReason').value.trim();
@@ -1337,7 +1314,6 @@
             }
         }
 
-        // Remove Blocked Date
         async function removeBlockedDate(id) {
             if (!confirm('Remove this blocked date?')) return;
 
@@ -1357,7 +1333,6 @@
             }
         }
 
-        // Display Profile
         function displayProfile() {
             const profileSection = document.getElementById('profileSection');
             profileSection.innerHTML = '<h2 style="margin-bottom: 20px; color: #667eea;">My Profile</h2>' +
@@ -1370,7 +1345,6 @@
                 '<div class="profile-field"><label>Status</label><div class="value"><span class="status-badge ' + (therapistData.approval_status === 'approved' ? 'status-confirmed' : 'status-pending') + '">' + therapistData.approval_status.toUpperCase() + '</span></div></div>';
         }
 
-        // Update Statistics
         function updateStats() {
             const bookingsToCount = filteredBookings;
             document.getElementById('totalBookings').textContent = bookingsToCount.length;
@@ -1382,7 +1356,6 @@
                 bookingsToCount.filter(b => b.status === 'completed').length;
         }
 
-        // Switch Tabs
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelector('.tab[data-tab="' + tab + '"]').classList.add('active');
@@ -1402,7 +1375,6 @@
             document.getElementById(tabMap[tab]).classList.add('active');
         }
 
-        // Show Message
         function showMessage(message, type) {
             const messageBox = document.getElementById('messageBox');
             messageBox.textContent = message;
@@ -1412,7 +1384,6 @@
             }, 5000);
         }
 
-        // Convert 24-hour to 12-hour format
         function convertTo12Hour(time) {
             const parts = time.split(':');
             const hours = parts[0];
@@ -1423,13 +1394,11 @@
             return hour12 + ':' + minutes + ' ' + period;
         }
 
-        // Logout
         function logout() {
             localStorage.removeItem('user');
             window.location.href = 'login.html';
         }
 
-        // Initialize on page load
         init();
     </script>
 </body>
