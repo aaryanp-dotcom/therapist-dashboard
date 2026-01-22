@@ -245,33 +245,66 @@
         }
 
         async function confirmBooking() {
-            const date = document.getElementById('sessionDate').value;
-            const time = document.getElementById('sessionTime').value;
-            const notes = document.getElementById('sessionNotes').value;
-            if (!date || !time) {
-                alert('Please select date and time');
-                return;
-            }
-            const bookingData = {
-                user_id: currentUser.id,
-                therapist_id: selectedTherapist.id,
-                session_date: date,
-                start_time: time,
-                status: 'pending'
-            };
-            if (notes) bookingData.notes = notes;
-            
-            const result = await db.from('Bookings').insert([bookingData]);
-            if (result.error) {
-                alert('Booking failed: ' + result.error.message);
-                return;
-            }
-            alert('Booking successful! The therapist will confirm shortly.');
-            closeModal();
-            document.getElementById('sessionDate').value = '';
-            document.getElementById('sessionTime').value = '';
-            document.getElementById('sessionNotes').value = '';
-        }
+    const date = document.getElementById('sessionDate').value;
+    const time = document.getElementById('sessionTime').value;
+    const notes = document.getElementById('sessionNotes').value;
+    
+    if (!date || !time) {
+        alert('Please select date and time');
+        return;
+    }
+    
+    // Check if user already has a booking at this time
+    const {data: userConflict} = await db
+        .from('Bookings')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .eq('session_date', date)
+        .eq('start_time', time)
+        .neq('status', 'cancelled');
+    
+    if (userConflict && userConflict.length > 0) {
+        alert('You already have a booking at this time. Please choose a different time slot.');
+        return;
+    }
+    
+    // Check if therapist is already booked at this time
+    const {data: therapistConflict} = await db
+        .from('Bookings')
+        .select('*')
+        .eq('therapist_id', selectedTherapist.id)
+        .eq('session_date', date)
+        .eq('start_time', time)
+        .neq('status', 'cancelled');
+    
+    if (therapistConflict && therapistConflict.length > 0) {
+        alert('This therapist is already booked at this time. Please choose a different time slot.');
+        return;
+    }
+    
+    // If no conflicts, proceed with booking
+    const bookingData = {
+        user_id: currentUser.id,
+        therapist_id: selectedTherapist.id,
+        session_date: date,
+        start_time: time,
+        status: 'pending'
+    };
+    if (notes) bookingData.notes = notes;
+    
+    const result = await db.from('Bookings').insert([bookingData]);
+    if (result.error) {
+        alert('Booking failed: ' + result.error.message);
+        return;
+    }
+    
+    alert('Booking successful! The therapist will confirm shortly.');
+    closeModal();
+    document.getElementById('sessionDate').value = '';
+    document.getElementById('sessionTime').value = '';
+    document.getElementById('sessionNotes').value = '';
+}
+
 
         async function loadBookings() {
             const bookingsResult = await db.from('Bookings').select('*').eq('user_id', currentUser.id).order('session_date', { ascending: false });
