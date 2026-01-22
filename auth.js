@@ -152,15 +152,43 @@ function login() {
     
     var userId = response.data.user.id;
     
-    client.from("profiles").select("role, status").eq("id", userId).single().then(function(profileResponse) {
+    // Changed: Remove .single() and handle array result
+    client.from("profiles").select("role, status").eq("id", userId).then(function(profileResponse) {
       if (profileResponse.error) {
         console.error("Profile error:", profileResponse.error);
         alert("Error loading profile");
         return;
       }
       
-      var role = profileResponse.data.role;
-      var status = profileResponse.data.status;
+      // Check if profile exists
+      if (!profileResponse.data || profileResponse.data.length === 0) {
+        console.log("No profile found, creating one...");
+        
+        // Create profile with role 'user' by default
+        client.from("profiles").insert([{
+          id: userId,
+          email: email,
+          role: 'user',
+          status: 'active',
+          full_name: email.split('@')[0]
+        }]).then(function(insertResponse) {
+          if (insertResponse.error) {
+            console.error("Profile creation error:", insertResponse.error);
+            alert("Error creating profile");
+            return;
+          }
+          
+          // Redirect to user dashboard
+          setTimeout(function() {
+            window.location.href = "user-dashboard.html";
+          }, 1000);
+        });
+        return;
+      }
+      
+      var profile = profileResponse.data[0];
+      var role = profile.role;
+      var status = profile.status;
       
       if (role === 'therapist' && status === 'pending') {
         alert("Your therapist application is pending admin approval.");
@@ -168,7 +196,7 @@ function login() {
         return;
       }
       
-      // CRITICAL FIX: Wait for session to be saved before redirect
+      // Wait for session to be saved before redirect
       setTimeout(function() {
         if (role === 'admin') {
           window.location.href = "admin-dashboard.html";
