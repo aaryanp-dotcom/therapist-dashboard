@@ -464,26 +464,56 @@
             }
         }
 
-        // Load All Bookings
+        // Load All Bookings - FIXED VERSION
         async function loadBookings() {
             try {
-                const { data, error } = await supabaseClient
+                // First, get all bookings for this therapist
+                const { data: bookingsData, error: bookingsError } = await supabaseClient
                     .from('Bookings')
-                    .select(`
-                        *,
-                        profiles!Bookings_user_id_fkey(full_name, email, phone)
-                    `)
+                    .select('*')
                     .eq('therapist_id', therapistData.id)
                     .order('session_date', { ascending: false })
                     .order('start_time', { ascending: false });
 
-                if (error) throw error;
+                if (bookingsError) throw bookingsError;
                 
-                allBookings = data || [];
+                if (!bookingsData || bookingsData.length === 0) {
+                    allBookings = [];
+                    displayBookings();
+                    return;
+                }
+
+                // Then, get user profiles for each booking
+                const userIds = [...new Set(bookingsData.map(b => b.user_id))];
+                const { data: profilesData, error: profilesError } = await supabaseClient
+                    .from('profiles')
+                    .select('id, full_name, email, phone')
+                    .in('id', userIds);
+
+                if (profilesError) {
+                    console.error('Error loading profiles:', profilesError);
+                    // Continue without profile data
+                    allBookings = bookingsData.map(booking => ({
+                        ...booking,
+                        profiles: null
+                    }));
+                } else {
+                    // Map profiles to bookings
+                    allBookings = bookingsData.map(booking => {
+                        const profile = profilesData.find(p => p.id === booking.user_id);
+                        return {
+                            ...booking,
+                            profiles: profile || null
+                        };
+                    });
+                }
+
                 displayBookings();
             } catch (error) {
                 console.error('Error loading bookings:', error);
                 showMessage('Error loading bookings', 'error');
+                allBookings = [];
+                displayBookings();
             }
         }
 
