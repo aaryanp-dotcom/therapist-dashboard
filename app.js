@@ -97,7 +97,13 @@ function bookSession(therapistId, userId) {
   client.from("Bookings").insert([bookingData]).then(function(response) {
     if (response.error) {
       console.error("Booking error:", response.error);
-      alert("Error creating booking: " + response.error.message);
+
+      // Check for duplicate booking constraint
+      if (response.error.code === '23505') {
+        alert("You already have a booking on this date. Please choose a different date or cancel your existing booking first.");
+      } else {
+        alert("Error creating booking: " + response.error.message);
+      }
       return;
     }
 
