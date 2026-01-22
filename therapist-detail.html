@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Therapist Details</title>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: #5568d3;
+        }
+
+        .therapist-profile {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .therapist-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #667eea;
+        }
+
+        .therapist-info {
+            flex: 1;
+        }
+
+        .therapist-info h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .specialization {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .rating {
+            color: #ffa500;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .experience, .location {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .bio {
+            color: #444;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+
+        .booking-section {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .booking-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .book-btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .book-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .price {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .therapist-profile {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="user-dashboard.html" class="back-btn">← Back to Dashboard</a>
+        
+        <div class="therapist-profile" id="therapistProfile">
+            <!-- Therapist details will be loaded here -->
+        </div>
+
+        <div class="booking-section">
+            <h2>Book a Session</h2>
+            <div class="price" id="sessionPrice">₹0 per session</div>
+            
+            <form id="bookingForm">
+                <div class="form-group">
+                    <label for="date">Select Date:</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="time">Select Time Slot:</label>
+                    <select id="time" required>
+                        <option value="">Choose a time slot</option>
+                        <option value="09:00 AM">09:00 AM</option>
+                        <option value="10:00 AM">10:00 AM</option>
+                        <option value="11:00 AM">11:00 AM</option>
+                        <option value="02:00 PM">02:00 PM</option>
+                        <option value="03:00 PM">03:00 PM</option>
+                        <option value="04:00 PM">04:00 PM</option>
+                        <option value="05:00 PM">05:00 PM</option>
+                        <option value="06:00 PM">06:00 PM</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Additional Notes (Optional):</label>
+                    <textarea id="notes" placeholder="Any specific concerns or topics you'd like to discuss..."></textarea>
+                </div>
+
+                <button type="submit" class="book-btn">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Get therapist ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const therapistId = parseInt(urlParams.get('id'));
+
+        // Get current user
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (!currentUser) {
+            alert('Please login first!');
+            window.location.href = 'index.html';
+        }
+
+        // Sample therapist data
+        const therapists = [
+            {
+                id: 1,
+                name: 'Dr. Sarah Johnson',
+                specialization: 'Clinical Psychologist',
+                experience: '10 years',
+                rating: 4.8,
+                location: 'Mumbai, India',
+                price: 1500,
+                image: 'https://randomuser.me/api/portraits/women/1.jpg',
+                bio: 'Specializing in anxiety, depression, and stress management. I use evidence-based approaches including CBT and mindfulness techniques to help my clients achieve their mental health goals.',
+                email: 'sarah.johnson@therapist.com'
+            },
+            {
+                id: 2,
+                name: 'Dr. Michael Chen',
+                specialization: 'Marriage Counselor',
+                experience: '15 years',
+                rating: 4.9,
+                location: 'Delhi, India',
+                price: 2000,
+                image: 'https://randomuser.me/api/portraits/men/2.jpg',
+                bio: 'Expert in relationship counseling and family therapy. Helping couples build stronger connections and resolve conflicts through effective communication strategies.',
+                email: 'michael.chen@therapist.com'
+            },
+            {
+                id: 3,
+                name: 'Dr. Emily Rodriguez',
+                specialization: 'Child Psychologist',
+                experience: '8 years',
+                rating: 4.7,
+                location: 'Bangalore, India',
+                price: 1800,
+                image: 'https://randomuser.me/api/portraits/women/3.jpg',
+                bio: 'Passionate about helping children and adolescents overcome emotional and behavioral challenges. Creating a safe, nurturing environment for young minds to thrive.',
+                email: 'emily.rodriguez@therapist.com'
+            }
+        ];
+
+        // Find the therapist
+        const therapist = therapists.find(t => t.id === therapistId);
+
+        if (!therapist) {
+            alert('Therapist not found!');
+            window.location.href = 'user-dashboard.html';
+        }
+
+        // Display therapist details
+        document.getElementById('therapistProfile').innerHTML = `
+            <img src="${therapist.image}" alt="${therapist.name}" class="therapist-image">
+            <div class="therapist-info">
+                <h1>${therapist.name}</h1>
+                <div class="specialization">${therapist.specialization}</div>
+                <div class="rating">⭐ ${therapist.rating} / 5.0</div>
+                <div class="experience">📊 Experience: ${therapist.experience}</div>
+                <div class="location">📍 ${therapist.location}</div>
+                <div class="bio">${therapist.bio}</div>
+            </div>
+        `;
+
+        document.getElementById('sessionPrice').textContent = `₹${therapist.price} per session`;
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').setAttribute('min', today);
+
+        // Handle booking form submission
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const bookingDate = new Date(document.getElementById('date').value);
+            const timeSlot = document.getElementById('time').value;
+            const notes = document.getElementById('notes').value;
+
+            // Create booking object
+            const newBooking = {
+                id: Date.now(),
+                therapistId: therapist.id,
+                therapistName: therapist.name,
+                therapistImage: therapist.image,
+                patientName: currentUser.name,
+                patientEmail: currentUser.email,
+                date: bookingDate.toISOString(),
+                time: timeSlot,
+                notes: notes,
+                status: 'pending',
+                price: therapist.price,
+                bookedAt: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            let bookings = JSON.parse(localStorage.getItem('bookings')) || [];
+            bookings.push(newBooking);
+            localStorage.setItem('bookings', JSON.stringify(bookings));
+
+            // Initialize EmailJS
+            emailjs.init('SuVKfTpN99-jG7y9L');
+
+            // Send confirmation email to patient
+            emailjs.send('service_95x3tyn', 'template_5ocff0p', {
+                patient_name: currentUser.name,
+                patient_email: currentUser.email,
+                therapist_name: therapist.name,
+                session_date: bookingDate.toLocaleDateString('en-IN', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }),
+                session_time: timeSlot,
+                booking_id: newBooking.id
+            }).then(() => {
+                console.log('Patient email sent successfully');
+            }).catch((error) => {
+                console.error('Patient email failed:', error);
+            });
+
+            // Send notification to therapist
+            emailjs.send('service_95x3tyn', 'template_4xnwjo', {
+                therapist_name: therapist.name,
+                therapist_email: therapist.email,
+                patient_name: currentUser.name,
+                patient_email: currentUser.email,
+                session_date: bookingDate.toLocaleDateString('en-IN', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }),
+                session_time: timeSlot,
+                booking_id: newBooking.id,
+                notes: notes || 'None'
+            }).then(() => {
+                console.log('Therapist email sent successfully');
+            }).catch((error) => {
+                console.error('Therapist email failed:', error);
+            });
+
+            alert('Booking confirmed! Check your email for details.');
+            window.location.href = 'user-dashboard.html';
+        });
+    </script>
+</body>
+</html>
