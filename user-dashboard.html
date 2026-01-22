@@ -196,6 +196,32 @@
             margin-bottom: 10px;
         }
 
+        .booking-link {
+            margin-top: 8px;
+            padding: 8px;
+            background: #e3f2fd;
+            border-radius: 6px;
+        }
+
+        .booking-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .booking-link a:hover {
+            text-decoration: underline;
+        }
+
+        .reschedule-badge {
+            background: #fff3cd;
+            color: #856404;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
         .status-badge {
             display: inline-block;
             padding: 5px 12px;
@@ -233,6 +259,18 @@
 
         .btn-cancel:hover {
             background: #d32f2f;
+        }
+
+        .btn-reschedule {
+            background: #ff9800;
+            color: white;
+            padding: 8px 15px;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+
+        .btn-reschedule:hover {
+            background: #e68900;
         }
 
         .btn-review {
@@ -462,6 +500,35 @@
         </div>
     </div>
 
+    <!-- Reschedule Modal -->
+    <div id="rescheduleModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-header">🔄 Reschedule Session</h2>
+            
+            <div class="form-group">
+                <label>New Session Date:</label>
+                <input type="date" id="rescheduleDate" required>
+            </div>
+            
+            <div class="form-group">
+                <label>New Start Time:</label>
+                <select id="rescheduleStartTime" required>
+                    <option value="">Select start time</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Reason for Rescheduling (Optional):</label>
+                <textarea id="rescheduleReason" placeholder="Why do you need to reschedule?"></textarea>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeRescheduleModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitReschedule()">Request Reschedule</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Review Modal -->
     <div id="reviewModal" class="modal">
         <div class="modal-content">
@@ -507,6 +574,7 @@
         let allBookings = [];
         let currentBookingTherapist = null;
         let currentReviewBooking = null;
+        let currentRescheduleBooking = null;
 
         // Initialize
         async function init() {
@@ -582,7 +650,6 @@
                 
                 allTherapists = data || [];
                 
-                // Get unique specializations for filter
                 const specializations = [...new Set(allTherapists.map(t => t.Specialization))];
                 const filterSelect = document.getElementById('specializationFilter');
                 specializations.forEach(spec => {
@@ -616,10 +683,13 @@
                 card.className = 'therapist-card';
                 card.onclick = function() { openBookingModal(therapist); };
                 
+                const ratingHTML = rating ? '<div class="therapist-rating">⭐ ' + rating.average + ' (' + rating.count + ' reviews)</div>' : '';
+                const bioHTML = therapist.bio && therapist.bio !== 'null' ? '<div class="therapist-bio">' + therapist.bio + '</div>' : '<div class="therapist-bio" style="color: #999;">No bio available</div>';
+                
                 card.innerHTML = '<div class="therapist-name">Dr. ' + therapist.Name + '</div>' +
                     '<div class="therapist-specialization">' + therapist.Specialization + '</div>' +
-                    (rating ? '<div class="therapist-rating">⭐ ' + rating.average + ' (' + rating.count + ' reviews)</div>' : '') +
-                    '<div class="therapist-bio">' + therapist.bio + '</div>';
+                    ratingHTML +
+                    bioHTML;
                 
                 container.appendChild(card);
             }
@@ -654,7 +724,7 @@
             const filtered = allTherapists.filter(therapist => {
                 const matchesSearch = therapist.Name.toLowerCase().includes(searchTerm) ||
                                     therapist.Specialization.toLowerCase().includes(searchTerm) ||
-                                    therapist.bio.toLowerCase().includes(searchTerm);
+                                    (therapist.bio && therapist.bio.toLowerCase().includes(searchTerm));
                 const matchesSpec = !selectedSpec || therapist.Specialization === selectedSpec;
                 
                 return matchesSearch && matchesSpec;
@@ -679,27 +749,31 @@
             currentBookingTherapist = null;
         }
 
-        // Generate Time Slots (8 AM - 9 PM, 30-min intervals)
+        // Generate Time Slots
         function generateTimeSlots() {
-            const select = document.getElementById('startTime');
-            select.innerHTML = '<option value="">Select start time</option>';
+            const selects = [document.getElementById('startTime'), document.getElementById('rescheduleStartTime')];
             
-            for (let hour = 8; hour <= 20; hour++) {
-                for (let min = 0; min < 60; min += 30) {
-                    const time = String(hour).padStart(2, '0') + ':' + String(min).padStart(2, '0');
-                    const displayTime = convertTo12Hour(time);
-                    const option = document.createElement('option');
-                    option.value = time;
-                    option.textContent = displayTime;
-                    select.appendChild(option);
+            selects.forEach(select => {
+                select.innerHTML = '<option value="">Select start time</option>';
+                
+                for (let hour = 8; hour <= 20; hour++) {
+                    for (let min = 0; min < 60; min += 30) {
+                        const time = String(hour).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+                        const displayTime = convertTo12Hour(time);
+                        const option = document.createElement('option');
+                        option.value = time;
+                        option.textContent = displayTime;
+                        select.appendChild(option);
+                    }
                 }
-            }
+            });
         }
 
         // Set minimum date to today
         function setMinDate() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('sessionDate').min = today;
+            document.getElementById('rescheduleDate').min = today;
         }
 
         // Submit Booking
@@ -713,12 +787,10 @@
                 return;
             }
 
-            // Calculate end time (1 hour later)
             const startParts = startTime.split(':');
             const endHour = parseInt(startParts[0]) + 1;
             const endTime = String(endHour).padStart(2, '0') + ':' + startParts[1];
 
-            // Check for overlaps
             const hasOverlap = await checkBookingOverlap(sessionDate, startTime, endTime);
             if (hasOverlap) {
                 alert('⚠️ This time slot conflicts with another booking. Please choose a different time.');
@@ -788,7 +860,6 @@
                 
                 allBookings = data || [];
                 
-                // Check for reviews on completed bookings
                 for (const booking of allBookings) {
                     if (booking.status === 'completed') {
                         booking.review = await checkBookingReview(booking.id);
@@ -840,11 +911,31 @@
                 const startTime = convertTo12Hour(booking.start_time);
                 const endTime = convertTo12Hour(booking.end_time);
 
+                let meetingLink = '';
+                if (booking.meeting_link && booking.status === 'confirmed') {
+                    meetingLink = '<div class="booking-link">🎥 <a href="' + booking.meeting_link + '" target="_blank">Join Session</a></div>';
+                }
+
+                let rescheduleInfo = '';
+                if (booking.reschedule_requested) {
+                    const newDate = new Date(booking.reschedule_new_date).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    const newStart = convertTo12Hour(booking.reschedule_new_start_time);
+                    const newEnd = convertTo12Hour(booking.reschedule_new_end_time);
+                    rescheduleInfo = '<div class="reschedule-badge"><strong>🔄 Reschedule Requested</strong><br>New: ' + newDate + ' at ' + newStart + ' - ' + newEnd + '<br>Status: Pending therapist approval</div>';
+                }
+
                 let actions = '';
-                if (booking.status === 'pending' || booking.status === 'confirmed') {
-                    actions = '<button class="btn btn-cancel" onclick="cancelBooking(' + booking.id + ')">Cancel</button>';
+                if ((booking.status === 'pending' || booking.status === 'confirmed') && !booking.reschedule_requested) {
+                    actions = '<div style="margin-top: 10px;">' +
+                        '<button class="btn btn-cancel" onclick="cancelBooking(' + booking.id + ')">Cancel</button>' +
+                        '<button class="btn btn-reschedule" onclick="openRescheduleModal(' + booking.id + ', \'' + therapistName + '\')">🔄 Reschedule</button>' +
+                        '</div>';
                 } else if (booking.status === 'completed' && !booking.review) {
-                    actions = '<button class="btn btn-review" onclick="openReviewModal(' + booking.id + ', \'' + therapistName + '\', ' + booking.therapist_id + ')">⭐ Write Review</button>';
+                    actions = '<div style="margin-top: 10px;"><button class="btn btn-review" onclick="openReviewModal(' + booking.id + ', \'' + therapistName + '\', ' + booking.therapist_id + ')">⭐ Write Review</button></div>';
                 }
 
                 const reviewBadge = booking.review ? '<div class="reviewed-badge">✓ Reviewed (' + booking.review.rating + ' stars)</div>' : '';
@@ -855,8 +946,10 @@
                     '</div>' +
                     '<div class="booking-date">📅 ' + date + '</div>' +
                     '<div class="booking-time">🕐 ' + startTime + ' - ' + endTime + '</div>' +
+                    meetingLink +
+                    rescheduleInfo +
                     reviewBadge +
-                    (actions ? '<div style="margin-top: 10px;">' + actions + '</div>' : '');
+                    actions;
 
                 container.appendChild(card);
             });
@@ -879,6 +972,59 @@
             } catch (error) {
                 console.error('Error cancelling booking:', error);
                 showMessage('❌ Error cancelling booking', 'error');
+            }
+        }
+
+        // Open Reschedule Modal
+        function openRescheduleModal(bookingId, therapistName) {
+            currentRescheduleBooking = bookingId;
+            document.getElementById('rescheduleDate').value = '';
+            document.getElementById('rescheduleStartTime').value = '';
+            document.getElementById('rescheduleReason').value = '';
+            document.getElementById('rescheduleModal').style.display = 'flex';
+        }
+
+        // Close Reschedule Modal
+        function closeRescheduleModal() {
+            document.getElementById('rescheduleModal').style.display = 'none';
+            currentRescheduleBooking = null;
+        }
+
+        // Submit Reschedule
+        async function submitReschedule() {
+            const newDate = document.getElementById('rescheduleDate').value;
+            const newStartTime = document.getElementById('rescheduleStartTime').value;
+            const reason = document.getElementById('rescheduleReason').value.trim();
+
+            if (!newDate || !newStartTime) {
+                alert('⚠️ Please select new date and time');
+                return;
+            }
+
+            const startParts = newStartTime.split(':');
+            const endHour = parseInt(startParts[0]) + 1;
+            const newEndTime = String(endHour).padStart(2, '0') + ':' + startParts[1];
+
+            try {
+                const { error } = await supabaseClient
+                    .from('Bookings')
+                    .update({
+                        reschedule_requested: true,
+                        reschedule_new_date: newDate,
+                        reschedule_new_start_time: newStartTime,
+                        reschedule_new_end_time: newEndTime,
+                        reschedule_reason: reason || null
+                    })
+                    .eq('id', currentRescheduleBooking);
+
+                if (error) throw error;
+
+                showMessage('✅ Reschedule request sent! Waiting for therapist approval.', 'success');
+                closeRescheduleModal();
+                await loadBookings();
+            } catch (error) {
+                console.error('Error requesting reschedule:', error);
+                showMessage('❌ Error requesting reschedule', 'error');
             }
         }
 
@@ -918,7 +1064,6 @@
             }
             
             try {
-                // Check if review already exists
                 const { data: existingReview, error: checkError } = await supabaseClient
                     .from('Reviews')
                     .select('id')
@@ -931,7 +1076,6 @@
                     return;
                 }
                 
-                // Insert review
                 const { error } = await supabaseClient
                     .from('Reviews')
                     .insert([{
@@ -947,7 +1091,7 @@
                 showMessage('✅ Thank you for your review!', 'success');
                 closeReviewModal();
                 await loadBookings();
-                await loadTherapists(); // Refresh ratings
+                await loadTherapists();
                 
             } catch (error) {
                 console.error('Error submitting review:', error);
