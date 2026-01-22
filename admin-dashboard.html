@@ -1,3 +1,5 @@
+
+admin-dashboard.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -175,6 +177,11 @@
             color: #721c24;
         }
 
+        .status-confirmed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
         .loading {
             text-align: center;
             padding: 40px;
@@ -259,16 +266,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Use existing supabase client from auth.js or create new one
-let supabase;
-if (window.supabaseClient) {
-    supabase = window.supabaseClient;
-} else {
-    const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcyNjQ4NzksImV4cCI6MjA1Mjg0MDg3OX0.r7gqHYqxEJtmEqXDwjr_j7U-JuFr7fB8vZf_6gNnYPo';
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}
-
+        // Use existing supabase client or create new one
+        let supabase;
+        if (window.supabaseClient) {
+            supabase = window.supabaseClient;
+        } else {
+            const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcyNjQ4NzksImV4cCI6MjA1Mjg0MDg3OX0.r7gqHYqxEJtmEqXDwjr_j7U-JuFr7fB8vZf_6gNnYPo';
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
 
         async function checkAuth() {
             const { data: { user } } = await supabase.auth.getUser();
@@ -327,7 +333,13 @@ if (window.supabaseClient) {
 
             const container = document.getElementById('applicationsTable');
 
-            if (error || !applications || applications.length === 0) {
+            if (error) {
+                console.error('Error loading applications:', error);
+                container.innerHTML = '<div class="no-data">Error loading applications</div>';
+                return;
+            }
+
+            if (!applications || applications.length === 0) {
                 container.innerHTML = '<div class="no-data">No pending applications</div>';
                 return;
             }
@@ -430,7 +442,13 @@ if (window.supabaseClient) {
 
             const container = document.getElementById('bookingsTable');
 
-            if (error || !bookings || bookings.length === 0) {
+            if (error) {
+                console.error('Error loading bookings:', error);
+                container.innerHTML = '<div class="no-data">Error loading bookings</div>';
+                return;
+            }
+
+            if (!bookings || bookings.length === 0) {
                 container.innerHTML = '<div class="no-data">No bookings found</div>';
                 return;
             }
@@ -476,7 +494,13 @@ if (window.supabaseClient) {
 
             const container = document.getElementById('usersTable');
 
-            if (error || !users || users.length === 0) {
+            if (error) {
+                console.error('Error loading users:', error);
+                container.innerHTML = '<div class="no-data">Error loading users</div>';
+                return;
+            }
+
+            if (!users || users.length === 0) {
                 container.innerHTML = '<div class="no-data">No users found</div>';
                 return;
             }
