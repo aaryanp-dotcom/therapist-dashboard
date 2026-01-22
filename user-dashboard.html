@@ -866,12 +866,93 @@
                     }
                 }
                 
-                displayBookings();
-            } catch (error) {
-                console.error('Error loading bookings:', error);
-                showMessage('Error loading bookings', 'error');
-            }
+                // Display Bookings
+function displayBookings() {
+    const container = document.getElementById('bookingsList');
+    container.innerHTML = '';
+
+    if (allBookings.length === 0) {
+        container.innerHTML = '<div class="empty-state">No bookings yet</div>';
+        return;
+    }
+
+    allBookings.forEach(booking => {
+        const card = document.createElement('div');
+        card.className = 'booking-card';
+
+        const therapistName = booking.Therapists ? booking.Therapists.Name : 'Unknown';
+        const date = new Date(booking.session_date).toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+        const startTime = convertTo12Hour(booking.start_time);
+        const endTime = convertTo12Hour(booking.end_time);
+
+        let meetingLinkHTML = '';
+        if (booking.meeting_link && booking.status === 'confirmed') {
+            meetingLinkHTML = '<div class="booking-link">🎥 <a href="' + booking.meeting_link + '" target="_blank">Join Session</a></div>';
         }
+
+        let rescheduleInfoHTML = '';
+        if (booking.reschedule_requested) {
+            const newDate = new Date(booking.reschedule_new_date).toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+            const newStart = convertTo12Hour(booking.reschedule_new_start_time);
+            const newEnd = convertTo12Hour(booking.reschedule_new_end_time);
+            rescheduleInfoHTML = '<div class="reschedule-badge"><strong>🔄 Reschedule Requested</strong><br>New: ' + newDate + ' at ' + newStart + ' - ' + newEnd + '<br>Status: Pending therapist approval</div>';
+        }
+
+        const reviewBadgeHTML = booking.review ? '<div class="reviewed-badge">✓ Reviewed (' + booking.review.rating + ' stars)</div>' : '';
+
+        card.innerHTML = '<div class="booking-header">' +
+            '<div class="booking-therapist">Dr. ' + therapistName + '</div>' +
+            '<span class="status-badge status-' + booking.status + '">' + booking.status.toUpperCase() + '</span>' +
+            '</div>' +
+            '<div class="booking-date">📅 ' + date + '</div>' +
+            '<div class="booking-time">🕐 ' + startTime + ' - ' + endTime + '</div>' +
+            meetingLinkHTML +
+            rescheduleInfoHTML +
+            reviewBadgeHTML;
+
+        // Add action buttons using DOM methods instead of inline onclick
+        if ((booking.status === 'pending' || booking.status === 'confirmed') && !booking.reschedule_requested) {
+            const actionsDiv = document.createElement('div');
+            actionsDiv.style.marginTop = '10px';
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-cancel';
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.onclick = function() { cancelBooking(booking.id); };
+            
+            const rescheduleBtn = document.createElement('button');
+            rescheduleBtn.className = 'btn btn-reschedule';
+            rescheduleBtn.textContent = '🔄 Reschedule';
+            rescheduleBtn.onclick = function() { openRescheduleModal(booking.id, therapistName); };
+            
+            actionsDiv.appendChild(cancelBtn);
+            actionsDiv.appendChild(rescheduleBtn);
+            card.appendChild(actionsDiv);
+        } else if (booking.status === 'completed' && !booking.review) {
+            const actionsDiv = document.createElement('div');
+            actionsDiv.style.marginTop = '10px';
+            
+            const reviewBtn = document.createElement('button');
+            reviewBtn.className = 'btn btn-review';
+            reviewBtn.textContent = '⭐ Write Review';
+            reviewBtn.onclick = function() { openReviewModal(booking.id, therapistName, booking.therapist_id); };
+            
+            actionsDiv.appendChild(reviewBtn);
+            card.appendChild(actionsDiv);
+        }
+
+        container.appendChild(card);
+    });
+}
+
 
         // Check if booking has review
         async function checkBookingReview(bookingId) {
