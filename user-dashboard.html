@@ -249,13 +249,13 @@
             selectedTherapist = null;
         }
 
-        async function confirmBooking() {
-            const date = document.getElementById('sessionDate').value;
-            const time = document.getElementById('sessionTime').value;
-            const notes = document.getElementById('sessionNotes').value;
-            if (!date || !time) {
-                alert('Please select date and time');
-                return;
+        const result = await db.from('Bookings').insert([{
+    user_id: currentUser.id,
+    therapist_id: selectedTherapist.id,
+    session_date: date,
+    start_time: time,
+    status: 'pending'
+}]);
             }
             const result = await db.from('Bookings').insert([{
                 user_id: currentUser.id,
