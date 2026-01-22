@@ -337,7 +337,7 @@
                 <p class="therapist-name" id="therapistName">Loading...</p>
             </div>
             <div class="header-info">
-                <button class="btn btn-logout" onclick="logout()">Logout</button>
+                <button class="btn btn-logout" id="logoutBtn">Logout</button>
             </div>
         </div>
 
@@ -367,11 +367,11 @@
 
             <!-- Tabs -->
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('all')">All Bookings</button>
-                <button class="tab" onclick="switchTab('pending')">Pending</button>
-                <button class="tab" onclick="switchTab('confirmed')">Confirmed</button>
-                <button class="tab" onclick="switchTab('completed')">Completed</button>
-                <button class="tab" onclick="switchTab('profile')">My Profile</button>
+                <button class="tab active" data-tab="all">All Bookings</button>
+                <button class="tab" data-tab="pending">Pending</button>
+                <button class="tab" data-tab="confirmed">Confirmed</button>
+                <button class="tab" data-tab="completed">Completed</button>
+                <button class="tab" data-tab="profile">My Profile</button>
             </div>
 
             <!-- Tab Contents -->
@@ -414,7 +414,7 @@
             console.log('Current User:', user);
             
             if (!user || user.role !== 'therapist') {
-                alert('⚠️ Access denied. Therapist role required.');
+                alert('Access denied. Therapist role required.');
                 window.location.href = 'login.html';
                 return;
             }
@@ -425,10 +425,35 @@
                 await loadTherapistData();
                 await loadBookings();
                 updateStats();
+                setupEventListeners();
             } catch (error) {
                 console.error('Initialization error:', error);
-                alert('❌ Error loading dashboard. Check console for details.');
+                alert('Error loading dashboard. Check console for details.');
             }
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            // Tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    switchTab(this.dataset.tab);
+                });
+            });
+            
+            // Event delegation for booking action buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('btn-confirm')) {
+                    const bookingId = parseInt(e.target.dataset.bookingId);
+                    confirmBooking(bookingId);
+                } else if (e.target.classList.contains('btn-cancel')) {
+                    const bookingId = parseInt(e.target.dataset.bookingId);
+                    cancelBooking(bookingId);
+                }
+            });
         }
 
         // Load Therapist Data
@@ -449,17 +474,17 @@
                 }
                 
                 if (!data || data.length === 0) {
-                    alert('❌ No therapist profile found for this account. Please contact admin.');
+                    alert('No therapist profile found for this account. Please contact admin.');
                     window.location.href = 'login.html';
                     return;
                 }
                 
                 therapistData = data[0];
-                document.getElementById('therapistName').textContent = `Dr. ${therapistData.Name}`;
+                document.getElementById('therapistName').textContent = 'Dr. ' + therapistData.Name;
                 displayProfile();
             } catch (error) {
                 console.error('Error loading therapist data:', error);
-                alert('❌ Error: ' + error.message);
+                alert('Error: ' + error.message);
                 throw error;
             }
         }
@@ -467,7 +492,6 @@
         // Load All Bookings
         async function loadBookings() {
             try {
-                // First, get all bookings for this therapist
                 const { data: bookingsData, error: bookingsError } = await supabaseClient
                     .from('Bookings')
                     .select('*')
@@ -483,7 +507,6 @@
                     return;
                 }
 
-                // Then, get user profiles for each booking
                 const userIds = [...new Set(bookingsData.map(b => b.user_id))];
                 const { data: profilesData, error: profilesError } = await supabaseClient
                     .from('profiles')
@@ -492,13 +515,11 @@
 
                 if (profilesError) {
                     console.error('Error loading profiles:', profilesError);
-                    // Continue without profile data
                     allBookings = bookingsData.map(booking => ({
                         ...booking,
                         profiles: null
                     }));
                 } else {
-                    // Map profiles to bookings
                     allBookings = bookingsData.map(booking => {
                         const profile = profilesData.find(p => p.id === booking.user_id);
                         return {
@@ -524,7 +545,6 @@
             const confirmedList = document.getElementById('confirmedBookingsList');
             const completedList = document.getElementById('completedBookingsList');
 
-            // Clear all lists
             allList.innerHTML = '';
             pendingList.innerHTML = '';
             confirmedList.innerHTML = '';
@@ -537,25 +557,24 @@
 
             allBookings.forEach(booking => {
                 const card = createBookingCard(booking);
-                allList.innerHTML += card;
+                allList.appendChild(card);
 
                 if (booking.status === 'pending') {
-                    pendingList.innerHTML += card;
+                    pendingList.appendChild(card.cloneNode(true));
                 } else if (booking.status === 'confirmed') {
-                    confirmedList.innerHTML += card;
+                    confirmedList.appendChild(card.cloneNode(true));
                 } else if (booking.status === 'completed') {
-                    completedList.innerHTML += card;
+                    completedList.appendChild(card.cloneNode(true));
                 }
             });
 
-            // Check if filtered lists are empty
-            if (!pendingList.innerHTML) {
+            if (pendingList.children.length === 0) {
                 pendingList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No pending bookings</p></div>';
             }
-            if (!confirmedList.innerHTML) {
+            if (confirmedList.children.length === 0) {
                 confirmedList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No confirmed bookings</p></div>';
             }
-            if (!completedList.innerHTML) {
+            if (completedList.children.length === 0) {
                 completedList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎉</div><p>No completed sessions yet</p></div>';
             }
         }
@@ -563,7 +582,7 @@
         // Create Booking Card
         function createBookingCard(booking) {
             const patient = booking.profiles || {};
-            const statusClass = `status-${booking.status}`;
+            const statusClass = 'status-' + booking.status;
             const date = new Date(booking.session_date).toLocaleDateString('en-IN', {
                 weekday: 'long',
                 year: 'numeric',
@@ -574,57 +593,84 @@
             const startTime = convertTo12Hour(booking.start_time);
             const endTime = convertTo12Hour(booking.end_time);
 
-            let actions = '';
-            if (booking.status === 'pending') {
-                actions = `
-                    <div class="booking-actions">
-                        <button class="btn btn-confirm" onclick="window.confirmBooking(${booking.id})">&#x2713; Confirm</button>
-                        <button class="btn btn-cancel" onclick="window.cancelBooking(${booking.id})">&#x2715; Reject</button>
-                    </div>
-                `;
-            } else if (booking.status === 'confirmed') {
-                actions = `
-                    <div class="booking-actions">
-                        <button class="btn btn-cancel" onclick="window.cancelBooking(${booking.id})">&#x2715; Cancel</button>
-                    </div>
-                `;
+            const card = document.createElement('div');
+            card.className = 'booking-card';
+            
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'booking-header';
+            
+            const patientInfo = document.createElement('div');
+            const patientName = document.createElement('div');
+            patientName.className = 'booking-patient';
+            patientName.textContent = '👤 ' + (patient.full_name || 'Patient');
+            
+            const bookingDate = document.createElement('div');
+            bookingDate.className = 'booking-date';
+            bookingDate.textContent = date;
+            
+            patientInfo.appendChild(patientName);
+            patientInfo.appendChild(bookingDate);
+            
+            const statusBadge = document.createElement('span');
+            statusBadge.className = 'status-badge ' + statusClass;
+            statusBadge.textContent = booking.status.toUpperCase();
+            
+            headerDiv.appendChild(patientInfo);
+            headerDiv.appendChild(statusBadge);
+            
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'booking-details';
+            detailsDiv.innerHTML = '<div class="detail-item"><span class="detail-label">Time Slot</span><span class="detail-value">🕐 ' + startTime + ' - ' + endTime + '</span></div>' +
+                '<div class="detail-item"><span class="detail-label">Patient Email</span><span class="detail-value">📧 ' + (patient.email || 'N/A') + '</span></div>' +
+                '<div class="detail-item"><span class="detail-label">Patient Phone</span><span class="detail-value">📱 ' + (patient.phone || 'N/A') + '</span></div>' +
+                '<div class="detail-item"><span class="detail-label">Booking ID</span><span class="detail-value">#' + booking.id + '</span></div>';
+            
+            card.appendChild(headerDiv);
+            card.appendChild(detailsDiv);
+            
+            if (booking.notes) {
+                const notesDiv = document.createElement('div');
+                notesDiv.className = 'detail-item';
+                notesDiv.style.marginTop = '10px';
+                notesDiv.innerHTML = '<span class="detail-label">Notes</span><span class="detail-value">' + booking.notes + '</span>';
+                card.appendChild(notesDiv);
             }
-
-            return `
-                <div class="booking-card">
-                    <div class="booking-header">
-                        <div>
-                            <div class="booking-patient">&#x1F464; ${patient.full_name || 'Patient'}</div>
-                            <div class="booking-date">${date}</div>
-                        </div>
-                        <span class="status-badge ${statusClass}">${booking.status.toUpperCase()}</span>
-                    </div>
-                    <div class="booking-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Time Slot</span>
-                            <span class="detail-value">&#x1F550; ${startTime} - ${endTime}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Patient Email</span>
-                            <span class="detail-value">&#x1F4E7; ${patient.email || 'N/A'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Patient Phone</span>
-                            <span class="detail-value">&#x1F4F1; ${patient.phone || 'N/A'}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Booking ID</span>
-                            <span class="detail-value">#${booking.id}</span>
-                        </div>
-                    </div>
-                    ${booking.notes ? `<div class="detail-item" style="margin-top: 10px;"><span class="detail-label">Notes</span><span class="detail-value">${booking.notes}</span></div>` : ''}
-                    ${actions}
-                </div>
-            `;
+            
+            if (booking.status === 'pending') {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'booking-actions';
+                
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = 'btn btn-confirm';
+                confirmBtn.textContent = '✓ Confirm';
+                confirmBtn.dataset.bookingId = booking.id;
+                
+                const rejectBtn = document.createElement('button');
+                rejectBtn.className = 'btn btn-cancel';
+                rejectBtn.textContent = '✕ Reject';
+                rejectBtn.dataset.bookingId = booking.id;
+                
+                actionsDiv.appendChild(confirmBtn);
+                actionsDiv.appendChild(rejectBtn);
+                card.appendChild(actionsDiv);
+            } else if (booking.status === 'confirmed') {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'booking-actions';
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn btn-cancel';
+                cancelBtn.textContent = '✕ Cancel';
+                cancelBtn.dataset.bookingId = booking.id;
+                
+                actionsDiv.appendChild(cancelBtn);
+                card.appendChild(actionsDiv);
+            }
+            
+            return card;
         }
 
-        // Confirm Booking - Make globally accessible
-        window.confirmBooking = async function(bookingId) {
+        // Confirm Booking
+        async function confirmBooking(bookingId) {
             if (!confirm('⚠️ Confirm this booking?')) return;
 
             try {
@@ -644,8 +690,8 @@
             }
         }
 
-        // Cancel Booking - Make globally accessible
-        window.cancelBooking = async function(bookingId) {
+        // Cancel Booking
+        async function cancelBooking(bookingId) {
             if (!confirm('⚠️ Are you sure you want to cancel this booking?')) return;
 
             try {
@@ -668,41 +714,14 @@
         // Display Profile
         function displayProfile() {
             const profileSection = document.getElementById('profileSection');
-            profileSection.innerHTML = `
-                <h2 style="margin-bottom: 20px; color: #667eea;">My Profile</h2>
-                <div class="profile-field">
-                    <label>Name</label>
-                    <div class="value">${therapistData.Name}</div>
-                </div>
-                <div class="profile-field">
-                    <label>Email</label>
-                    <div class="value">${therapistData.email}</div>
-                </div>
-                <div class="profile-field">
-                    <label>Phone</label>
-                    <div class="value">${therapistData.phone}</div>
-                </div>
-                <div class="profile-field">
-                    <label>Specialization</label>
-                    <div class="value">${therapistData.Specialization}</div>
-                </div>
-                <div class="profile-field">
-                    <label>Qualifications</label>
-                    <div class="value">${therapistData.qualifications}</div>
-                </div>
-                <div class="profile-field">
-                    <label>Bio</label>
-                    <div class="value">${therapistData.bio}</div>
-                </div>
-                <div class="profile-field">
-                    <label>Status</label>
-                    <div class="value">
-                        <span class="status-badge ${therapistData.approval_status === 'approved' ? 'status-confirmed' : 'status-pending'}">
-                            ${therapistData.approval_status.toUpperCase()}
-                        </span>
-                    </div>
-                </div>
-            `;
+            profileSection.innerHTML = '<h2 style="margin-bottom: 20px; color: #667eea;">My Profile</h2>' +
+                '<div class="profile-field"><label>Name</label><div class="value">' + therapistData.Name + '</div></div>' +
+                '<div class="profile-field"><label>Email</label><div class="value">' + therapistData.email + '</div></div>' +
+                '<div class="profile-field"><label>Phone</label><div class="value">' + therapistData.phone + '</div></div>' +
+                '<div class="profile-field"><label>Specialization</label><div class="value">' + therapistData.Specialization + '</div></div>' +
+                '<div class="profile-field"><label>Qualifications</label><div class="value">' + therapistData.qualifications + '</div></div>' +
+                '<div class="profile-field"><label>Bio</label><div class="value">' + therapistData.bio + '</div></div>' +
+                '<div class="profile-field"><label>Status</label><div class="value"><span class="status-badge ' + (therapistData.approval_status === 'approved' ? 'status-confirmed' : 'status-pending') + '">' + therapistData.approval_status.toUpperCase() + '</span></div></div>';
         }
 
         // Update Statistics
@@ -717,12 +736,10 @@
         }
 
         // Switch Tabs
-        window.switchTab = function(tab) {
-            // Update tab buttons
+        function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelector('.tab[data-tab="' + tab + '"]').classList.add('active');
 
-            // Update tab content
             document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
             
             const tabMap = {
@@ -740,19 +757,21 @@
         function showMessage(message, type) {
             const messageBox = document.getElementById('messageBox');
             messageBox.textContent = message;
-            messageBox.className = `message ${type}`;
-            setTimeout(() => {
+            messageBox.className = 'message ' + type;
+            setTimeout(function() {
                 messageBox.className = 'message';
             }, 5000);
         }
 
         // Convert 24-hour to 12-hour format
         function convertTo12Hour(time) {
-            const [hours, minutes] = time.split(':');
+            const parts = time.split(':');
+            const hours = parts[0];
+            const minutes = parts[1];
             const h = parseInt(hours);
             const period = h >= 12 ? 'PM' : 'AM';
             const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-            return `${hour12}:${minutes} ${period}`;
+            return hour12 + ':' + minutes + ' ' + period;
         }
 
         // Logout
