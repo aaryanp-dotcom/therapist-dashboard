@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -265,294 +264,290 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Use existing supabase client or create new one
-        let supabase;
-        if (window.supabaseClient) {
-            supabase = window.supabaseClient;
-        } else {
+        (function() {
             const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
-            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcyNjQ4NzksImV4cCI6MjA1Mjg0MDg3OX0.r7gqHYqxEJtmEqXDwjr_j7U-JuFr7fB8vZf_6gNnYPo';
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcyNjQ4NzksImV4cCI6MjA1Mjg0MDg3OX0.r7gqHYqxEJtmEqXDwjr_j7U-JuFr7fB8vZf_6gNnYPo';
+            const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function checkAuth() {
-            const { data: { user } } = await supabase.auth.getUser();
+            window.checkAuth = async function() {
+                const { data: { user } } = await db.auth.getUser();
+                
+                if (!user) {
+                    window.location.href = 'login.html';
+                    return null;
+                }
 
-            if (!user) {
-                window.location.href = 'login.html';
-                return null;
-            }
-
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
-
-            if (!profile || profile.role !== 'admin') {
-                alert('Access denied. Admin only.');
-                window.location.href = 'index.html';
-                return null;
-            }
-
-            return user;
-        }
-
-        async function loadStatistics() {
-            const { data: users } = await supabase
-                .from('profiles')
-                .select('*', { count: 'exact' })
-                .eq('role', 'user');
-
-            const { data: therapists } = await supabase
-                .from('Therapists')
-                .select('*', { count: 'exact' });
-
-            const { data: pending } = await supabase
-                .from('Therapists')
-                .select('*', { count: 'exact' })
-                .eq('approval_status', 'pending');
-
-            const { data: bookings } = await supabase
-                .from('Bookings')
-                .select('*', { count: 'exact' });
-
-            document.getElementById('totalUsers').textContent = users?.length || 0;
-            document.getElementById('totalTherapists').textContent = therapists?.length || 0;
-            document.getElementById('pendingApps').textContent = pending?.length || 0;
-            document.getElementById('totalBookings').textContent = bookings?.length || 0;
-        }
-
-        async function loadApplications() {
-            const { data: applications, error } = await supabase
-                .from('Therapists')
-                .select('*')
-                .eq('approval_status', 'pending')
-                .order('created_at', { ascending: false });
-
-            const container = document.getElementById('applicationsTable');
-
-            if (error) {
-                console.error('Error loading applications:', error);
-                container.innerHTML = '<div class="no-data">Error loading applications</div>';
-                return;
-            }
-
-            if (!applications || applications.length === 0) {
-                container.innerHTML = '<div class="no-data">No pending applications</div>';
-                return;
-            }
-
-            let html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Specialization</th>
-                            <th>Qualifications</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            applications.forEach(app => {
-                html += `
-                    <tr>
-                        <td>${app.Name || 'N/A'}</td>
-                        <td>${app.email}</td>
-                        <td>${app.phone || 'N/A'}</td>
-                        <td>${app.Specialization || 'N/A'}</td>
-                        <td>${app.qualifications || 'N/A'}</td>
-                        <td>
-                            <button class="btn btn-approve" onclick="approveTherapist('${app.id}')">Approve</button>
-                            <button class="btn btn-reject" onclick="rejectTherapist('${app.id}')">Reject</button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        }
-
-        async function approveTherapist(therapistId) {
-            const { error: therapistError } = await supabase
-                .from('Therapists')
-                .update({ 
-                    approval_status: 'approved',
-                    Active: true 
-                })
-                .eq('id', therapistId);
-
-            if (therapistError) {
-                alert('Error approving therapist: ' + therapistError.message);
-                return;
-            }
-
-            const { data: therapist } = await supabase
-                .from('Therapists')
-                .select('user_id')
-                .eq('id', therapistId)
-                .single();
-
-            if (therapist && therapist.user_id) {
-                await supabase
+                const { data: profile } = await db
                     .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (!profile || profile.role !== 'admin') {
+                    alert('Access denied. Admin only.');
+                    window.location.href = 'index.html';
+                    return null;
+                }
+
+                return user;
+            };
+
+            window.loadStatistics = async function() {
+                const { data: users } = await db
+                    .from('profiles')
+                    .select('*', { count: 'exact' })
+                    .eq('role', 'user');
+
+                const { data: therapists } = await db
+                    .from('Therapists')
+                    .select('*', { count: 'exact' });
+
+                const { data: pending } = await db
+                    .from('Therapists')
+                    .select('*', { count: 'exact' })
+                    .eq('approval_status', 'pending');
+
+                const { data: bookings } = await db
+                    .from('Bookings')
+                    .select('*', { count: 'exact' });
+
+                document.getElementById('totalUsers').textContent = users?.length || 0;
+                document.getElementById('totalTherapists').textContent = therapists?.length || 0;
+                document.getElementById('pendingApps').textContent = pending?.length || 0;
+                document.getElementById('totalBookings').textContent = bookings?.length || 0;
+            };
+
+            window.loadApplications = async function() {
+                const { data: applications, error } = await db
+                    .from('Therapists')
+                    .select('*')
+                    .eq('approval_status', 'pending')
+                    .order('created_at', { ascending: false });
+
+                const container = document.getElementById('applicationsTable');
+
+                if (error) {
+                    console.error('Error loading applications:', error);
+                    container.innerHTML = '<div class="no-data">Error loading applications</div>';
+                    return;
+                }
+
+                if (!applications || applications.length === 0) {
+                    container.innerHTML = '<div class="no-data">No pending applications</div>';
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Specialization</th>
+                                <th>Qualifications</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                applications.forEach(app => {
+                    html += `
+                        <tr>
+                            <td>${app.Name || 'N/A'}</td>
+                            <td>${app.email}</td>
+                            <td>${app.phone || 'N/A'}</td>
+                            <td>${app.Specialization || 'N/A'}</td>
+                            <td>${app.qualifications || 'N/A'}</td>
+                            <td>
+                                <button class="btn btn-approve" onclick="approveTherapist('${app.id}')">Approve</button>
+                                <button class="btn btn-reject" onclick="rejectTherapist('${app.id}')">Reject</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            };
+
+            window.approveTherapist = async function(therapistId) {
+                const { error: therapistError } = await db
+                    .from('Therapists')
                     .update({ 
-                        status: 'active',
-                        approved: true 
+                        approval_status: 'approved',
+                        Active: true 
                     })
-                    .eq('id', therapist.user_id);
-            }
+                    .eq('id', therapistId);
 
-            alert('Therapist approved successfully!');
-            loadApplications();
-            loadStatistics();
-        }
+                if (therapistError) {
+                    alert('Error approving therapist: ' + therapistError.message);
+                    return;
+                }
 
-        async function rejectTherapist(therapistId) {
-            const { error } = await supabase
-                .from('Therapists')
-                .update({ approval_status: 'rejected' })
-                .eq('id', therapistId);
+                const { data: therapist } = await db
+                    .from('Therapists')
+                    .select('user_id')
+                    .eq('id', therapistId)
+                    .single();
 
-            if (error) {
-                alert('Error rejecting therapist: ' + error.message);
-                return;
-            }
+                if (therapist && therapist.user_id) {
+                    await db
+                        .from('profiles')
+                        .update({ 
+                            status: 'active',
+                            approved: true 
+                        })
+                        .eq('id', therapist.user_id);
+                }
 
-            alert('Therapist application rejected.');
-            loadApplications();
-            loadStatistics();
-        }
+                alert('Therapist approved successfully!');
+                window.loadApplications();
+                window.loadStatistics();
+            };
 
-        async function loadBookings() {
-            const { data: bookings, error } = await supabase
-                .from('Bookings')
-                .select(`
-                    *,
-                    profiles:user_id (full_name, email),
-                    Therapists:therapist_id (Name, Specialization)
-                `)
-                .order('session_date', { ascending: false });
+            window.rejectTherapist = async function(therapistId) {
+                const { error } = await db
+                    .from('Therapists')
+                    .update({ approval_status: 'rejected' })
+                    .eq('id', therapistId);
 
-            const container = document.getElementById('bookingsTable');
+                if (error) {
+                    alert('Error rejecting therapist: ' + error.message);
+                    return;
+                }
 
-            if (error) {
-                console.error('Error loading bookings:', error);
-                container.innerHTML = '<div class="no-data">Error loading bookings</div>';
-                return;
-            }
+                alert('Therapist application rejected.');
+                window.loadApplications();
+                window.loadStatistics();
+            };
 
-            if (!bookings || bookings.length === 0) {
-                container.innerHTML = '<div class="no-data">No bookings found</div>';
-                return;
-            }
+            window.loadBookings = async function() {
+                const { data: bookings, error } = await db
+                    .from('Bookings')
+                    .select(`
+                        *,
+                        profiles:user_id (full_name, email),
+                        Therapists:therapist_id (Name, Specialization)
+                    `)
+                    .order('session_date', { ascending: false });
 
-            let html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Therapist</th>
-                            <th>Specialization</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+                const container = document.getElementById('bookingsTable');
 
-            bookings.forEach(booking => {
-                const statusClass = `status-${booking.status}`;
-                html += `
-                    <tr>
-                        <td>${booking.profiles?.full_name || 'N/A'}</td>
-                        <td>${booking.Therapists?.Name || 'N/A'}</td>
-                        <td>${booking.Therapists?.Specialization || 'N/A'}</td>
-                        <td>${new Date(booking.session_date).toLocaleDateString()}</td>
-                        <td>${booking.start_time}</td>
-                        <td><span class="status-badge ${statusClass}">${booking.status}</span></td>
-                    </tr>
+                if (error) {
+                    console.error('Error loading bookings:', error);
+                    container.innerHTML = '<div class="no-data">Error loading bookings</div>';
+                    return;
+                }
+
+                if (!bookings || bookings.length === 0) {
+                    container.innerHTML = '<div class="no-data">No bookings found</div>';
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Therapist</th>
+                                <th>Specialization</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                 `;
-            });
 
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        }
-
-        async function loadUsers() {
-            const { data: users, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            const container = document.getElementById('usersTable');
-
-            if (error) {
-                console.error('Error loading users:', error);
-                container.innerHTML = '<div class="no-data">Error loading users</div>';
-                return;
-            }
-
-            if (!users || users.length === 0) {
-                container.innerHTML = '<div class="no-data">No users found</div>';
-                return;
-            }
-
-            let html = `
-                <table>
-                    <thead>
+                bookings.forEach(booking => {
+                    const statusClass = `status-${booking.status}`;
+                    html += `
                         <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Joined</th>
+                            <td>${booking.profiles?.full_name || 'N/A'}</td>
+                            <td>${booking.Therapists?.Name || 'N/A'}</td>
+                            <td>${booking.Therapists?.Specialization || 'N/A'}</td>
+                            <td>${new Date(booking.session_date).toLocaleDateString()}</td>
+                            <td>${booking.start_time}</td>
+                            <td><span class="status-badge ${statusClass}">${booking.status}</span></td>
                         </tr>
-                    </thead>
-                    <tbody>
-            `;
+                    `;
+                });
 
-            users.forEach(user => {
-                const statusClass = `status-${user.status}`;
-                html += `
-                    <tr>
-                        <td>${user.full_name || user.name || 'N/A'}</td>
-                        <td>${user.email}</td>
-                        <td>${user.phone || 'N/A'}</td>
-                        <td>${user.role}</td>
-                        <td><span class="status-badge ${statusClass}">${user.status}</span></td>
-                        <td>${new Date(user.created_at).toLocaleDateString()}</td>
-                    </tr>
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            };
+
+            window.loadUsers = async function() {
+                const { data: users, error } = await db
+                    .from('profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                const container = document.getElementById('usersTable');
+
+                if (error) {
+                    console.error('Error loading users:', error);
+                    container.innerHTML = '<div class="no-data">Error loading users</div>';
+                    return;
+                }
+
+                if (!users || users.length === 0) {
+                    container.innerHTML = '<div class="no-data">No users found</div>';
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                 `;
-            });
 
-            html += '</tbody></table>';
-            container.innerHTML = html;
-        }
+                users.forEach(user => {
+                    const statusClass = `status-${user.status}`;
+                    html += `
+                        <tr>
+                            <td>${user.full_name || user.name || 'N/A'}</td>
+                            <td>${user.email}</td>
+                            <td>${user.phone || 'N/A'}</td>
+                            <td>${user.role}</td>
+                            <td><span class="status-badge ${statusClass}">${user.status}</span></td>
+                            <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                        </tr>
+                    `;
+                });
 
-        async function logout() {
-            await supabase.auth.signOut();
-            window.location.href = 'index.html';
-        }
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            };
 
-        async function init() {
-            const user = await checkAuth();
-            if (user) {
-                loadStatistics();
-                loadApplications();
-                loadBookings();
-                loadUsers();
+            window.logout = async function() {
+                await db.auth.signOut();
+                window.location.href = 'index.html';
+            };
+
+            async function init() {
+                const user = await window.checkAuth();
+                if (user) {
+                    window.loadStatistics();
+                    window.loadApplications();
+                    window.loadBookings();
+                    window.loadUsers();
+                }
             }
-        }
 
-        init();
+            init();
+        })();
     </script>
 </body>
 </html>
