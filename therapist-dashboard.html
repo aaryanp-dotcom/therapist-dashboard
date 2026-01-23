@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Therapist Dashboard - Therapist Connect</title>
+
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         * {
             margin: 0;
@@ -297,6 +300,7 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
 
         .action-btn {
@@ -333,6 +337,7 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
+            min-width: 250px;
         }
 
         .empty-state {
@@ -352,12 +357,7 @@
         }
 
         .availability-container, .profile-container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             max-width: 800px;
-            margin: 0 auto;
         }
 
         .availability-form, .profile-form {
@@ -454,7 +454,7 @@
             color: #333;
         }
 
-        .form-input, .form-textarea {
+        .form-input, .form-textarea, .form-select {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -464,7 +464,7 @@
             transition: border-color 0.3s;
         }
 
-        .form-input:focus, .form-textarea:focus {
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -663,7 +663,7 @@
 
                     <div class="form-group">
                         <label for="profile-specialization">Specialization</label>
-                        <select id="profile-specialization" class="form-input" required>
+                        <select id="profile-specialization" class="form-select" required>
                             <option value="">Select Specialization</option>
                             <option value="Anxiety">Anxiety</option>
                             <option value="Depression">Depression</option>
@@ -695,74 +695,90 @@
     </div>
 
     <script>
-        // Initialize Supabase FIRST
+        // Initialize Supabase - DO THIS FIRST, ONLY ONCE
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let allBookings = [];
         let filteredBookings = [];
+        let currentTherapistId = null;
 
         // Check authentication
         async function checkAuth() {
-            const { data: { user }, error } = await supabase.auth.getUser();
-            if (!user || error) {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+                if (!user || error) {
+                    console.error('Not authenticated:', error);
+                    window.location.href = 'login.html';
+                    return;
+                }
+                console.log('Logged in user:', user.email);
+                await loadTherapistData();
+                await loadBookings();
+            } catch (err) {
+                console.error('Auth check error:', err);
                 window.location.href = 'login.html';
-                return;
             }
-            loadTherapistData();
-            loadBookings();
         }
 
         // Load therapist data
         async function loadTherapistData() {
-            const { data: { user } } = await supabase.auth.getUser();
-            const { data, error } = await supabase
-                .from('Therapists')
-                .select('name')
-                .eq('user_id', user.id)
-                .single();
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                const { data, error } = await supabase
+                    .from('Therapists')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .single();
 
-            if (data) {
-                document.getElementById('therapist-name').textContent = data.name;
+                console.log('Therapist data:', data);
+
+                if (error) {
+                    console.error('Error loading therapist:', error);
+                    return;
+                }
+
+                if (data) {
+                    currentTherapistId = data.id;
+                    document.getElementById('therapist-name').textContent = data.Name || data.name || 'Therapist';
+                }
+            } catch (err) {
+                console.error('Load therapist error:', err);
             }
         }
 
         // Load all bookings
         async function loadBookings() {
-            const { data: { user } } = await supabase.auth.getUser();
+            try {
+                if (!currentTherapistId) {
+                    console.error('No therapist ID found');
+                    return;
+                }
 
-            const { data: therapistData, error: therapistError } = await supabase
-                .from('Therapists')
-                .select('id, name')
-                .eq('user_id', user.id)
-                .single();
+                console.log('Loading bookings for therapist ID:', currentTherapistId);
 
-            if (therapistError || !therapistData) {
-                console.error('Error loading therapist:', therapistError);
-                return;
+                const { data, error } = await supabase
+                    .from('Bookings')
+                    .select('*')
+                    .eq('therapist_id', currentTherapistId)
+                    .order('created_at', { ascending: false });
+
+                console.log('Bookings data:', data);
+                console.log('Bookings error:', error);
+
+                if (error) {
+                    console.error('Error loading bookings:', error);
+                    return;
+                }
+
+                allBookings = data || [];
+                filteredBookings = allBookings;
+                updateStats();
+                displayBookings();
+            } catch (err) {
+                console.error('Load bookings error:', err);
             }
-
-            console.log('Therapist data:', therapistData);
-
-            const { data, error } = await supabase
-                .from('Bookings')
-                .select('*')
-                .eq('therapist_id', therapistData.id)
-                .order('created_at', { ascending: false });
-
-            console.log('Bookings data:', data);
-            console.log('Bookings error:', error);
-
-            if (error) {
-                console.error('Error loading bookings:', error);
-                return;
-            }
-
-            allBookings = data || [];
-            filteredBookings = allBookings;
-            updateStats();
-            displayBookings();
         }
 
         // Update statistics
@@ -792,7 +808,9 @@
             const container = document.getElementById(containerId);
             let bookings = filteredBookings;
 
-            if (status !== 'all') {
+            if (status === 'reschedule') {
+                bookings = filteredBookings.filter(b => b.reschedule_requested === true);
+            } else if (status !== 'all') {
                 bookings = filteredBookings.filter(b => b.status === status);
             }
 
@@ -811,7 +829,7 @@
                 <div class="booking-card ${booking.status}">
                     <div class="booking-header">
                         <div class="booking-patient">
-                            👤 ${booking.patient_name || 'Patient'}
+                            👤 ${booking.patient_name || booking.user_name || 'Patient'}
                         </div>
                         <span class="booking-status status-${booking.status}">${booking.status}</span>
                     </div>
@@ -819,25 +837,27 @@
                     <div class="booking-details">
                         <div class="detail-item">
                             <span class="detail-label">Time Slot</span>
-                            <span class="detail-value">🕐 ${booking.start_time} - ${booking.end_time}</span>
+                            <span class="detail-value">🕐 ${booking.start_time} - ${booking.end_time || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Patient Email</span>
-                            <span class="detail-value">📧 ${booking.patient_email || 'N/A'}</span>
+                            <span class="detail-value">📧 ${booking.patient_email || booking.user_email || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Booking ID</span>
-                            <span class="detail-value">#${booking.id.substring(0, 8)}</span>
+                            <span class="detail-value">#${booking.id ? booking.id.substring(0, 8) : 'N/A'}</span>
                         </div>
                     </div>
+                    ${booking.notes ? `<div style="margin-top:10px; color:#666;"><strong>Notes:</strong> ${booking.notes}</div>` : ''}
                     ${booking.status === 'pending' ? `
                         <div class="booking-actions">
                             <input type="text" 
                                    id="meeting-link-${booking.id}" 
                                    class="meeting-link-input" 
-                                   placeholder="Enter meeting link (Google Meet, Zoom, etc.)">
+                                   placeholder="Enter meeting link (Google Meet, Zoom, etc.)"
+                                   value="${booking.meeting_link || ''}">
                             <button class="action-btn confirm-btn" onclick="confirmBooking('${booking.id}')">
-                                ✓ Confirm & Add Link
+                                ✓ Confirm
                             </button>
                             <button class="action-btn reject-btn" onclick="rejectBooking('${booking.id}')">
                                 ✕ Reject
@@ -847,7 +867,7 @@
                     ${booking.status === 'confirmed' && booking.meeting_link ? `
                         <div class="detail-item" style="margin-top: 10px;">
                             <span class="detail-label">Meeting Link</span>
-                            <span class="detail-value">🔗 <a href="${booking.meeting_link}" target="_blank">${booking.meeting_link}</a></span>
+                            <span class="detail-value">🔗 <a href="${booking.meeting_link}" target="_blank" style="color:#667eea;">${booking.meeting_link}</a></span>
                         </div>
                     ` : ''}
                 </div>
@@ -883,8 +903,8 @@
                 return;
             }
 
-            alert('Booking confirmed successfully!');
-            loadBookings();
+            alert('✅ Booking confirmed successfully!');
+            await loadBookings();
         }
 
         // Reject booking
@@ -903,8 +923,8 @@
                 return;
             }
 
-            alert('Booking rejected successfully!');
-            loadBookings();
+            alert('✅ Booking rejected successfully!');
+            await loadBookings();
         }
 
         // Apply date filter
@@ -972,7 +992,7 @@
         // Logout
         async function logout() {
             await supabase.auth.signOut();
-            window.location.href = './login.html';
+            window.location.href = 'login.html';
         }
 
         // Load saved availability
@@ -1075,13 +1095,13 @@
 
             const { data, error } = await supabase
                 .from('Therapists')
-                .select('name, specialization, bio, hourly_rate')
+                .select('*')
                 .eq('user_id', user.id)
                 .single();
 
             if (data) {
-                document.getElementById('profile-name').value = data.name || '';
-                document.getElementById('profile-specialization').value = data.specialization || '';
+                document.getElementById('profile-name').value = data.Name || data.name || '';
+                document.getElementById('profile-specialization').value = data.Specialization || data.specialization || '';
                 document.getElementById('profile-bio').value = data.bio || '';
                 document.getElementById('profile-rate').value = data.hourly_rate || 500;
                 updateCharCount();
@@ -1131,8 +1151,8 @@
             const { data, error } = await supabase
                 .from('Therapists')
                 .update({
-                    name: name,
-                    specialization: specialization,
+                    Name: name,
+                    Specialization: specialization,
                     bio: bio,
                     hourly_rate: rate
                 })
