@@ -5,14 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Therapist Dashboard - Therapist Connect</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    // Initialize Supabase
-    const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-</script>
-<script>
-
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -358,7 +351,6 @@
             margin-bottom: 10px;
         }
 
-        /* Availability Tab Styles */
         .availability-container, .profile-container {
             background: white;
             padding: 30px;
@@ -451,7 +443,6 @@
             display: block;
         }
 
-        /* Profile Tab Styles */
         .form-group {
             margin-bottom: 20px;
         }
@@ -591,7 +582,6 @@
             <div id="reschedule-bookings-list"></div>
         </div>
 
-        <!-- MY AVAILABILITY TAB -->
         <div id="availability-content" class="tab-content">
             <div class="availability-container">
                 <h3>⏰ Set Your Weekly Availability</h3>
@@ -660,7 +650,6 @@
             </div>
         </div>
 
-        <!-- MY PROFILE TAB -->
         <div id="profile-content" class="tab-content">
             <div class="profile-container">
                 <h3>👤 Edit Your Profile</h3>
@@ -705,12 +694,16 @@
         </div>
     </div>
 
-  <script src="auth.js"></script>
     <script>
+        // Initialize Supabase FIRST
+        const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
         let allBookings = [];
         let filteredBookings = [];
 
-        // Check authentication - FIXED FOR SUPABASE V2
+        // Check authentication
         async function checkAuth() {
             const { data: { user }, error } = await supabase.auth.getUser();
             if (!user || error) {
@@ -721,7 +714,7 @@
             loadBookings();
         }
 
-        // Load therapist data - FIXED
+        // Load therapist data
         async function loadTherapistData() {
             const { data: { user } } = await supabase.auth.getUser();
             const { data, error } = await supabase
@@ -735,11 +728,10 @@
             }
         }
 
-        // Load all bookings - FIXED
+        // Load all bookings
         async function loadBookings() {
             const { data: { user } } = await supabase.auth.getUser();
 
-            // First, get the therapist's ID from the Therapists table
             const { data: therapistData, error: therapistError } = await supabase
                 .from('Therapists')
                 .select('id, name')
@@ -753,12 +745,11 @@
 
             console.log('Therapist data:', therapistData);
 
-            // Now get bookings using the therapist's ID
             const { data, error } = await supabase
                 .from('Bookings')
                 .select('*')
                 .eq('therapist_id', therapistData.id)
-                .order('booking_date', { ascending: true });
+                .order('created_at', { ascending: false });
 
             console.log('Bookings data:', data);
             console.log('Bookings error:', error);
@@ -820,23 +811,19 @@
                 <div class="booking-card ${booking.status}">
                     <div class="booking-header">
                         <div class="booking-patient">
-                            👤 ${booking.patient_name}
+                            👤 ${booking.patient_name || 'Patient'}
                         </div>
                         <span class="booking-status status-${booking.status}">${booking.status}</span>
                     </div>
-                    <div class="booking-date">📅 ${formatDate(booking.booking_date)}</div>
+                    <div class="booking-date">📅 ${formatDate(booking.session_date)}</div>
                     <div class="booking-details">
                         <div class="detail-item">
                             <span class="detail-label">Time Slot</span>
-                            <span class="detail-value">🕐 ${booking.time_slot}</span>
+                            <span class="detail-value">🕐 ${booking.start_time} - ${booking.end_time}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Patient Email</span>
-                            <span class="detail-value">📧 ${booking.patient_email}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Patient Phone</span>
-                            <span class="detail-value">📱 ${booking.patient_phone || 'N/A'}</span>
+                            <span class="detail-value">📧 ${booking.patient_email || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Booking ID</span>
@@ -931,7 +918,7 @@
             }
 
             filteredBookings = allBookings.filter(booking => {
-                const bookingDate = new Date(booking.booking_date);
+                const bookingDate = new Date(booking.session_date);
                 return bookingDate >= new Date(fromDate) && bookingDate <= new Date(toDate);
             });
 
@@ -974,7 +961,6 @@
                     document.getElementById(contentId).style.display = 'block';
                 }
 
-                // Load data for specific tabs
                 if (tab === 'availability') {
                     loadAvailability();
                 } else if (tab === 'profile') {
@@ -983,15 +969,13 @@
             });
         });
 
-        // Logout - FIXED
+        // Logout
         async function logout() {
             await supabase.auth.signOut();
             window.location.href = './login.html';
         }
 
-        // ========== MY AVAILABILITY TAB ==========
-
-        // Load saved availability - FIXED
+        // Load saved availability
         async function loadAvailability() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
@@ -1018,7 +1002,7 @@
             }
         }
 
-        // Enable/disable time inputs based on checkbox
+        // Enable/disable time inputs
         document.querySelectorAll('.day-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const day = this.id;
@@ -1042,7 +1026,7 @@
             document.getElementById(`${day}-end`).disabled = !checkbox.checked;
         });
 
-        // Save availability - FIXED
+        // Save availability
         document.getElementById('save-availability-btn').addEventListener('click', async function() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
@@ -1084,9 +1068,7 @@
             }
         });
 
-        // ========== MY PROFILE TAB ==========
-
-        // Load profile data - FIXED
+        // Load profile data
         async function loadProfile() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
@@ -1106,7 +1088,7 @@
             }
         }
 
-        // Character counter for bio
+        // Character counter
         document.getElementById('profile-bio').addEventListener('input', updateCharCount);
 
         function updateCharCount() {
@@ -1121,7 +1103,7 @@
             }
         }
 
-        // Save profile - FIXED
+        // Save profile
         document.getElementById('profile-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -1136,7 +1118,6 @@
             const bio = document.getElementById('profile-bio').value.trim();
             const rate = parseInt(document.getElementById('profile-rate').value);
 
-            // Validation
             if (bio.length > 500) {
                 showMessage('profile-message', 'Bio must be less than 500 characters', 'error');
                 return;
