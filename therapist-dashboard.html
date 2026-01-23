@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -346,6 +347,85 @@
             margin-bottom: 10px;
         }
 
+        /* Availability Management Styles */
+        .availability-container {
+            max-width: 800px;
+        }
+
+        .day-row {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            gap: 15px;
+        }
+
+        .day-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .day-label {
+            min-width: 100px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .time-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 120px;
+        }
+
+        .time-input:disabled {
+            background: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .save-btn:hover {
+            background: #45a049;
+        }
+
+        .message-box {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .message-box.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message-box.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .stats-container {
                 grid-template-columns: repeat(2, 1fr);
@@ -359,6 +439,10 @@
             .booking-details {
                 grid-template-columns: 1fr;
             }
+
+            .day-row {
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
@@ -366,7 +450,7 @@
     <div class="dashboard-header">
         <div>
             <h1>🩺 Therapist Dashboard</h1>
-            <h2 id="therapist-name">Dr. Aaryan Parashar</h2>
+            <h2 id="therapist-name">Loading...</h2>
         </div>
         <button class="logout-btn" onclick="handleLogout()">Logout</button>
     </div>
@@ -412,6 +496,7 @@
             <button class="tab-btn" data-tab="pending">Pending</button>
             <button class="tab-btn" data-tab="confirmed">Confirmed</button>
             <button class="tab-btn" data-tab="completed">Completed</button>
+            <button class="tab-btn" data-tab="availability">⏰ My Availability</button>
         </div>
 
         <div id="all-bookings-content" class="tab-content" style="display: block;">
@@ -429,10 +514,78 @@
         <div id="completed-content" class="tab-content">
             <div id="completed-bookings-list"></div>
         </div>
+
+        <div id="availability-content" class="tab-content">
+            <div class="availability-container">
+                <h3>⏰ Set Your Weekly Availability</h3>
+                <p style="color: #666; margin-bottom: 20px;">Define your working hours for each day of the week</p>
+
+                <div class="availability-form">
+                    <div class="day-row">
+                        <input type="checkbox" id="monday" class="day-checkbox" onchange="toggleDayInputs('monday')">
+                        <label for="monday" class="day-label">Monday</label>
+                        <input type="time" id="monday-start" class="time-input" value="09:00" disabled>
+                        <span style="color: #666;">to</span>
+                        <input type="time" id="monday-end" class="time-input" value="17:00" disabled>
+                    </div>
+
+                    <div class="day-row">
+                        <input type="checkbox" id="tuesday" class="day-checkbox" onchange="toggleDayInputs('tuesday')">
+                        <label for="tuesday" class="day-label">Tuesday</label>
+                        <input type="time" id="tuesday-start" class="time-input" value="09:00" disabled>
+                        <span style="color: #666;">to</span>
+                        <input type="time" id="tuesday-end" class="time-input" value="17:00" disabled>
+                    </div>
+
+                    <div class="day-row">
+                        <input type="checkbox" id="wednesday" class="day-checkbox" onchange="toggleDayInputs('wednesday')">
+                        <label for="wednesday" class="day-label">Wednesday</label>
+                        <input type="time" id="wednesday-start" class="time-input" value="09:00" disabled>
+                        <span style="color: #666;">to</span>
+                        <input type="time" id="wednesday-end" class="time-input" value="17:00" disabled>
+                    </div>
+
+                    <div class="day-row">
+                        <input type="checkbox" id="thursday" class="day-checkbox" onchange="toggleDayInputs('thursday')">
+                        <label for="thursday" class="day-label">Thursday</label>
+                        <input type="time" id="thursday-start" class="time-input" value="09:00" disabled>
+                        <span style="color: #666;">to</span>
+                        <input type="time" id="thursday-end" class="time-input" value="17:00" disabled>
+                    </div>
+
+                    <div class="day-row">
+                        <input type="checkbox" id="friday" class="day-checkbox" onchange="toggleDayInputs('friday')">
+                        <label for="friday" class="day-label">Friday</label>
+                        <input type="time" id="friday-start" class="time-input" value="09:00" disabled>
+                        <span style="color: #666;">to</span>
+                        <input type="time" id="friday-end" class="time-input" value="17:00" disabled>
+                    </div>
+
+                    <div class="day-row">
+                        <input type="checkbox" id="saturday" class="day-checkbox" onchange="toggleDayInputs('saturday')">
+                        <label for="saturday" class="day-label">Saturday</label>
+                        <input type="time" id="saturday-start" class="time-input" value="09:00" disabled>
+                        <span style="color: #666;">to</span>
+                        <input type="time" id="saturday-end" class="time-input" value="17:00" disabled>
+                    </div>
+
+                    <div class="day-row">
+                        <input type="checkbox" id="sunday" class="day-checkbox" onchange="toggleDayInputs('sunday')">
+                        <label for="sunday" class="day-label">Sunday</label>
+                        <input type="time" id="sunday-start" class="time-input" value="09:00" disabled>
+                        <span style="color: #666;">to</span>
+                        <input type="time" id="sunday-end" class="time-input" value="17:00" disabled>
+                    </div>
+
+                    <button onclick="saveAvailability()" class="save-btn">💾 Save Availability</button>
+                    <div id="availability-message" class="message-box"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // ✅ FIXED: Initialize Supabase client ONLY ONCE
+        // ✅ Initialize Supabase client ONLY ONCE
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -440,6 +593,7 @@
         let allBookings = [];
         let filteredBookings = [];
         let currentTherapistId = null;
+        let currentTherapistData = null;
 
         // Check authentication
         async function checkAuth() {
@@ -453,6 +607,7 @@
                 console.log('✅ Logged in user:', user.email);
                 await loadTherapistData();
                 await loadBookings();
+                await loadAvailability();
             } catch (err) {
                 console.error('Auth check error:', err);
                 window.location.href = 'login.html';
@@ -478,7 +633,8 @@
 
                 if (data) {
                     currentTherapistId = data.id;
-                    document.getElementById('therapist-name').textContent = data.Name || data.name || 'Therapist';
+                    currentTherapistData = data;
+                    document.getElementById('therapist-name').textContent = 'Dr. ' + (data.Name || data.name || 'Therapist');
                 }
             } catch (err) {
                 console.error('❌ Load therapist error:', err);
@@ -690,6 +846,87 @@
             displayBookings();
         }
 
+        // Toggle day inputs
+        function toggleDayInputs(day) {
+            const checkbox = document.getElementById(day);
+            const startInput = document.getElementById(`${day}-start`);
+            const endInput = document.getElementById(`${day}-end`);
+
+            startInput.disabled = !checkbox.checked;
+            endInput.disabled = !checkbox.checked;
+        }
+
+        // Load availability
+        async function loadAvailability() {
+            if (!currentTherapistData || !currentTherapistData.availability) {
+                return;
+            }
+
+            const availability = currentTherapistData.availability;
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+            days.forEach(day => {
+                if (availability[day]) {
+                    const checkbox = document.getElementById(day);
+                    const startInput = document.getElementById(`${day}-start`);
+                    const endInput = document.getElementById(`${day}-end`);
+
+                    checkbox.checked = availability[day].enabled;
+                    startInput.value = availability[day].start || '09:00';
+                    endInput.value = availability[day].end || '17:00';
+                    startInput.disabled = !availability[day].enabled;
+                    endInput.disabled = !availability[day].enabled;
+                }
+            });
+
+            console.log('✅ Availability loaded');
+        }
+
+        // Save availability
+        async function saveAvailability() {
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const availability = {};
+
+            days.forEach(day => {
+                const checkbox = document.getElementById(day);
+                const startInput = document.getElementById(`${day}-start`);
+                const endInput = document.getElementById(`${day}-end`);
+
+                availability[day] = {
+                    enabled: checkbox.checked,
+                    start: startInput.value,
+                    end: endInput.value
+                };
+            });
+
+            try {
+                const { error } = await supabaseClient
+                    .from('Therapists')
+                    .update({ availability: availability })
+                    .eq('id', currentTherapistId);
+
+                const messageBox = document.getElementById('availability-message');
+
+                if (error) {
+                    console.error('Error saving availability:', error);
+                    messageBox.className = 'message-box error';
+                    messageBox.textContent = '❌ Error saving availability: ' + error.message;
+                    return;
+                }
+
+                messageBox.className = 'message-box success';
+                messageBox.textContent = '✅ Availability saved successfully!';
+
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 3000);
+
+                console.log('✅ Availability saved:', availability);
+            } catch (err) {
+                console.error('Save availability error:', err);
+            }
+        }
+
         // Tab switching
         document.querySelectorAll('.tab-btn').forEach(button => {
             button.addEventListener('click', function() {
@@ -705,7 +942,8 @@
                     'all': 'all-bookings-content',
                     'pending': 'pending-content',
                     'confirmed': 'confirmed-content',
-                    'completed': 'completed-content'
+                    'completed': 'completed-content',
+                    'availability': 'availability-content'
                 };
 
                 const contentId = contentMap[tab];
