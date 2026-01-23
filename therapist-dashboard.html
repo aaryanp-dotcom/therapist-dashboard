@@ -695,16 +695,11 @@
     </div>
 
     <script>
-        // Initialize Supabase - DO THIS FIRST, ONLY ONCE
-               // Initialize Supabase - DO THIS FIRST, ONLY ONCE
+        // ✅ FIXED: Initialize Supabase client ONLY ONCE
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        let allBookings = [];
-
-
-
         let allBookings = [];
         let filteredBookings = [];
         let currentTherapistId = null;
@@ -712,7 +707,7 @@
         // Check authentication
         async function checkAuth() {
             try {
-                const { data: { user }, error } = await supabase.auth.getUser();
+                const { data: { user }, error } = await supabaseClient.auth.getUser();
                 if (!user || error) {
                     console.error('Not authenticated:', error);
                     window.location.href = 'login.html';
@@ -730,8 +725,8 @@
         // Load therapist data
         async function loadTherapistData() {
             try {
-                const { data: { user } } = await supabase.auth.getUser();
-                const { data, error } = await supabase
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                const { data, error } = await supabaseClient
                     .from('Therapists')
                     .select('*')
                     .eq('user_id', user.id)
@@ -763,7 +758,7 @@
 
                 console.log('Loading bookings for therapist ID:', currentTherapistId);
 
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('Bookings')
                     .select('*')
                     .eq('therapist_id', currentTherapistId)
@@ -871,322 +866,3 @@
                     ` : ''}
                     ${booking.status === 'confirmed' && booking.meeting_link ? `
                         <div class="detail-item" style="margin-top: 10px;">
-                            <span class="detail-label">Meeting Link</span>
-                            <span class="detail-value">🔗 <a href="${booking.meeting_link}" target="_blank" style="color:#667eea;">${booking.meeting_link}</a></span>
-                        </div>
-                    ` : ''}
-                </div>
-            `).join('');
-        }
-
-        // Format date
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('en-US', options);
-        }
-
-        // Confirm booking
-        async function confirmBooking(bookingId) {
-            const meetingLink = document.getElementById(`meeting-link-${bookingId}`).value.trim();
-
-            if (!meetingLink) {
-                alert('Please enter a meeting link');
-                return;
-            }
-
-            const { data, error } = await supabase
-                .from('Bookings')
-                .update({ 
-                    status: 'confirmed',
-                    meeting_link: meetingLink
-                })
-                .eq('id', bookingId);
-
-            if (error) {
-                alert('Error confirming booking: ' + error.message);
-                return;
-            }
-
-            alert('✅ Booking confirmed successfully!');
-            await loadBookings();
-        }
-
-        // Reject booking
-        async function rejectBooking(bookingId) {
-            if (!confirm('Are you sure you want to reject this booking?')) {
-                return;
-            }
-
-            const { data, error } = await supabase
-                .from('Bookings')
-                .delete()
-                .eq('id', bookingId);
-
-            if (error) {
-                alert('Error rejecting booking: ' + error.message);
-                return;
-            }
-
-            alert('✅ Booking rejected successfully!');
-            await loadBookings();
-        }
-
-        // Apply date filter
-        function applyFilter() {
-            const fromDate = document.getElementById('filter-from-date').value;
-            const toDate = document.getElementById('filter-to-date').value;
-
-            if (!fromDate || !toDate) {
-                alert('Please select both from and to dates');
-                return;
-            }
-
-            filteredBookings = allBookings.filter(booking => {
-                const bookingDate = new Date(booking.session_date);
-                return bookingDate >= new Date(fromDate) && bookingDate <= new Date(toDate);
-            });
-
-            updateStats();
-            displayBookings();
-        }
-
-        // Clear filter
-        function clearFilter() {
-            document.getElementById('filter-from-date').value = '';
-            document.getElementById('filter-to-date').value = '';
-            filteredBookings = allBookings;
-            updateStats();
-            displayBookings();
-        }
-
-        // Tab switching
-        document.querySelectorAll('.tab-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-
-                const tab = this.getAttribute('data-tab');
-                const contentMap = {
-                    'all': 'all-bookings-content',
-                    'pending': 'pending-content',
-                    'confirmed': 'confirmed-content',
-                    'completed': 'completed-content',
-                    'reschedule': 'reschedule-content',
-                    'availability': 'availability-content',
-                    'profile': 'profile-content'
-                };
-
-                const contentId = contentMap[tab];
-                if (contentId) {
-                    document.getElementById(contentId).style.display = 'block';
-                }
-
-                if (tab === 'availability') {
-                    loadAvailability();
-                } else if (tab === 'profile') {
-                    loadProfile();
-                }
-            });
-        });
-
-        // Logout
-        async function logout() {
-            await supabase.auth.signOut();
-            window.location.href = 'login.html';
-        }
-
-        // Load saved availability
-        async function loadAvailability() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const { data, error } = await supabase
-                .from('Therapists')
-                .select('availability')
-                .eq('user_id', user.id)
-                .single();
-
-            if (data && data.availability) {
-                const availability = data.availability;
-                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-                days.forEach(day => {
-                    if (availability[day]) {
-                        document.getElementById(day).checked = true;
-                        document.getElementById(`${day}-start`).value = availability[day].start;
-                        document.getElementById(`${day}-end`).value = availability[day].end;
-                        document.getElementById(`${day}-start`).disabled = false;
-                        document.getElementById(`${day}-end`).disabled = false;
-                    }
-                });
-            }
-        }
-
-        // Enable/disable time inputs
-        document.querySelectorAll('.day-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const day = this.id;
-                const startInput = document.getElementById(`${day}-start`);
-                const endInput = document.getElementById(`${day}-end`);
-
-                if (this.checked) {
-                    startInput.disabled = false;
-                    endInput.disabled = false;
-                } else {
-                    startInput.disabled = true;
-                    endInput.disabled = true;
-                }
-            });
-        });
-
-        // Initialize disabled state
-        document.querySelectorAll('.day-checkbox').forEach(checkbox => {
-            const day = checkbox.id;
-            document.getElementById(`${day}-start`).disabled = !checkbox.checked;
-            document.getElementById(`${day}-end`).disabled = !checkbox.checked;
-        });
-
-        // Save availability
-        document.getElementById('save-availability-btn').addEventListener('click', async function() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                alert('Please log in first');
-                return;
-            }
-
-            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            const availability = {};
-            let hasAtLeastOneDay = false;
-
-            days.forEach(day => {
-                const checkbox = document.getElementById(day);
-                if (checkbox.checked) {
-                    const start = document.getElementById(`${day}-start`).value;
-                    const end = document.getElementById(`${day}-end`).value;
-
-                    if (start && end) {
-                        availability[day] = { start, end };
-                        hasAtLeastOneDay = true;
-                    }
-                }
-            });
-
-            if (!hasAtLeastOneDay) {
-                showMessage('availability-message', 'Please select at least one day with time slots', 'error');
-                return;
-            }
-
-            const { data, error } = await supabase
-                .from('Therapists')
-                .update({ availability: availability })
-                .eq('user_id', user.id);
-
-            if (error) {
-                showMessage('availability-message', 'Error saving availability: ' + error.message, 'error');
-            } else {
-                showMessage('availability-message', '✅ Availability saved successfully!', 'success');
-            }
-        });
-
-        // Load profile data
-        async function loadProfile() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            const { data, error } = await supabase
-                .from('Therapists')
-                .select('*')
-                .eq('user_id', user.id)
-                .single();
-
-            if (data) {
-                document.getElementById('profile-name').value = data.Name || data.name || '';
-                document.getElementById('profile-specialization').value = data.Specialization || data.specialization || '';
-                document.getElementById('profile-bio').value = data.bio || '';
-                document.getElementById('profile-rate').value = data.hourly_rate || 500;
-                updateCharCount();
-            }
-        }
-
-        // Character counter
-        document.getElementById('profile-bio').addEventListener('input', updateCharCount);
-
-        function updateCharCount() {
-            const bio = document.getElementById('profile-bio').value;
-            const count = bio.length;
-            document.getElementById('bio-char-count').textContent = `${count}/500 characters`;
-
-            if (count > 500) {
-                document.getElementById('bio-char-count').style.color = '#dc3545';
-            } else {
-                document.getElementById('bio-char-count').style.color = '#666';
-            }
-        }
-
-        // Save profile
-        document.getElementById('profile-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                alert('Please log in first');
-                return;
-            }
-
-            const name = document.getElementById('profile-name').value.trim();
-            const specialization = document.getElementById('profile-specialization').value;
-            const bio = document.getElementById('profile-bio').value.trim();
-            const rate = parseInt(document.getElementById('profile-rate').value);
-
-            if (bio.length > 500) {
-                showMessage('profile-message', 'Bio must be less than 500 characters', 'error');
-                return;
-            }
-
-            if (rate < 0) {
-                showMessage('profile-message', 'Hourly rate must be a positive number', 'error');
-                return;
-            }
-
-            const { data, error } = await supabase
-                .from('Therapists')
-                .update({
-                    Name: name,
-                    Specialization: specialization,
-                    bio: bio,
-                    hourly_rate: rate
-                })
-                .eq('user_id', user.id);
-
-            if (error) {
-                showMessage('profile-message', 'Error updating profile: ' + error.message, 'error');
-            } else {
-                showMessage('profile-message', '✅ Profile updated successfully!', 'success');
-                document.getElementById('therapist-name').textContent = name;
-            }
-        });
-
-        // Helper function to show messages
-        function showMessage(elementId, message, type) {
-            const messageBox = document.getElementById(elementId);
-            messageBox.textContent = message;
-            messageBox.className = `message-box ${type}`;
-            messageBox.style.display = 'block';
-
-            setTimeout(() => {
-                messageBox.style.display = 'none';
-            }, 5000);
-        }
-
-        // Initialize on page load
-        window.addEventListener('load', function() {
-            checkAuth();
-        });
-    </script>
-</body>
-</html>
