@@ -347,8 +347,8 @@
             margin-bottom: 10px;
         }
 
-        /* Availability Management Styles */
-        .availability-container {
+        /* Availability & Profile Styles */
+        .availability-container, .profile-container {
             max-width: 800px;
         }
 
@@ -426,6 +426,37 @@
             display: block;
         }
 
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
         @media (max-width: 768px) {
             .stats-container {
                 grid-template-columns: repeat(2, 1fr);
@@ -496,7 +527,8 @@
             <button class="tab-btn" data-tab="pending">Pending</button>
             <button class="tab-btn" data-tab="confirmed">Confirmed</button>
             <button class="tab-btn" data-tab="completed">Completed</button>
-            <button class="tab-btn" data-tab="availability">⏰ My Availability</button>
+            <button class="tab-btn" data-tab="availability">⏰ Availability</button>
+            <button class="tab-btn" data-tab="profile">👤 My Profile</button>
         </div>
 
         <div id="all-bookings-content" class="tab-content" style="display: block;">
@@ -582,6 +614,48 @@
                 </div>
             </div>
         </div>
+
+        <div id="profile-content" class="tab-content">
+            <div class="profile-container">
+                <h3>👤 Edit Your Profile</h3>
+                <p style="color: #666; margin-bottom: 20px;">Update your professional information</p>
+
+                <form id="profile-form" class="profile-form" onsubmit="saveProfile(event)">
+                    <div class="form-group">
+                        <label for="profile-name">Full Name</label>
+                        <input type="text" id="profile-name" class="form-input" placeholder="Dr. John Doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-specialization">Specialization</label>
+                        <select id="profile-specialization" class="form-select" required>
+                            <option value="">Select Specialization</option>
+                            <option value="Anxiety">Anxiety</option>
+                            <option value="Depression">Depression</option>
+                            <option value="Career Stress">Career Stress</option>
+                            <option value="Relationship Issues">Relationship Issues</option>
+                            <option value="Trauma">Trauma</option>
+                            <option value="Addiction">Addiction</option>
+                            <option value="Child Psychology">Child Psychology</option>
+                            <option value="Family Therapy">Family Therapy</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-bio">Bio</label>
+                        <textarea id="profile-bio" class="form-textarea" rows="5" placeholder="Tell patients about your experience, qualifications, and approach to therapy..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profile-rate">Hourly Rate (₹)</label>
+                        <input type="number" id="profile-rate" class="form-input" placeholder="500" min="0">
+                    </div>
+
+                    <button type="submit" class="save-btn">💾 Update Profile</button>
+                    <div id="profile-message" class="message-box"></div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -594,6 +668,7 @@
         let filteredBookings = [];
         let currentTherapistId = null;
         let currentTherapistData = null;
+        let isLoggingOut = false; // Prevent infinite loop
 
         // Check authentication
         async function checkAuth() {
@@ -608,6 +683,7 @@
                 await loadTherapistData();
                 await loadBookings();
                 await loadAvailability();
+                await loadProfile();
             } catch (err) {
                 console.error('Auth check error:', err);
                 window.location.href = 'login.html';
@@ -927,6 +1003,68 @@
             }
         }
 
+        // Load profile
+        async function loadProfile() {
+            if (!currentTherapistData) return;
+
+            document.getElementById('profile-name').value = currentTherapistData.Name || '';
+            document.getElementById('profile-specialization').value = currentTherapistData.Specialization || '';
+            document.getElementById('profile-bio').value = currentTherapistData.bio || '';
+            document.getElementById('profile-rate').value = currentTherapistData.hourly_rate || '';
+
+            console.log('✅ Profile loaded');
+        }
+
+        // Save profile
+        async function saveProfile(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('profile-name').value.trim();
+            const specialization = document.getElementById('profile-specialization').value;
+            const bio = document.getElementById('profile-bio').value.trim();
+            const hourlyRate = document.getElementById('profile-rate').value;
+
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('Therapists')
+                    .update({
+                        Name: name,
+                        Specialization: specialization,
+                        bio: bio,
+                        hourly_rate: hourlyRate ? parseInt(hourlyRate) : null
+                    })
+                    .eq('id', currentTherapistId);
+
+                const messageBox = document.getElementById('profile-message');
+
+                if (error) {
+                    console.error('Error saving profile:', error);
+                    messageBox.className = 'message-box error';
+                    messageBox.textContent = '❌ Error saving profile: ' + error.message;
+                    return;
+                }
+
+                messageBox.className = 'message-box success';
+                messageBox.textContent = '✅ Profile updated successfully!';
+
+                // Update header name
+                document.getElementById('therapist-name').textContent = 'Dr. ' + name;
+
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 3000);
+
+                console.log('✅ Profile saved');
+            } catch (err) {
+                console.error('Save profile error:', err);
+            }
+        }
+
         // Tab switching
         document.querySelectorAll('.tab-btn').forEach(button => {
             button.addEventListener('click', function() {
@@ -943,7 +1081,8 @@
                     'pending': 'pending-content',
                     'confirmed': 'confirmed-content',
                     'completed': 'completed-content',
-                    'availability': 'availability-content'
+                    'availability': 'availability-content',
+                    'profile': 'profile-content'
                 };
 
                 const contentId = contentMap[tab];
@@ -953,10 +1092,24 @@
             });
         });
 
-        // Logout
+        // ✅ FIXED: Logout with infinite loop prevention
         async function handleLogout() {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'login.html';
+            if (isLoggingOut) {
+                return; // Prevent multiple logout calls
+            }
+
+            isLoggingOut = true;
+            console.log('🚪 Logging out...');
+
+            try {
+                await supabaseClient.auth.signOut();
+                console.log('✅ Logged out successfully');
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('❌ Logout error:', error);
+                isLoggingOut = false;
+                window.location.href = 'login.html';
+            }
         }
 
         // Initialize on page load
