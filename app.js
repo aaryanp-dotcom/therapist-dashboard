@@ -1,7 +1,13 @@
 // Supabase Configuration
-var supabaseUrl = "https://hviqxpfnvjsqbdjfbttm.supabase.co";
-var supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs";
-var client = supabase.createClient(supabaseUrl, supabaseKey);
+const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
+
+// Create Supabase client
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Make it available as both 'supabaseClient' and 'supabase' for compatibility
+window.supabase = supabaseClient;
+window.supabaseClient = supabaseClient;
 
 // Check authentication and load dashboard
 function loadDashboard() {
