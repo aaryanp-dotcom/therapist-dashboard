@@ -805,7 +805,7 @@
                 if (error) throw error;
 
                 // Send confirmation email to user
-                emailjs.send('service_95x3tyn', 'v8mj7vx', {
+                emailjs.send('service_95x3tyn', 'template_r4ar0cm', {
                     email: currentUser.email,
                     patient_name: currentUser.full_name,
                     therapist_name: 'Dr. ' + currentBookingTherapist.Name,
@@ -825,7 +825,7 @@
 
                 // Send notification to therapist (only if email exists)
                 if (currentBookingTherapist.email) {
-                    emailjs.send('service_95x3tyn', 'uav35f9', {
+                    emailjs.send('service_95x3tyn', 'template_i30rzbb', {
                         email: currentBookingTherapist.email,
                         therapist_name: 'Dr. ' + currentBookingTherapist.Name,
                         patient_name: currentUser.full_name,
