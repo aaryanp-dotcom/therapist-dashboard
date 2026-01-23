@@ -1,9 +1,11 @@
+
+therapist-dashboard-FIXED.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Therapist Dashboard - Therapist Connect</title>
+    <title>Therapist Dashboard</title>
 
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -31,6 +33,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .dashboard-header h1 {
@@ -108,9 +111,6 @@
         .filter-section h3 {
             color: #667eea;
             margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .filter-inputs {
@@ -225,12 +225,10 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
         .booking-patient {
-            display: flex;
-            align-items: center;
-            gap: 8px;
             font-size: 16px;
             font-weight: 600;
             color: #333;
@@ -263,9 +261,6 @@
             color: #667eea;
             font-weight: 600;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .booking-details {
@@ -291,9 +286,6 @@
         .detail-value {
             font-size: 14px;
             color: #333;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .booking-actions {
@@ -356,132 +348,6 @@
             margin-bottom: 10px;
         }
 
-        .availability-container, .profile-container {
-            max-width: 800px;
-        }
-
-        .availability-form, .profile-form {
-            margin-top: 20px;
-        }
-
-        .day-row {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            gap: 15px;
-        }
-
-        .day-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .day-label {
-            min-width: 100px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .time-input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            width: 120px;
-        }
-
-        .time-input:disabled {
-            background: #e9ecef;
-            cursor: not-allowed;
-        }
-
-        .day-row span {
-            color: #666;
-            font-weight: 500;
-        }
-
-        .save-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background 0.3s;
-        }
-
-        .save-btn:hover {
-            background: #45a049;
-        }
-
-        .message-box {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 6px;
-            display: none;
-            font-weight: 500;
-        }
-
-        .message-box.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: block;
-        }
-
-        .message-box.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-input, .form-textarea, .form-select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
-
-        .form-input:focus, .form-textarea:focus, .form-select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .char-count {
-            display: block;
-            text-align: right;
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
         @media (max-width: 768px) {
             .stats-container {
                 grid-template-columns: repeat(2, 1fr);
@@ -492,17 +358,8 @@
                 align-items: stretch;
             }
 
-            .tabs {
-                overflow-x: auto;
-            }
-
             .booking-details {
                 grid-template-columns: 1fr;
-            }
-
-            .day-row {
-                flex-wrap: wrap;
-                gap: 10px;
             }
         }
     </style>
@@ -513,7 +370,7 @@
             <h1>🩺 Therapist Dashboard</h1>
             <h2 id="therapist-name">Dr. Aaryan Parashar</h2>
         </div>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <button class="logout-btn" onclick="handleLogout()">Logout</button>
     </div>
 
     <div class="stats-container">
@@ -557,9 +414,6 @@
             <button class="tab-btn" data-tab="pending">Pending</button>
             <button class="tab-btn" data-tab="confirmed">Confirmed</button>
             <button class="tab-btn" data-tab="completed">Completed</button>
-            <button class="tab-btn" data-tab="reschedule">Reschedule Requests</button>
-            <button class="tab-btn" data-tab="availability">My Availability</button>
-            <button class="tab-btn" data-tab="profile">My Profile</button>
         </div>
 
         <div id="all-bookings-content" class="tab-content" style="display: block;">
@@ -577,121 +431,6 @@
         <div id="completed-content" class="tab-content">
             <div id="completed-bookings-list"></div>
         </div>
-
-        <div id="reschedule-content" class="tab-content">
-            <div id="reschedule-bookings-list"></div>
-        </div>
-
-        <div id="availability-content" class="tab-content">
-            <div class="availability-container">
-                <h3>⏰ Set Your Weekly Availability</h3>
-                <p style="color: #666; margin-bottom: 20px;">Define your working hours for each day of the week</p>
-
-                <div class="availability-form">
-                    <div class="day-row">
-                        <input type="checkbox" id="monday" class="day-checkbox">
-                        <label for="monday" class="day-label">Monday</label>
-                        <input type="time" id="monday-start" class="time-input" value="09:00">
-                        <span>to</span>
-                        <input type="time" id="monday-end" class="time-input" value="17:00">
-                    </div>
-
-                    <div class="day-row">
-                        <input type="checkbox" id="tuesday" class="day-checkbox">
-                        <label for="tuesday" class="day-label">Tuesday</label>
-                        <input type="time" id="tuesday-start" class="time-input" value="09:00">
-                        <span>to</span>
-                        <input type="time" id="tuesday-end" class="time-input" value="17:00">
-                    </div>
-
-                    <div class="day-row">
-                        <input type="checkbox" id="wednesday" class="day-checkbox">
-                        <label for="wednesday" class="day-label">Wednesday</label>
-                        <input type="time" id="wednesday-start" class="time-input" value="09:00">
-                        <span>to</span>
-                        <input type="time" id="wednesday-end" class="time-input" value="17:00">
-                    </div>
-
-                    <div class="day-row">
-                        <input type="checkbox" id="thursday" class="day-checkbox">
-                        <label for="thursday" class="day-label">Thursday</label>
-                        <input type="time" id="thursday-start" class="time-input" value="09:00">
-                        <span>to</span>
-                        <input type="time" id="thursday-end" class="time-input" value="17:00">
-                    </div>
-
-                    <div class="day-row">
-                        <input type="checkbox" id="friday" class="day-checkbox">
-                        <label for="friday" class="day-label">Friday</label>
-                        <input type="time" id="friday-start" class="time-input" value="09:00">
-                        <span>to</span>
-                        <input type="time" id="friday-end" class="time-input" value="17:00">
-                    </div>
-
-                    <div class="day-row">
-                        <input type="checkbox" id="saturday" class="day-checkbox">
-                        <label for="saturday" class="day-label">Saturday</label>
-                        <input type="time" id="saturday-start" class="time-input" value="09:00">
-                        <span>to</span>
-                        <input type="time" id="saturday-end" class="time-input" value="17:00">
-                    </div>
-
-                    <div class="day-row">
-                        <input type="checkbox" id="sunday" class="day-checkbox">
-                        <label for="sunday" class="day-label">Sunday</label>
-                        <input type="time" id="sunday-start" class="time-input" value="09:00">
-                        <span>to</span>
-                        <input type="time" id="sunday-end" class="time-input" value="17:00">
-                    </div>
-
-                    <button id="save-availability-btn" class="save-btn">💾 Save Availability</button>
-                    <div id="availability-message" class="message-box"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="profile-content" class="tab-content">
-            <div class="profile-container">
-                <h3>👤 Edit Your Profile</h3>
-                <p style="color: #666; margin-bottom: 20px;">Update your professional information</p>
-
-                <form id="profile-form" class="profile-form">
-                    <div class="form-group">
-                        <label for="profile-name">Full Name</label>
-                        <input type="text" id="profile-name" class="form-input" placeholder="Dr. John Doe" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="profile-specialization">Specialization</label>
-                        <select id="profile-specialization" class="form-select" required>
-                            <option value="">Select Specialization</option>
-                            <option value="Anxiety">Anxiety</option>
-                            <option value="Depression">Depression</option>
-                            <option value="Career Stress">Career Stress</option>
-                            <option value="Relationship Issues">Relationship Issues</option>
-                            <option value="Trauma">Trauma</option>
-                            <option value="Addiction">Addiction</option>
-                            <option value="Child Psychology">Child Psychology</option>
-                            <option value="Family Therapy">Family Therapy</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="profile-bio">Bio</label>
-                        <textarea id="profile-bio" class="form-textarea" rows="5" placeholder="Tell patients about your experience, qualifications, and approach to therapy..." required></textarea>
-                        <span class="char-count" id="bio-char-count">0/500 characters</span>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="profile-rate">Hourly Rate (₹)</label>
-                        <input type="number" id="profile-rate" class="form-input" placeholder="500" min="0" required>
-                    </div>
-
-                    <button type="submit" id="save-profile-btn" class="save-btn">💾 Update Profile</button>
-                    <div id="profile-message" class="message-box"></div>
-                </form>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -699,7 +438,7 @@
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
+
         let allBookings = [];
         let filteredBookings = [];
         let currentTherapistId = null;
@@ -713,7 +452,7 @@
                     window.location.href = 'login.html';
                     return;
                 }
-                console.log('Logged in user:', user.email);
+                console.log('✅ Logged in user:', user.email);
                 await loadTherapistData();
                 await loadBookings();
             } catch (err) {
@@ -732,10 +471,10 @@
                     .eq('user_id', user.id)
                     .single();
 
-                console.log('Therapist data:', data);
+                console.log('✅ Therapist data:', data);
 
                 if (error) {
-                    console.error('Error loading therapist:', error);
+                    console.error('❌ Error loading therapist:', error);
                     return;
                 }
 
@@ -744,7 +483,7 @@
                     document.getElementById('therapist-name').textContent = data.Name || data.name || 'Therapist';
                 }
             } catch (err) {
-                console.error('Load therapist error:', err);
+                console.error('❌ Load therapist error:', err);
             }
         }
 
@@ -752,11 +491,11 @@
         async function loadBookings() {
             try {
                 if (!currentTherapistId) {
-                    console.error('No therapist ID found');
+                    console.error('❌ No therapist ID found');
                     return;
                 }
 
-                console.log('Loading bookings for therapist ID:', currentTherapistId);
+                console.log('🔍 Loading bookings for therapist ID:', currentTherapistId);
 
                 const { data, error } = await supabaseClient
                     .from('Bookings')
@@ -764,11 +503,11 @@
                     .eq('therapist_id', currentTherapistId)
                     .order('created_at', { ascending: false });
 
-                console.log('Bookings data:', data);
-                console.log('Bookings error:', error);
+                console.log('✅ Bookings data:', data);
+                console.log('✅ Bookings count:', data ? data.length : 0);
 
                 if (error) {
-                    console.error('Error loading bookings:', error);
+                    console.error('❌ Error loading bookings:', error);
                     return;
                 }
 
@@ -777,7 +516,7 @@
                 updateStats();
                 displayBookings();
             } catch (err) {
-                console.error('Load bookings error:', err);
+                console.error('❌ Load bookings error:', err);
             }
         }
 
@@ -792,6 +531,8 @@
             document.getElementById('pending-bookings').textContent = pending;
             document.getElementById('confirmed-bookings').textContent = confirmed;
             document.getElementById('completed-bookings').textContent = completed;
+
+            console.log('📊 Stats updated - Total:', total, 'Pending:', pending, 'Confirmed:', confirmed, 'Completed:', completed);
         }
 
         // Display bookings
@@ -800,7 +541,6 @@
             displayBookingsByStatus('pending', 'pending-bookings-list');
             displayBookingsByStatus('confirmed', 'confirmed-bookings-list');
             displayBookingsByStatus('completed', 'completed-bookings-list');
-            displayBookingsByStatus('reschedule', 'reschedule-bookings-list');
         }
 
         // Display bookings by status
@@ -808,9 +548,7 @@
             const container = document.getElementById(containerId);
             let bookings = filteredBookings;
 
-            if (status === 'reschedule') {
-                bookings = filteredBookings.filter(b => b.reschedule_requested === true);
-            } else if (status !== 'all') {
+            if (status !== 'all') {
                 bookings = filteredBookings.filter(b => b.status === status);
             }
 
@@ -829,7 +567,7 @@
                 <div class="booking-card ${booking.status}">
                     <div class="booking-header">
                         <div class="booking-patient">
-                            👤 ${booking.patient_name || booking.user_name || 'Patient'}
+                            👤 ${booking.patient_name || 'Patient ID: ' + (booking.user_id ? booking.user_id.substring(0, 8) : 'Unknown')}
                         </div>
                         <span class="booking-status status-${booking.status}">${booking.status}</span>
                     </div>
@@ -837,18 +575,17 @@
                     <div class="booking-details">
                         <div class="detail-item">
                             <span class="detail-label">Time Slot</span>
-                            <span class="detail-value">🕐 ${booking.start_time} - ${booking.end_time || 'N/A'}</span>
+                            <span class="detail-value">🕐 ${booking.start_time || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Patient Email</span>
-                            <span class="detail-value">📧 ${booking.patient_email || booking.user_email || 'N/A'}</span>
+                            <span class="detail-value">📧 ${booking.patient_email || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Booking ID</span>
                             <span class="detail-value">#${booking.id ? booking.id.substring(0, 8) : 'N/A'}</span>
                         </div>
                     </div>
-                    ${booking.notes ? `<div style="margin-top:10px; color:#666;"><strong>Notes:</strong> ${booking.notes}</div>` : ''}
                     ${booking.status === 'pending' ? `
                         <div class="booking-actions">
                             <input type="text" 
@@ -866,3 +603,131 @@
                     ` : ''}
                     ${booking.status === 'confirmed' && booking.meeting_link ? `
                         <div class="detail-item" style="margin-top: 10px;">
+                            <span class="detail-label">Meeting Link</span>
+                            <span class="detail-value">🔗 <a href="${booking.meeting_link}" target="_blank" style="color:#667eea;">${booking.meeting_link}</a></span>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Confirm booking
+        async function confirmBooking(bookingId) {
+            const meetingLink = document.getElementById(`meeting-link-${bookingId}`).value.trim();
+
+            if (!meetingLink) {
+                alert('Please enter a meeting link');
+                return;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('Bookings')
+                .update({ 
+                    status: 'confirmed',
+                    meeting_link: meetingLink
+                })
+                .eq('id', bookingId);
+
+            if (error) {
+                alert('Error confirming booking: ' + error.message);
+                return;
+            }
+
+            alert('✅ Booking confirmed successfully!');
+            await loadBookings();
+        }
+
+        // Reject booking
+        async function rejectBooking(bookingId) {
+            if (!confirm('Are you sure you want to reject this booking?')) {
+                return;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('Bookings')
+                .delete()
+                .eq('id', bookingId);
+
+            if (error) {
+                alert('Error rejecting booking: ' + error.message);
+                return;
+            }
+
+            alert('✅ Booking rejected successfully!');
+            await loadBookings();
+        }
+
+        // Apply date filter
+        function applyFilter() {
+            const fromDate = document.getElementById('filter-from-date').value;
+            const toDate = document.getElementById('filter-to-date').value;
+
+            if (!fromDate || !toDate) {
+                alert('Please select both from and to dates');
+                return;
+            }
+
+            filteredBookings = allBookings.filter(booking => {
+                const bookingDate = new Date(booking.session_date);
+                return bookingDate >= new Date(fromDate) && bookingDate <= new Date(toDate);
+            });
+
+            updateStats();
+            displayBookings();
+        }
+
+        // Clear filter
+        function clearFilter() {
+            document.getElementById('filter-from-date').value = '';
+            document.getElementById('filter-to-date').value = '';
+            filteredBookings = allBookings;
+            updateStats();
+            displayBookings();
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+
+                const tab = this.getAttribute('data-tab');
+                const contentMap = {
+                    'all': 'all-bookings-content',
+                    'pending': 'pending-content',
+                    'confirmed': 'confirmed-content',
+                    'completed': 'completed-content'
+                };
+
+                const contentId = contentMap[tab];
+                if (contentId) {
+                    document.getElementById(contentId).style.display = 'block';
+                }
+            });
+        });
+
+        // Logout
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'login.html';
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            console.log('🚀 Dashboard initializing...');
+            checkAuth();
+        });
+    </script>
+</body>
+</html>
