@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Therapist Dashboard</title>
-
+    
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    
     <style>
         * {
             margin: 0;
@@ -432,10 +432,15 @@
     </div>
 
     <script>
-        // Initialize Supabase - ONE TIME ONLY
-        const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Initialize Supabase - avoid duplicate declaration
+        var supabaseClient;
+        if (typeof supabase !== 'undefined') {
+            supabaseClient = supabase;
+        } else {
+            const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
 
         let allBookings = [];
         let filteredBookings = [];
@@ -444,7 +449,7 @@
         // Check authentication
         async function checkAuth() {
             try {
-                const { data: { user }, error } = await supabase.auth.getUser();
+                const { data: { user }, error } = await supabaseClient.auth.getUser();
                 if (!user || error) {
                     console.error('Not authenticated:', error);
                     window.location.href = 'login.html';
@@ -462,8 +467,8 @@
         // Load therapist data
         async function loadTherapistData() {
             try {
-                const { data: { user } } = await supabase.auth.getUser();
-                const { data, error } = await supabase
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                const { data, error} = await supabaseClient
                     .from('Therapists')
                     .select('*')
                     .eq('user_id', user.id)
@@ -492,10 +497,10 @@
                     console.error('❌ No therapist ID found');
                     return;
                 }
-
+                
                 console.log('🔍 Loading bookings for therapist ID:', currentTherapistId);
-
-                const { data, error } = await supabase
+                
+                const { data, error } = await supabaseClient
                     .from('Bookings')
                     .select('*')
                     .eq('therapist_id', currentTherapistId)
@@ -619,13 +624,13 @@
         // Confirm booking
         async function confirmBooking(bookingId) {
             const meetingLink = document.getElementById(`meeting-link-${bookingId}`).value.trim();
-
+            
             if (!meetingLink) {
                 alert('Please enter a meeting link');
                 return;
             }
 
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('Bookings')
                 .update({ 
                     status: 'confirmed',
@@ -648,7 +653,7 @@
                 return;
             }
 
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('Bookings')
                 .delete()
                 .eq('id', bookingId);
@@ -717,7 +722,7 @@
 
         // Logout
         async function handleLogout() {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.href = 'login.html';
         }
 
