@@ -520,19 +520,19 @@
 
     <div class="stats-container">
         <div class="stat-card">
-            <div class="stat-number" id="total-bookings">14</div>
+            <div class="stat-number" id="total-bookings">0</div>
             <div class="stat-label">Total Bookings</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number" id="pending-bookings">9</div>
+            <div class="stat-number" id="pending-bookings">0</div>
             <div class="stat-label">Pending</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number" id="confirmed-bookings">3</div>
+            <div class="stat-number" id="confirmed-bookings">0</div>
             <div class="stat-label">Confirmed</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number" id="completed-bookings">1</div>
+            <div class="stat-number" id="completed-bookings">0</div>
             <div class="stat-label">Completed</div>
         </div>
     </div>
@@ -703,10 +703,10 @@
         let allBookings = [];
         let filteredBookings = [];
 
-        // Check authentication
+        // Check authentication - FIXED FOR SUPABASE V2
         async function checkAuth() {
-            const user = supabase.auth.user();
-            if (!user) {
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (!user || error) {
                 window.location.href = 'login.html';
                 return;
             }
@@ -714,9 +714,9 @@
             loadBookings();
         }
 
-        // Load therapist data
+        // Load therapist data - FIXED
         async function loadTherapistData() {
-            const user = supabase.auth.user();
+            const { data: { user } } = await supabase.auth.getUser();
             const { data, error } = await supabase
                 .from('Therapists')
                 .select('name')
@@ -728,17 +728,33 @@
             }
         }
 
-        // Load all bookings
+        // Load all bookings - FIXED
         async function loadBookings() {
-            const user = supabase.auth.user();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            // First, get the therapist's ID from the Therapists table
+            const { data: therapistData, error: therapistError } = await supabase
+                .from('Therapists')
+                .select('id, name')
+                .eq('user_id', user.id)
+                .single();
+
+            if (therapistError || !therapistData) {
+                console.error('Error loading therapist:', therapistError);
+                return;
+            }
+
+            console.log('Therapist data:', therapistData);
+
+            // Now get bookings using the therapist's ID
             const { data, error } = await supabase
                 .from('Bookings')
-                .select(`
-                    *,
-                    Therapists (name)
-                `)
-                .eq('therapist_id', user.id)
+                .select('*')
+                .eq('therapist_id', therapistData.id)
                 .order('booking_date', { ascending: true });
+
+            console.log('Bookings data:', data);
+            console.log('Bookings error:', error);
 
             if (error) {
                 console.error('Error loading bookings:', error);
@@ -960,17 +976,17 @@
             });
         });
 
-        // Logout
+        // Logout - FIXED
         async function logout() {
             await supabase.auth.signOut();
-            window.location.href = 'login.html';
+            window.location.href = './login.html';
         }
 
         // ========== MY AVAILABILITY TAB ==========
 
-        // Load saved availability
+        // Load saved availability - FIXED
         async function loadAvailability() {
-            const user = supabase.auth.user();
+            const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
             const { data, error } = await supabase
@@ -1019,9 +1035,9 @@
             document.getElementById(`${day}-end`).disabled = !checkbox.checked;
         });
 
-        // Save availability
+        // Save availability - FIXED
         document.getElementById('save-availability-btn').addEventListener('click', async function() {
-            const user = supabase.auth.user();
+            const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 alert('Please log in first');
                 return;
@@ -1063,9 +1079,9 @@
 
         // ========== MY PROFILE TAB ==========
 
-        // Load profile data
+        // Load profile data - FIXED
         async function loadProfile() {
-            const user = supabase.auth.user();
+            const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
             const { data, error } = await supabase
@@ -1098,11 +1114,11 @@
             }
         }
 
-        // Save profile
+        // Save profile - FIXED
         document.getElementById('profile-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const user = supabase.auth.user();
+            const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 alert('Please log in first');
                 return;
