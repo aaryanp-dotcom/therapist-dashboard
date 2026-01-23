@@ -1,11 +1,15 @@
+
+user-dashboard-UPDATED.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
+    <title>User Dashboard - Therapist Booking</title>
+
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -20,215 +24,154 @@
             padding: 20px;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .header {
+        .dashboard-header {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
         }
 
-        .header h1 {
+        .dashboard-header h1 {
             color: #667eea;
-            font-size: 28px;
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .user-name {
-            color: #333;
-            font-weight: 600;
-        }
-
-        .btn {
-            padding: 10px 20px;
+        .logout-btn {
+            background: #dc3545;
+            color: white;
             border: none;
+            padding: 10px 20px;
             border-radius: 8px;
-            cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-logout {
-            background: #f44336;
-            color: white;
-        }
-
-        .btn-logout:hover {
-            background: #d32f2f;
+            cursor: pointer;
         }
 
         .main-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-        }
-
-        .therapists-section {
             background: white;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-        }
-
-        .bookings-section {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
 
         .section-title {
             color: #667eea;
-            font-size: 22px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
+            font-size: 24px;
+            border-bottom: 2px solid #667eea;
             padding-bottom: 10px;
         }
 
-        .search-filter {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .filter-select {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
         .therapist-card {
-            background: #f9f9f9;
+            border: 1px solid #ddd;
             padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-            cursor: pointer;
-            transition: all 0.3s;
+            margin: 15px 0;
+            border-radius: 8px;
+            background: #f9f9f9;
         }
 
-        .therapist-card:hover {
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-
-        .therapist-name {
-            font-size: 18px;
-            font-weight: bold;
+        .therapist-card h3 {
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
-        .therapist-specialization {
-            color: #667eea;
+        .booking-form {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
             font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .therapist-rating {
-            color: #FFD700;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .therapist-bio {
-            color: #666;
+            color: #555;
             font-size: 14px;
-            line-height: 1.5;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .book-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .book-btn:hover {
+            background: #45a049;
         }
 
         .booking-card {
-            background: #f9f9f9;
+            border: 1px solid #ddd;
             padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #f9f9f9;
         }
 
-        .booking-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .booking-therapist {
-            font-weight: bold;
-            color: #333;
-        }
-
-        .booking-date {
+        .booking-card strong {
             color: #667eea;
+            font-size: 16px;
+        }
+
+        .cancel-btn {
+            background: #f44336;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
             font-size: 14px;
         }
 
-        .booking-time {
-            color: #666;
-            font-size: 13px;
-            margin-bottom: 10px;
-        }
-
-        .booking-link {
-            margin-top: 8px;
-            padding: 8px;
-            background: #e3f2fd;
-            border-radius: 6px;
-        }
-
-        .booking-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .booking-link a:hover {
-            text-decoration: underline;
-        }
-
-        .reschedule-badge {
-            background: #fff3cd;
-            color: #856404;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            margin-top: 10px;
+        .cancel-btn:hover {
+            background: #da190b;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
+            padding: 4px 12px;
+            border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
+            text-transform: uppercase;
         }
 
         .status-pending {
@@ -241,944 +184,285 @@
             color: #155724;
         }
 
-        .status-completed {
-            background: #d1ecf1;
-            color: #0c5460;
+        .required {
+            color: red;
         }
 
-        .status-cancelled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .btn-cancel {
-            background: #f44336;
-            color: white;
-            padding: 8px 15px;
-            font-size: 13px;
-        }
-
-        .btn-cancel:hover {
-            background: #d32f2f;
-        }
-
-        .btn-reschedule {
-            background: #ff9800;
-            color: white;
-            padding: 8px 15px;
-            font-size: 13px;
-            margin-left: 8px;
-        }
-
-        .btn-reschedule:hover {
-            background: #e68900;
-        }
-
-        .btn-review {
-            background: #FFD700;
-            color: #333;
-            padding: 8px 15px;
-            font-size: 13px;
-            margin-left: 8px;
-        }
-
-        .btn-review:hover {
-            background: #FFC700;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            color: #667eea;
-            font-size: 22px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #666;
-            font-weight: 600;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-
-        .btn-secondary {
-            background: #999;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #777;
-        }
-
-        .star-rating {
-            font-size: 40px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .star-rating span {
-            transition: all 0.2s;
-        }
-
-        .star-rating span:hover {
-            transform: scale(1.1);
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-weight: 500;
-            display: none;
-        }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            display: block;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            display: block;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #999;
-        }
-
-        .reviewed-badge {
-            display: inline-block;
-            background: #d4edda;
-            color: #155724;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            margin-top: 8px;
-        }
-
-        @media (max-width: 968px) {
-            .main-content {
+        @media (max-width: 768px) {
+            .form-row {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div>
-                <h1>👤 User Dashboard</h1>
-                <p class="user-name" id="userName">Loading...</p>
-            </div>
-            <div class="user-info">
-                <button class="btn btn-logout" id="logoutBtn">Logout</button>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="therapists-section">
-                <div id="messageBox" class="message"></div>
-                
-                <h2 class="section-title">🔍 Find a Therapist</h2>
-                
-                <div class="search-filter">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search by name or specialization...">
-                    <select id="specializationFilter" class="filter-select">
-                        <option value="">All Specializations</option>
-                    </select>
-                </div>
-                
-                <div id="therapistsList"></div>
-            </div>
-
-            <div class="bookings-section">
-                <h2 class="section-title">📅 My Bookings</h2>
-                <div id="bookingsList"></div>
-            </div>
-        </div>
+    <div class="dashboard-header">
+        <h1>👤 Patient Dashboard</h1>
+        <button class="logout-btn" onclick="handleLogout()">Logout</button>
     </div>
 
-    <div id="bookingModal" class="modal">
-        <div class="modal-content">
-            <h2 class="modal-header">Book a Session</h2>
-            
-            <div class="form-group">
-                <label>Therapist:</label>
-                <input type="text" id="modalTherapistName" readonly>
-            </div>
-            
-            <div class="form-group">
-                <label>Session Date:</label>
-                <input type="date" id="sessionDate" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Start Time:</label>
-                <select id="startTime" required>
-                    <option value="">Select start time</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Notes (Optional):</label>
-                <textarea id="bookingNotes" placeholder="Any specific concerns or requests..."></textarea>
-            </div>
-            
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeBookingModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="submitBooking()">Book Session</button>
-            </div>
-        </div>
+    <div class="main-content">
+        <h2 class="section-title">📋 Available Therapists</h2>
+        <div id="therapist-list">Loading therapists...</div>
     </div>
 
-    <div id="rescheduleModal" class="modal">
-        <div class="modal-content">
-            <h2 class="modal-header">🔄 Reschedule Session</h2>
-            
-            <div class="form-group">
-                <label>New Session Date:</label>
-                <input type="date" id="rescheduleDate" required>
-            </div>
-            
-            <div class="form-group">
-                <label>New Start Time:</label>
-                <select id="rescheduleStartTime" required>
-                    <option value="">Select start time</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Reason for Rescheduling (Optional):</label>
-                <textarea id="rescheduleReason" placeholder="Why do you need to reschedule?"></textarea>
-            </div>
-            
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeRescheduleModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="submitReschedule()">Request Reschedule</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="reviewModal" class="modal">
-        <div class="modal-content">
-            <h2 class="modal-header">⭐ Rate Your Session</h2>
-            
-            <div class="form-group">
-                <label>Therapist:</label>
-                <p id="reviewTherapistName" style="font-weight: bold; color: #333;"></p>
-            </div>
-            
-            <div class="form-group">
-                <label>Rating:</label>
-                <div id="starRating" class="star-rating">
-                    <span data-rating="1">☆</span>
-                    <span data-rating="2">☆</span>
-                    <span data-rating="3">☆</span>
-                    <span data-rating="4">☆</span>
-                    <span data-rating="5">☆</span>
-                </div>
-                <input type="hidden" id="selectedRating" value="0">
-            </div>
-            
-            <div class="form-group">
-                <label>Your Review (Optional):</label>
-                <textarea id="reviewText" placeholder="Share your experience..."></textarea>
-            </div>
-            
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeReviewModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="submitReview()">Submit Review</button>
-            </div>
-        </div>
+    <div class="main-content">
+        <h2 class="section-title">🗓️ My Bookings</h2>
+        <div id="booking-list">Loading bookings...</div>
     </div>
 
     <script>
+        // Initialize Supabase
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentUser = null;
-        let allTherapists = [];
-        let allBookings = [];
-        let currentBookingTherapist = null;
-        let currentReviewBooking = null;
-        let currentRescheduleBooking = null;
+        let currentUserId = null;
+        let currentUserEmail = null;
 
-        async function init() {
-            const user = JSON.parse(localStorage.getItem('user'));
-            
-            if (!user || user.role !== 'user') {
-                alert('Access denied. User role required.');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            currentUser = user;
-            document.getElementById('userName').textContent = 'Welcome, ' + user.full_name;
-            
-            // Initialize EmailJS
-            emailjs.init('SuVKfTpN99-jG7y9L');
-            
-            await loadTherapists();
-            await loadBookings();
-            setupEventListeners();
-            generateTimeSlots();
-            setMinDate();
-        }
-
-        function setupEventListeners() {
-            document.getElementById('logoutBtn').addEventListener('click', logout);
-            document.getElementById('searchInput').addEventListener('input', filterTherapists);
-            document.getElementById('specializationFilter').addEventListener('change', filterTherapists);
-            
-            const stars = document.querySelectorAll('#starRating span');
-            stars.forEach(star => {
-                star.addEventListener('click', function() {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    document.getElementById('selectedRating').value = rating;
-                    updateStars(rating);
-                });
-                
-                star.addEventListener('mouseenter', function() {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    updateStars(rating);
-                });
-            });
-            
-            document.getElementById('starRating').addEventListener('mouseleave', function() {
-                const currentRating = parseInt(document.getElementById('selectedRating').value);
-                updateStars(currentRating);
-            });
-        }
-
-        function updateStars(rating) {
-            const stars = document.querySelectorAll('#starRating span');
-            stars.forEach((star, index) => {
-                if (index < rating) {
-                    star.textContent = '★';
-                    star.style.color = '#FFD700';
-                } else {
-                    star.textContent = '☆';
-                    star.style.color = '#ccc';
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const { data: { user }, error } = await supabaseClient.auth.getUser();
+                if (!user || error) {
+                    console.error('Not authenticated:', error);
+                    window.location.href = 'login.html';
+                    return;
                 }
-            });
+                console.log('✅ Logged in user:', user.email);
+                currentUserId = user.id;
+                currentUserEmail = user.email;
+                await loadTherapists();
+                await loadBookings();
+            } catch (err) {
+                console.error('Auth check error:', err);
+                window.location.href = 'login.html';
+            }
         }
 
+        // Load therapists
         async function loadTherapists() {
             try {
                 const { data, error } = await supabaseClient
                     .from('Therapists')
                     .select('*')
-                    .eq('approval_status', 'approved')
                     .eq('Active', true);
 
-                if (error) throw error;
-                
-                allTherapists = data || [];
-                
-                const specializations = [...new Set(allTherapists.map(t => t.Specialization))];
-                const filterSelect = document.getElementById('specializationFilter');
-                specializations.forEach(spec => {
-                    const option = document.createElement('option');
-                    option.value = spec;
-                    option.textContent = spec;
-                    filterSelect.appendChild(option);
+                if (error) {
+                    console.error('Error loading therapists:', error);
+                    document.getElementById('therapist-list').innerHTML = '<p>Error loading therapists</p>';
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    document.getElementById('therapist-list').innerHTML = '<p>No therapists available</p>';
+                    return;
+                }
+
+                let html = '';
+                data.forEach(therapist => {
+                    html += `
+                        <div class="therapist-card">
+                            <h3>Dr. ${therapist.Name}</h3>
+                            <p style="color:#666; margin:5px 0;">${therapist.Specialization || 'General Therapy'}</p>
+                            ${therapist.bio ? `<p style="color:#888; font-size:14px; margin:10px 0;">${therapist.bio}</p>` : ''}
+                            ${therapist.hourly_rate ? `<p style="color:#4CAF50; font-weight:600;">₹${therapist.hourly_rate}/hour</p>` : ''}
+
+                            <div class="booking-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Your Name <span class="required">*</span></label>
+                                        <input type="text" id="name-${therapist.id}" placeholder="Enter your full name" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Your Email <span class="required">*</span></label>
+                                        <input type="email" id="email-${therapist.id}" value="${currentUserEmail}" placeholder="your@email.com" required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Date <span class="required">*</span></label>
+                                        <input type="date" id="date-${therapist.id}" min="${new Date().toISOString().split('T')[0]}" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Time <span class="required">*</span></label>
+                                        <select id="time-${therapist.id}" required>
+                                            <option value="">Select time</option>
+                                            <option value="09:00">09:00 AM</option>
+                                            <option value="10:00">10:00 AM</option>
+                                            <option value="11:00">11:00 AM</option>
+                                            <option value="12:00">12:00 PM</option>
+                                            <option value="14:00">02:00 PM</option>
+                                            <option value="15:00">03:00 PM</option>
+                                            <option value="16:00">04:00 PM</option>
+                                            <option value="17:00">05:00 PM</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button onclick="bookSession('${therapist.id}')" class="book-btn">📅 Book Session</button>
+                            </div>
+                        </div>
+                    `;
                 });
-                
-                displayTherapists(allTherapists);
-            } catch (error) {
-                console.error('Error loading therapists:', error);
-                showMessage('Error loading therapists', 'error');
+
+                document.getElementById('therapist-list').innerHTML = html;
+            } catch (err) {
+                console.error('Load therapists error:', err);
             }
         }
 
-        async function displayTherapists(therapists) {
-            const container = document.getElementById('therapistsList');
-            container.innerHTML = '';
+        // Book a session
+        async function bookSession(therapistId) {
+            const patientName = document.getElementById(`name-${therapistId}`).value.trim();
+            const patientEmail = document.getElementById(`email-${therapistId}`).value.trim();
+            const sessionDate = document.getElementById(`date-${therapistId}`).value;
+            const startTime = document.getElementById(`time-${therapistId}`).value;
 
-            if (therapists.length === 0) {
-                container.innerHTML = '<div class="empty-state">No therapists found</div>';
+            // Validation
+            if (!patientName) {
+                alert('Please enter your name');
                 return;
             }
 
-            for (const therapist of therapists) {
-                const rating = await getTherapistRating(therapist.id);
-                
-                const card = document.createElement('div');
-                card.className = 'therapist-card';
-                card.onclick = function() { openBookingModal(therapist); };
-                
-                const nameDiv = document.createElement('div');
-                nameDiv.className = 'therapist-name';
-                nameDiv.textContent = 'Dr. ' + therapist.Name;
-                
-                const specDiv = document.createElement('div');
-                specDiv.className = 'therapist-specialization';
-                specDiv.textContent = therapist.Specialization;
-                
-                card.appendChild(nameDiv);
-                card.appendChild(specDiv);
-                
-                if (rating) {
-                    const ratingDiv = document.createElement('div');
-                    ratingDiv.className = 'therapist-rating';
-                    ratingDiv.textContent = '⭐ ' + rating.average + ' (' + rating.count + ' reviews)';
-                    card.appendChild(ratingDiv);
-                }
-                
-                const bioDiv = document.createElement('div');
-                bioDiv.className = 'therapist-bio';
-                bioDiv.textContent = (therapist.bio && therapist.bio !== 'null') ? therapist.bio : 'No bio available';
-                bioDiv.style.color = (therapist.bio && therapist.bio !== 'null') ? '#666' : '#999';
-                card.appendChild(bioDiv);
-                
-                container.appendChild(card);
+            if (!patientEmail) {
+                alert('Please enter your email');
+                return;
             }
-        }
 
-        async function getTherapistRating(therapistId) {
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(patientEmail)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+
+            if (!sessionDate) {
+                alert('Please select a date');
+                return;
+            }
+
+            if (!startTime) {
+                alert('Please select a time');
+                return;
+            }
+
+            const bookingData = {
+                user_id: currentUserId,
+                therapist_id: therapistId,
+                patient_name: patientName,
+                patient_email: patientEmail,
+                session_date: sessionDate,
+                start_time: startTime,
+                status: 'pending'
+            };
+
             try {
                 const { data, error } = await supabaseClient
-                    .from('Reviews')
-                    .select('rating')
-                    .eq('therapist_id', therapistId);
-                
-                if (error || !data || data.length === 0) return null;
-                
-                const avgRating = data.reduce((sum, review) => sum + review.rating, 0) / data.length;
-                return {
-                    average: avgRating.toFixed(1),
-                    count: data.length
-                };
-            } catch (error) {
-                return null;
-            }
-        }
-
-        function filterTherapists() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const selectedSpec = document.getElementById('specializationFilter').value;
-            
-            const filtered = allTherapists.filter(therapist => {
-                const matchesSearch = therapist.Name.toLowerCase().includes(searchTerm) ||
-                                    therapist.Specialization.toLowerCase().includes(searchTerm) ||
-                                    (therapist.bio && therapist.bio.toLowerCase().includes(searchTerm));
-                const matchesSpec = !selectedSpec || therapist.Specialization === selectedSpec;
-                
-                return matchesSearch && matchesSpec;
-            });
-            
-            displayTherapists(filtered);
-        }
-
-        function openBookingModal(therapist) {
-            currentBookingTherapist = therapist;
-            document.getElementById('modalTherapistName').value = 'Dr. ' + therapist.Name;
-            document.getElementById('sessionDate').value = '';
-            document.getElementById('startTime').value = '';
-            document.getElementById('bookingNotes').value = '';
-            document.getElementById('bookingModal').style.display = 'flex';
-        }
-
-        function closeBookingModal() {
-            document.getElementById('bookingModal').style.display = 'none';
-            currentBookingTherapist = null;
-        }
-
-        function generateTimeSlots() {
-            const selects = [document.getElementById('startTime'), document.getElementById('rescheduleStartTime')];
-            
-            selects.forEach(select => {
-                select.innerHTML = '<option value="">Select start time</option>';
-                
-                for (let hour = 8; hour <= 20; hour++) {
-                    for (let min = 0; min < 60; min += 30) {
-                        const time = String(hour).padStart(2, '0') + ':' + String(min).padStart(2, '0');
-                        const displayTime = convertTo12Hour(time);
-                        const option = document.createElement('option');
-                        option.value = time;
-                        option.textContent = displayTime;
-                        select.appendChild(option);
-                    }
-                }
-            });
-        }
-
-        function setMinDate() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('sessionDate').min = today;
-            document.getElementById('rescheduleDate').min = today;
-        }
-
-        async function submitBooking() {
-            const sessionDate = document.getElementById('sessionDate').value;
-            const startTime = document.getElementById('startTime').value;
-            const notes = document.getElementById('bookingNotes').value.trim();
-
-            if (!sessionDate || !startTime) {
-                alert('⚠️ Please select date and time');
-                return;
-            }
-
-            const startParts = startTime.split(':');
-            const endHour = parseInt(startParts[0]) + 1;
-            const endTime = String(endHour).padStart(2, '0') + ':' + startParts[1];
-
-            try {
-                const { data: newBooking, error } = await supabaseClient
                     .from('Bookings')
-                    .insert([{
-                        user_id: currentUser.id,
-                        therapist_id: currentBookingTherapist.id,
-                        session_date: sessionDate,
-                        start_time: startTime,
-                        end_time: endTime,
-                        status: 'pending',
-                        notes: notes || null
-                    }])
-                    .select()
-                    .single();
+                    .insert([bookingData]);
 
-                if (error) throw error;
-
-                // Send confirmation email to user
-                emailjs.send('service_95x3tyn', 'template_r4ar0cm', {
-                    email: currentUser.email,
-                    patient_name: currentUser.full_name,
-                    therapist_name: 'Dr. ' + currentBookingTherapist.Name,
-                    session_date: new Date(sessionDate).toLocaleDateString('en-IN', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                    }),
-                    session_time: convertTo12Hour(startTime) + ' - ' + convertTo12Hour(endTime),
-                    booking_id: newBooking.id
-                }).then(() => {
-                    console.log('✅ Patient email sent');
-                }).catch((error) => {
-                    console.error('❌ Patient email failed:', error);
-                });
-
-                // Send notification to therapist (only if email exists)
-                if (currentBookingTherapist.email) {
-                    emailjs.send('service_95x3tyn', 'template_i30rzbb', {
-                        email: currentBookingTherapist.email,
-                        therapist_name: 'Dr. ' + currentBookingTherapist.Name,
-                        patient_name: currentUser.full_name,
-                        patient_email: currentUser.email,
-                        session_date: new Date(sessionDate).toLocaleDateString('en-IN', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                        }),
-                        session_time: convertTo12Hour(startTime) + ' - ' + convertTo12Hour(endTime),
-                        booking_id: newBooking.id,
-                        notes: notes || 'None'
-                    }).then(() => {
-                        console.log('✅ Therapist email sent');
-                    }).catch((error) => {
-                        console.error('❌ Therapist email failed:', error);
-                    });
+                if (error) {
+                    console.error('Booking error:', error);
+                    if (error.code === '23505') {
+                        alert('You already have a booking on this date. Please choose a different date.');
+                    } else {
+                        alert('Error creating booking: ' + error.message);
+                    }
+                    return;
                 }
 
-                showMessage('✅ Booking request submitted successfully! Check your email.', 'success');
-                closeBookingModal();
+                alert('✅ Booking successful! The therapist will confirm your appointment.');
+
+                // Clear form
+                document.getElementById(`name-${therapistId}`).value = '';
+                document.getElementById(`date-${therapistId}`).value = '';
+                document.getElementById(`time-${therapistId}`).value = '';
+
                 await loadBookings();
-            } catch (error) {
-                console.error('Error creating booking:', error);
-                showMessage('❌ Error creating booking: ' + (error.message || 'Unknown error'), 'error');
+            } catch (err) {
+                console.error('Booking error:', err);
+                alert('Error creating booking');
             }
         }
 
+        // Load bookings
         async function loadBookings() {
             try {
                 const { data, error } = await supabaseClient
                     .from('Bookings')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('session_date', { ascending: false })
-                    .order('start_time', { ascending: false });
+                    .select('*, Therapists(*)')
+                    .eq('user_id', currentUserId)
+                    .order('session_date', { ascending: true });
 
-                if (error) throw error;
-                
-                const userIds = [...new Set((data || []).map(b => b.therapist_id))];
-                
-                let therapistsData = [];
-                if (userIds.length > 0) {
-                    const { data: tData, error: tError } = await supabaseClient
-                        .from('Therapists')
-                        .select('id, Name')
-                        .in('id', userIds);
-                    
-                    if (!tError) {
-                        therapistsData = tData;
-                    }
-                }
-                
-                allBookings = (data || []).map(booking => {
-                    const therapist = therapistsData.find(t => t.id === booking.therapist_id);
-                    return {
-                        ...booking,
-                        Therapists: therapist ? { Name: therapist.Name } : null
-                    };
-                });
-                
-                for (const booking of allBookings) {
-                    if (booking.status === 'completed') {
-                        booking.review = await checkBookingReview(booking.id);
-                    }
-                }
-                
-                displayBookings();
-            } catch (error) {
-                console.error('Error loading bookings:', error);
-                showMessage('Error loading bookings', 'error');
-            }
-        }
-
-        async function checkBookingReview(bookingId) {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('Reviews')
-                    .select('id, rating')
-                    .eq('booking_id', bookingId)
-                    .maybeSingle();
-                
-                return data;
-            } catch (error) {
-                return null;
-            }
-        }
-
-        function displayBookings() {
-            const container = document.getElementById('bookingsList');
-            container.innerHTML = '';
-
-            if (allBookings.length === 0) {
-                container.innerHTML = '<div class="empty-state">No bookings yet</div>';
-                return;
-            }
-
-            allBookings.forEach(booking => {
-                const card = document.createElement('div');
-                card.className = 'booking-card';
-
-                const therapistName = booking.Therapists ? booking.Therapists.Name : 'Unknown';
-                const date = new Date(booking.session_date).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric'
-                });
-                const startTime = convertTo12Hour(booking.start_time);
-                const endTime = convertTo12Hour(booking.end_time);
-
-                const headerDiv = document.createElement('div');
-                headerDiv.className = 'booking-header';
-                headerDiv.innerHTML = '<div class="booking-therapist">Dr. ' + therapistName + '</div><span class="status-badge status-' + booking.status + '">' + booking.status.toUpperCase() + '</span>';
-                card.appendChild(headerDiv);
-
-                const dateDiv = document.createElement('div');
-                dateDiv.className = 'booking-date';
-                dateDiv.textContent = '📅 ' + date;
-                card.appendChild(dateDiv);
-
-                const timeDiv = document.createElement('div');
-                timeDiv.className = 'booking-time';
-                timeDiv.textContent = '🕐 ' + startTime + ' - ' + endTime;
-                card.appendChild(timeDiv);
-
-                if (booking.meeting_link && booking.status === 'confirmed') {
-                    const linkDiv = document.createElement('div');
-                    linkDiv.className = 'booking-link';
-                    linkDiv.innerHTML = '🎥 <a href="' + booking.meeting_link + '" target="_blank">Join Session</a>';
-                    card.appendChild(linkDiv);
-                }
-
-                if (booking.reschedule_requested) {
-                    const newDate = new Date(booking.reschedule_new_date).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
-                    });
-                    const newStart = convertTo12Hour(booking.reschedule_new_start_time);
-                    const newEnd = convertTo12Hour(booking.reschedule_new_end_time);
-                    
-                    const rescheduleDiv = document.createElement('div');
-                    rescheduleDiv.className = 'reschedule-badge';
-                    rescheduleDiv.innerHTML = '<strong>🔄 Reschedule Requested</strong><br>New: ' + newDate + ' at ' + newStart + ' - ' + newEnd + '<br>Status: Pending therapist approval';
-                    card.appendChild(rescheduleDiv);
-                }
-
-                if (booking.review) {
-                    const reviewDiv = document.createElement('div');
-                    reviewDiv.className = 'reviewed-badge';
-                    reviewDiv.textContent = '✓ Reviewed (' + booking.review.rating + ' stars)';
-                    card.appendChild(reviewDiv);
-                }
-
-                if ((booking.status === 'pending' || booking.status === 'confirmed') && !booking.reschedule_requested) {
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.style.marginTop = '10px';
-                    
-                    const cancelBtn = document.createElement('button');
-                    cancelBtn.className = 'btn btn-cancel';
-                    cancelBtn.textContent = 'Cancel';
-                    cancelBtn.onclick = function() { cancelBooking(booking.id); };
-                    
-                    const rescheduleBtn = document.createElement('button');
-                    rescheduleBtn.className = 'btn btn-reschedule';
-                    rescheduleBtn.textContent = '🔄 Reschedule';
-                    rescheduleBtn.onclick = function() { openRescheduleModal(booking.id, therapistName); };
-                    
-                    actionsDiv.appendChild(cancelBtn);
-                    actionsDiv.appendChild(rescheduleBtn);
-                    card.appendChild(actionsDiv);
-                } else if (booking.status === 'completed' && !booking.review) {
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.style.marginTop = '10px';
-                    
-                    const reviewBtn = document.createElement('button');
-                    reviewBtn.className = 'btn btn-review';
-                    reviewBtn.textContent = '⭐ Write Review';
-                    reviewBtn.onclick = function() { openReviewModal(booking.id, therapistName, booking.therapist_id); };
-                    
-                    actionsDiv.appendChild(reviewBtn);
-                    card.appendChild(actionsDiv);
-                }
-
-                container.appendChild(card);
-            });
-        }
-
-        async function cancelBooking(bookingId) {
-            if (!confirm('⚠️ Are you sure you want to cancel this booking?')) return;
-
-            try {
-                const { error } = await supabaseClient
-                    .from('Bookings')
-                    .update({ status: 'cancelled' })
-                    .eq('id', bookingId);
-
-                if (error) throw error;
-
-                showMessage('✅ Booking cancelled', 'success');
-                await loadBookings();
-            } catch (error) {
-                console.error('Error cancelling booking:', error);
-                showMessage('❌ Error cancelling booking', 'error');
-            }
-        }
-
-        function openRescheduleModal(bookingId, therapistName) {
-            currentRescheduleBooking = bookingId;
-            document.getElementById('rescheduleDate').value = '';
-            document.getElementById('rescheduleStartTime').value = '';
-            document.getElementById('rescheduleReason').value = '';
-            document.getElementById('rescheduleModal').style.display = 'flex';
-        }
-
-        function closeRescheduleModal() {
-            document.getElementById('rescheduleModal').style.display = 'none';
-            currentRescheduleBooking = null;
-        }
-
-        async function submitReschedule() {
-            const newDate = document.getElementById('rescheduleDate').value;
-            const newStartTime = document.getElementById('rescheduleStartTime').value;
-            const reason = document.getElementById('rescheduleReason').value.trim();
-
-            if (!newDate || !newStartTime) {
-                alert('⚠️ Please select new date and time');
-                return;
-            }
-
-            const startParts = newStartTime.split(':');
-            const endHour = parseInt(startParts[0]) + 1;
-            const newEndTime = String(endHour).padStart(2, '0') + ':' + startParts[1];
-
-            try {
-                const { error } = await supabaseClient
-                    .from('Bookings')
-                    .update({
-                        reschedule_requested: true,
-                        reschedule_new_date: newDate,
-                        reschedule_new_start_time: newStartTime,
-                        reschedule_new_end_time: newEndTime,
-                        reschedule_reason: reason || null
-                    })
-                    .eq('id', currentRescheduleBooking);
-
-                if (error) throw error;
-
-                showMessage('✅ Reschedule request sent! Waiting for therapist approval.', 'success');
-                closeRescheduleModal();
-                await loadBookings();
-            } catch (error) {
-                console.error('Error requesting reschedule:', error);
-                showMessage('❌ Error requesting reschedule', 'error');
-            }
-        }
-
-        function openReviewModal(bookingId, therapistName, therapistId) {
-            currentReviewBooking = {
-                bookingId: bookingId,
-                therapistId: therapistId
-            };
-            
-            document.getElementById('reviewTherapistName').textContent = 'Dr. ' + therapistName;
-            document.getElementById('reviewModal').style.display = 'flex';
-            document.getElementById('selectedRating').value = '0';
-            document.getElementById('reviewText').value = '';
-            updateStars(0);
-        }
-
-        function closeReviewModal() {
-            document.getElementById('reviewModal').style.display = 'none';
-            currentReviewBooking = null;
-        }
-
-        async function submitReview() {
-            const rating = parseInt(document.getElementById('selectedRating').value);
-            const reviewText = document.getElementById('reviewText').value.trim();
-            
-            if (rating === 0) {
-                alert('⚠️ Please select a rating (1-5 stars)');
-                return;
-            }
-            
-            if (!currentReviewBooking) {
-                alert('❌ Error: Booking information not found');
-                return;
-            }
-            
-            try {
-                // Check if review already exists
-                const { data: existingReview } = await supabaseClient
-                    .from('Reviews')
-                    .select('id')
-                    .eq('booking_id', currentReviewBooking.bookingId)
-                    .maybeSingle();
-                
-                if (existingReview) {
-                    alert('⚠️ You have already reviewed this session');
-                    closeReviewModal();
+                if (error) {
+                    console.error('Error loading bookings:', error);
+                    document.getElementById('booking-list').innerHTML = '<p>Error loading bookings</p>';
                     return;
                 }
-                
-                // Insert new review
-                const { error } = await supabaseClient
-                    .from('Reviews')
-                    .insert({
-                        booking_id: currentReviewBooking.bookingId,
-                        user_id: currentUser.id,
-                        therapist_id: currentReviewBooking.therapistId,
-                        rating: rating,
-                        review_text: reviewText || null
-                    });
-                
-                if (error) throw error;
-                
-                showMessage('✅ Thank you for your review!', 'success');
-                closeReviewModal();
-                await loadBookings();
-                await loadTherapists();
-                
-            } catch (error) {
-                console.error('Error submitting review:', error);
-                showMessage('❌ Error: ' + (error.message || 'Please try again'), 'error');
+
+                if (!data || data.length === 0) {
+                    document.getElementById('booking-list').innerHTML = '<p>No bookings yet. Book your first session above!</p>';
+                    return;
+                }
+
+                let html = '';
+                data.forEach(booking => {
+                    const therapistName = booking.Therapists ? booking.Therapists.Name : 'Unknown';
+                    const statusClass = `status-${booking.status}`;
+
+                    html += `
+                        <div class="booking-card">
+                            <strong>Dr. ${therapistName}</strong><br>
+                            <span style="color:#666;">Patient: ${booking.patient_name || 'Not provided'}</span><br>
+                            <span style="color:#666;">Email: ${booking.patient_email || 'Not provided'}</span><br>
+                            📅 Date: ${new Date(booking.session_date).toLocaleDateString()}<br>
+                            🕐 Time: ${booking.start_time}<br>
+                            Status: <span class="status-badge ${statusClass}">${booking.status}</span><br>
+                            ${booking.meeting_link ? `<br>🔗 <a href="${booking.meeting_link}" target="_blank" style="color:#667eea;">Join Meeting</a>` : ''}
+                            ${booking.status === 'pending' ? `<button onclick="cancelBooking('${booking.id}')" class="cancel-btn">Cancel Booking</button>` : ''}
+                        </div>
+                    `;
+                });
+
+                document.getElementById('booking-list').innerHTML = html;
+            } catch (err) {
+                console.error('Load bookings error:', err);
             }
         }
 
-        function convertTo12Hour(time) {
-            const parts = time.split(':');
-            const hours = parts[0];
-            const minutes = parts[1];
-            const h = parseInt(hours);
-            const period = h >= 12 ? 'PM' : 'AM';
-            const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-            return hour12 + ':' + minutes + ' ' + period;
+        // Cancel booking
+        async function cancelBooking(bookingId) {
+            if (!confirm('Are you sure you want to cancel this booking?')) {
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('Bookings')
+                    .delete()
+                    .eq('id', bookingId);
+
+                if (error) {
+                    console.error('Cancel error:', error);
+                    alert('Error cancelling booking');
+                    return;
+                }
+
+                alert('✅ Booking cancelled successfully');
+                await loadBookings();
+            } catch (err) {
+                console.error('Cancel error:', err);
+            }
         }
 
-        function showMessage(message, type) {
-            const messageBox = document.getElementById('messageBox');
-            messageBox.textContent = message;
-            messageBox.className = 'message ' + type;
-            setTimeout(function() {
-                messageBox.className = 'message';
-            }, 5000);
-        }
-
-        function logout() {
-            localStorage.removeItem('user');
+        // Logout
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
             window.location.href = 'login.html';
         }
 
-        init();
+        // Initialize on page load
+        window.addEventListener('load', checkAuth);
     </script>
 </body>
 </html>
