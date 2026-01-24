@@ -1,101 +1,96 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up - User</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .signup-container {
-      max-width: 500px;
-      margin: 80px auto;
-      background: white;
-      padding: 40px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .signup-container h1 {
-      text-align: center;
-      margin-bottom: 30px;
-      color: #333;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #555;
-      font-weight: bold;
-    }
-    .form-group input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
-    }
-    .btn-signup {
-      width: 100%;
-      padding: 15px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 18px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .btn-signup:hover {
-      background: #45a049;
-    }
-    .back-link {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .back-link a {
-      color: #2196F3;
-      text-decoration: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Patient - MindSpace</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="signup-container">
-    <h1>Sign Up as User</h1>
+<body class="auth-page">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">🧠 MindSpace</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html" class="btn-nav-login">Login</a></li>
+            </ul>
+        </div>
+    </nav>
 
-    <div class="form-group">
-      <label>Full Name:</label>
-      <input type="text" id="fullName" placeholder="Enter your full name" required>
-    </div>
+    <!-- Signup Form -->
+    <section class="auth-section">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h1>Create Your Account</h1>
+                <p class="auth-subtitle">Start your journey to better mental health</p>
 
-    <div class="form-group">
-      <label>Email:</label>
-      <input type="email" id="email" placeholder="Enter your email" required>
-    </div>
+                <form id="signupForm" class="auth-form">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="fullName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone *</label>
+                        <input type="tel" id="phone" placeholder="+91 9876543210" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password *</label>
+                        <input type="password" id="password" placeholder="Minimum 6 characters" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password *</label>
+                        <input type="password" id="confirmPassword" placeholder="Re-enter password" minlength="6" required>
+                    </div>
+                    <button type="submit" class="btn-primary btn-full">Create Account</button>
+                </form>
 
-    <div class="form-group">
-      <label>Phone:</label>
-      <input type="tel" id="phone" placeholder="Enter your phone number">
-    </div>
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="login.html">Login</a></p>
+                    <p>Are you a therapist? <a href="signup-therapist.html">Apply here</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="form-group">
-      <label>Password:</label>
-      <input type="password" id="password" placeholder="Create a password (min 6 characters)" required>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./auth.js"></script>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-    <div class="form-group">
-      <label>Confirm Password:</label>
-      <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
-    </div>
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-    <button onclick="signupUser()" class="btn-signup">Create Account</button>
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
 
-    <div class="back-link">
-      <a href="index.html">← Back to Home</a>
-    </div>
-  </div>
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./auth.js"></script>
+            // Disable button
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Creating Account...';
+
+            await signupUser(email, password, fullName, phone);
+
+            // Re-enable if failed
+            btn.disabled = false;
+            btn.textContent = 'Create Account';
+        });
+    </script>
 </body>
 </html>
