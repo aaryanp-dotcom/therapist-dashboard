@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,184 +6,137 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>How It Works - MindSpace</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .hero-section { background: linear-gradient(135deg, #C9E4DE 0%, #A8D5BA 100%); padding: 100px 0 80px; text-align: center; }
+        .hero-section h1 { font-size: 48px; color: #2C3E50; margin-bottom: 20px; }
+        .hero-section p { font-size: 20px; color: #4B5563; max-width: 700px; margin: 0 auto; }
+        .steps-container { max-width: 1200px; margin: 80px auto; padding: 0 50px; }
+        .step { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; margin-bottom: 80px; }
+        .step:nth-child(even) { direction: rtl; }
+        .step:nth-child(even) > * { direction: ltr; }
+        .step-number { font-size: 80px; font-weight: bold; color: #C9E4DE; margin-bottom: 10px; }
+        .step h2 { color: #5A9B8E; font-size: 32px; margin-bottom: 15px; }
+        .step p { color: #4B5563; font-size: 18px; line-height: 1.8; margin-bottom: 15px; }
+        .step-visual { background: #F5F9F8; padding: 40px; border-radius: 16px; text-align: center; font-size: 80px; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+        .cta-section { background: #5A9B8E; color: white; padding: 80px 50px; text-align: center; margin-top: 80px; }
+        .cta-section h2 { font-size: 42px; margin-bottom: 20px; }
+        .cta-section p { font-size: 20px; margin-bottom: 30px; }
+        .cta-button { background: white; color: #5A9B8E; padding: 18px 40px; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+        .cta-button:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        @media (max-width: 768px) { .step { grid-template-columns: 1fr; gap: 30px; } .step:nth-child(even) { direction: ltr; } }
+    </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.html" class="logo">🧠 MindSpace</a>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
                 <li><a href="how-it-works.html" class="active">How It Works</a></li>
-                <li><a href="about.html">About Us</a></li>
                 <li><a href="contact.html">Contact</a></li>
-                <li><a href="login.html" class="btn-nav-login">Login</a></li>
+                <li><a href="login.html" class="btn-primary">Login</a></li>
             </ul>
         </div>
     </nav>
 
-    <!-- Hero -->
-    <section class="page-hero">
-        <div class="container">
-            <h1>How It Works</h1>
-            <p>Your journey to better mental health in 4 simple steps</p>
-        </div>
+    <section class="hero-section">
+        <h1>How MindSpace Works</h1>
+        <p>Getting started with therapy is simple and straightforward. Here's how:</p>
     </section>
 
-    <!-- Steps Section -->
-    <section class="content-section">
-        <div class="container">
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <div class="step-icon">📝</div>
-                    <h3>Create Your Account</h3>
-                    <p>Sign up in minutes with just your email. No lengthy forms or complicated processes.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <div class="step-icon">🔍</div>
-                    <h3>Find Your Therapist</h3>
-                    <p>Browse profiles, read bios, and choose a therapist who matches your needs and preferences.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <div class="step-icon">📅</div>
-                    <h3>Book a Session</h3>
-                    <p>Select a convenient time slot that fits your schedule. Get instant confirmation with meeting details.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <div class="step-icon">💬</div>
-                    <h3>Start Your Journey</h3>
-                    <p>Connect via video call at your scheduled time. Your therapist will guide you through your wellness journey.</p>
-                </div>
+    <div class="steps-container">
+        <div class="step">
+            <div class="step-content">
+                <div class="step-number">01</div>
+                <h2>Create Your Account</h2>
+                <p>Sign up in less than 2 minutes. Provide basic information and create your secure account.</p>
+                <p>Your privacy is protected with bank-level encryption. All your information remains confidential.</p>
+            </div>
+            <div class="step-visual">
+                📝
             </div>
         </div>
-    </section>
 
-    <!-- For Patients -->
-    <section class="content-section" style="background: #F5F9F8;">
-        <div class="container">
-            <div class="content-grid">
-                <div class="content-text">
-                    <h2>For Patients</h2>
-                    <ul class="feature-list">
-                        <li>✅ Browse verified, licensed therapists</li>
-                        <li>✅ Read detailed profiles and specializations</li>
-                        <li>✅ Book sessions at your convenience</li>
-                        <li>✅ Connect via secure video calls</li>
-                        <li>✅ Track your sessions and progress</li>
-                        <li>✅ Cancel or reschedule easily</li>
-                    </ul>
-                    <a href="signup-user.html" class="btn-primary">Get Started as Patient</a>
-                </div>
-                <div class="content-image">
-                    <div class="image-placeholder" style="background: linear-gradient(135deg, #C9E4DE 0%, #A8D5CC 100%); height: 300px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 80px;">
-                        👤
-                    </div>
-                </div>
+        <div class="step">
+            <div class="step-content">
+                <div class="step-number">02</div>
+                <h2>Browse Therapists</h2>
+                <p>Explore our directory of licensed, certified therapists. Filter by specialization, availability, and expertise.</p>
+                <p>Read therapist profiles, qualifications, and specializations to find the perfect match for your needs.</p>
+            </div>
+            <div class="step-visual">
+                🔍
             </div>
         </div>
-    </section>
 
-    <!-- For Therapists -->
-    <section class="content-section">
-        <div class="container">
-            <div class="content-grid-reverse">
-                <div class="content-image">
-                    <div class="image-placeholder" style="background: linear-gradient(135deg, #C9E4DE 0%, #A8D5CC 100%); height: 300px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 80px;">
-                        👨‍⚕️
-                    </div>
-                </div>
-                <div class="content-text">
-                    <h2>For Therapists</h2>
-                    <ul class="feature-list">
-                        <li>✅ Create your professional profile</li>
-                        <li>✅ Set your own availability and schedule</li>
-                        <li>✅ Manage bookings through dashboard</li>
-                        <li>✅ Connect with patients via video</li>
-                        <li>✅ Set your own rates</li>
-                        <li>✅ Get verified and build your practice</li>
-                    </ul>
-                    <a href="signup-therapist.html" class="btn-primary">Join as Therapist</a>
-                </div>
+        <div class="step">
+            <div class="step-content">
+                <div class="step-number">03</div>
+                <h2>Book Your Session</h2>
+                <p>Choose a convenient date and time that works for you. Our flexible scheduling makes it easy to fit therapy into your life.</p>
+                <p>Book sessions for mornings, evenings, or weekends - whatever fits your schedule best.</p>
+            </div>
+            <div class="step-visual">
+                📅
             </div>
         </div>
-    </section>
 
-    <!-- Safety & Privacy -->
-    <section class="content-section" style="background: #F5F9F8;">
-        <div class="container">
-            <div class="section-header">
-                <h2>Your Safety & Privacy</h2>
-                <p>We take your security seriously</p>
+        <div class="step">
+            <div class="step-content">
+                <div class="step-number">04</div>
+                <h2>Attend Your Session</h2>
+                <p>Join your video session from the comfort of your home. No travel required - just click the meeting link.</p>
+                <p>Our secure platform ensures your session remains private and confidential.</p>
             </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🔐</div>
-                    <h3>Encrypted Sessions</h3>
-                    <p>All video sessions are end-to-end encrypted for maximum privacy.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">✅</div>
-                    <h3>Verified Therapists</h3>
-                    <p>Every therapist is thoroughly vetted and licensed by relevant authorities.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🛡️</div>
-                    <h3>Secure Data</h3>
-                    <p>Your personal information is protected with bank-level security.</p>
-                </div>
+            <div class="step-visual">
+                💻
             </div>
         </div>
-    </section>
 
-    <!-- CTA -->
+        <div class="step">
+            <div class="step-content">
+                <div class="step-number">05</div>
+                <h2>Continue Your Journey</h2>
+                <p>Track your progress, schedule follow-up sessions, and build a lasting relationship with your therapist.</p>
+                <p>Mental wellness is a journey, not a destination. We're here to support you every step of the way.</p>
+            </div>
+            <div class="step-visual">
+                🌱
+            </div>
+        </div>
+    </div>
+
     <section class="cta-section">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Ready to get started?</h2>
-                <p>Your first step towards better mental health is just a click away</p>
-                <a href="signup-user.html" class="btn-primary btn-large">Start Your Journey Now</a>
-            </div>
-        </div>
+        <h2>Ready to Get Started?</h2>
+        <p>Take the first step towards better mental health today</p>
+        <a href="signup-user.html" class="cta-button">Create Your Account</a>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4 class="logo">🧠 MindSpace</h4>
-                    <p>Your trusted partner in mental wellness</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="how-it-works.html">How It Works</a></li>
-                        <li><a href="about.html">About Us</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>For Professionals</h4>
-                    <ul>
-                        <li><a href="signup-therapist.html">Join as Therapist</a></li>
-                        <li><a href="login.html">Therapist Login</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Legal</h4>
-                    <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                    </ul>
-                </div>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>MindSpace</h3>
+                <p>Your mental wellness journey starts here.</p>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 MindSpace. All rights reserved.</p>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="how-it-works.html">How It Works</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
             </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="terms.html">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 MindSpace. All rights reserved.</p>
         </div>
     </footer>
 </body>
