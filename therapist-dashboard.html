@@ -8,324 +8,57 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Dashboard-specific styles */
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 50px;
-        }
-
-        .dashboard-header {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .dashboard-header h1 {
-            color: #5A9B8E;
-            font-size: 32px;
-        }
-
-        .btn-logout {
-            background: #dc3545;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 48px;
-            font-weight: bold;
-            color: #5A9B8E;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            color: #6B7280;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .filter-section {
-            background: #F5F9F8;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border-left: 4px solid #5A9B8E;
-        }
-
-        .filter-section h3 {
-            color: #5A9B8E;
-            margin-bottom: 15px;
-        }
-
-        .filter-inputs {
-            display: flex;
-            gap: 15px;
-            align-items: end;
-            flex-wrap: wrap;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .filter-group label {
-            font-size: 14px;
-            color: #6B7280;
-            font-weight: 500;
-        }
-
-        .filter-group input {
-            padding: 10px 12px;
-            border: 1px solid #E5E7EB;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .filter-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .apply-filter-btn {
-            background: #5A9B8E;
-            color: white;
-        }
-
-        .clear-filter-btn {
-            background: #6c757d;
-            color: white;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #E5E7EB;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            padding: 12px 20px;
-            border: none;
-            background: transparent;
-            color: #6B7280;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .tab-btn:hover {
-            color: #5A9B8E;
-        }
-
-        .tab-btn.active {
-            color: #5A9B8E;
-            border-bottom-color: #5A9B8E;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .booking-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border-left: 4px solid #5A9B8E;
-        }
-
-        .booking-card.pending {
-            border-left-color: #ffc107;
-        }
-
-        .booking-card.confirmed {
-            border-left-color: #28a745;
-        }
-
-        .booking-card.completed {
-            border-left-color: #6c757d;
-        }
-
-        .booking-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .booking-patient {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2C3E50;
-        }
-
-        .booking-status {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-pending {
-            background: #FFF3CD;
-            color: #856404;
-        }
-
-        .status-confirmed {
-            background: #D4EDDA;
-            color: #155724;
-        }
-
-        .status-completed {
-            background: #D6D8DB;
-            color: #383D41;
-        }
-
-        .booking-date {
-            color: #5A9B8E;
-            font-weight: 600;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .booking-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .detail-label {
-            font-size: 12px;
-            color: #6B7280;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .detail-value {
-            font-size: 14px;
-            color: #2C3E50;
-            font-weight: 600;
-        }
-
-        .booking-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .confirm-btn {
-            background: #28a745;
-            color: white;
-        }
-
-        .confirm-btn:hover {
-            background: #218838;
-        }
-
-        .reject-btn {
-            background: #dc3545;
-            color: white;
-        }
-
-        .reject-btn:hover {
-            background: #c82333;
-        }
-
-        .meeting-link-input {
-            flex: 1;
-            padding: 10px 12px;
-            border: 1px solid #E5E7EB;
-            border-radius: 8px;
-            font-size: 14px;
-            min-width: 250px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6B7280;
-        }
-
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .stats-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .filter-inputs {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .booking-details {
-                grid-template-columns: 1fr;
-            }
-        }
+        .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 40px 50px; }
+        .dashboard-header { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .dashboard-header h1 { color: #5A9B8E; font-size: 32px; }
+        .btn-logout { background: #dc3545; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+        .stat-number { font-size: 48px; font-weight: bold; color: #5A9B8E; margin-bottom: 10px; }
+        .stat-label { color: #6B7280; font-size: 16px; font-weight: 500; }
+        .dashboard-section { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .filter-section { background: #F5F9F8; padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 4px solid #5A9B8E; }
+        .filter-section h3 { color: #5A9B8E; margin-bottom: 15px; }
+        .filter-inputs { display: flex; gap: 15px; align-items: end; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 14px; color: #6B7280; font-weight: 500; }
+        .filter-group input { padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 14px; }
+        .filter-btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .apply-filter-btn { background: #5A9B8E; color: white; }
+        .clear-filter-btn { background: #6c757d; color: white; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #E5E7EB; flex-wrap: wrap; }
+        .tab-btn { padding: 12px 20px; border: none; background: transparent; color: #6B7280; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
+        .tab-btn:hover { color: #5A9B8E; }
+        .tab-btn.active { color: #5A9B8E; border-bottom-color: #5A9B8E; }
+        .tab-content { display: none; }
+        .booking-card { background: white; padding: 25px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 4px solid #5A9B8E; }
+        .booking-card.pending { border-left-color: #ffc107; }
+        .booking-card.confirmed { border-left-color: #28a745; }
+        .booking-card.completed { border-left-color: #6c757d; }
+        .booking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .booking-patient { font-size: 18px; font-weight: 700; color: #2C3E50; }
+        .booking-status { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .status-pending { background: #FFF3CD; color: #856404; }
+        .status-confirmed { background: #D4EDDA; color: #155724; }
+        .status-completed { background: #D6D8DB; color: #383D41; }
+        .booking-date { color: #5A9B8E; font-weight: 600; margin-bottom: 15px; font-size: 16px; }
+        .booking-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .detail-item { display: flex; flex-direction: column; gap: 5px; }
+        .detail-label { font-size: 12px; color: #6B7280; font-weight: 600; text-transform: uppercase; }
+        .detail-value { font-size: 14px; color: #2C3E50; font-weight: 600; }
+        .booking-actions { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .action-btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .confirm-btn { background: #28a745; color: white; }
+        .confirm-btn:hover { background: #218838; }
+        .reject-btn { background: #dc3545; color: white; }
+        .reject-btn:hover { background: #c82333; }
+        .meeting-link-input { flex: 1; padding: 10px 12px; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 14px; min-width: 250px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #6B7280; }
+        .empty-state-icon { font-size: 64px; margin-bottom: 20px; }
+        @media (max-width: 768px) { .stats-container { grid-template-columns: repeat(2, 1fr); } .filter-inputs { flex-direction: column; align-items: stretch; } .booking-details { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.html" class="logo">🧠 MindSpace</a>
@@ -337,74 +70,44 @@
     </nav>
 
     <div class="dashboard-container">
-        <!-- Header -->
         <div class="dashboard-header">
             <h1>Therapist Dashboard</h1>
             <h2 id="therapist-name">Loading...</h2>
         </div>
 
-        <!-- Statistics -->
         <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-number" id="total-bookings">0</div>
-                <div class="stat-label">Total Bookings</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="pending-bookings">0</div>
-                <div class="stat-label">Pending</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="confirmed-bookings">0</div>
-                <div class="stat-label">Confirmed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="completed-bookings">0</div>
-                <div class="stat-label">Completed</div>
-            </div>
+            <div class="stat-card"><div class="stat-number" id="total-bookings">0</div><div class="stat-label">Total Bookings</div></div>
+            <div class="stat-card"><div class="stat-number" id="pending-bookings">0</div><div class="stat-label">Pending</div></div>
+            <div class="stat-card"><div class="stat-number" id="confirmed-bookings">0</div><div class="stat-label">Confirmed</div></div>
+            <div class="stat-card"><div class="stat-number" id="completed-bookings">0</div><div class="stat-label">Completed</div></div>
         </div>
 
-        <!-- Main Content -->
         <div class="dashboard-section">
             <div class="filter-section">
                 <h3>📅 Filter by Date Range</h3>
                 <div class="filter-inputs">
-                    <div class="filter-group">
-                        <label>From Date</label>
-                        <input type="date" id="filter-from-date">
-                    </div>
-                    <div class="filter-group">
-                        <label>To Date</label>
-                        <input type="date" id="filter-to-date">
-                    </div>
+                    <div class="filter-group"><label>From Date</label><input type="date" id="filter-from-date"></div>
+                    <div class="filter-group"><label>To Date</label><input type="date" id="filter-to-date"></div>
                     <button class="filter-btn apply-filter-btn" onclick="applyFilter()">Apply Filter</button>
                     <button class="filter-btn clear-filter-btn" onclick="clearFilter()">Clear Filter</button>
                 </div>
             </div>
 
             <div class="tabs">
-                <button class="tab-btn active" data-tab="all" onclick="switchTab('all')">All Bookings</button>
-                <button class="tab-btn" data-tab="pending" onclick="switchTab('pending')">Pending</button>
-                <button class="tab-btn" data-tab="confirmed" onclick="switchTab('confirmed')">Confirmed</button>
-                <button class="tab-btn" data-tab="completed" onclick="switchTab('completed')">Completed</button>
+                <button class="tab-btn active" onclick="switchTab('all')">All Bookings</button>
+                <button class="tab-btn" onclick="switchTab('pending')">Pending</button>
+                <button class="tab-btn" onclick="switchTab('confirmed')">Confirmed</button>
+                <button class="tab-btn" onclick="switchTab('completed')">Completed</button>
             </div>
 
-            <div id="all-bookings-content" class="tab-content" style="display: block;">
-                <div id="all-bookings-list"></div>
-            </div>
-            <div id="pending-content" class="tab-content">
-                <div id="pending-bookings-list"></div>
-            </div>
-            <div id="confirmed-content" class="tab-content">
-                <div id="confirmed-bookings-list"></div>
-            </div>
-            <div id="completed-content" class="tab-content">
-                <div id="completed-bookings-list"></div>
-            </div>
+            <div id="all-content" class="tab-content" style="display: block;"><div id="all-bookings-list"></div></div>
+            <div id="pending-content" class="tab-content"><div id="pending-bookings-list"></div></div>
+            <div id="confirmed-content" class="tab-content"><div id="confirmed-bookings-list"></div></div>
+            <div id="completed-content" class="tab-content"><div id="completed-bookings-list"></div></div>
         </div>
     </div>
 
     <script>
-        // Supabase Configuration
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -413,18 +116,10 @@
         let filteredBookings = [];
         let currentTherapistId = null;
 
-        // Check authentication (ALL ORIGINAL LOGIC)
         async function checkAuth() {
             try {
                 const { data: { user }, error } = await supabaseClient.auth.getUser();
-
-                if (!user || error) {
-                    console.error('Not authenticated:', error);
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                console.log('Logged in user:', user.email);
+                if (!user || error) { window.location.href = 'login.html'; return; }
                 await loadTherapistData();
                 await loadBookings();
             } catch (err) {
@@ -433,56 +128,25 @@
             }
         }
 
-        // Load therapist data (ALL ORIGINAL LOGIC)
         async function loadTherapistData() {
             try {
                 const { data: { user } } = await supabaseClient.auth.getUser();
-                const { data, error } = await supabaseClient
-                    .from('Therapists')
-                    .select('*')
-                    .eq('userid', user.id)
-                    .single();
-
-                console.log('Therapist data:', data);
-
-                if (error) {
-                    console.error('Error loading therapist:', error);
-                    return;
-                }
-
+                const { data, error } = await supabaseClient.from('Therapists').select('*').eq('userid', user.id).single();
+                if (error) { console.error('Error loading therapist:', error); return; }
                 if (data) {
                     currentTherapistId = data.id;
-                    document.getElementById('therapist-name').textContent = data.Name || data.name || 'Therapist';
+                    document.getElementById('therapist-name').textContent = data.Name || 'Therapist';
                 }
             } catch (err) {
                 console.error('Load therapist error:', err);
             }
         }
 
-        // Load all bookings (ALL ORIGINAL LOGIC)
         async function loadBookings() {
             try {
-                if (!currentTherapistId) {
-                    console.error('No therapist ID found');
-                    return;
-                }
-
-                console.log('Loading bookings for therapist ID:', currentTherapistId);
-
-                const { data, error } = await supabaseClient
-                    .from('Bookings')
-                    .select('*')
-                    .eq('therapistid', currentTherapistId)
-                    .order('createdat', { ascending: false });
-
-                console.log('Bookings data:', data);
-                console.log('Bookings count:', data ? data.length : 0);
-
-                if (error) {
-                    console.error('Error loading bookings:', error);
-                    return;
-                }
-
+                if (!currentTherapistId) { console.error('No therapist ID found'); return; }
+                const { data, error } = await supabaseClient.from('Bookings').select('*').eq('therapistid', currentTherapistId).order('createdat', { ascending: false });
+                if (error) { console.error('Error loading bookings:', error); return; }
                 allBookings = data || [];
                 filteredBookings = allBookings;
                 updateStats();
@@ -492,22 +156,17 @@
             }
         }
 
-        // Update statistics (ALL ORIGINAL LOGIC)
         function updateStats() {
             const total = filteredBookings.length;
             const pending = filteredBookings.filter(b => b.status === 'pending').length;
             const confirmed = filteredBookings.filter(b => b.status === 'confirmed').length;
             const completed = filteredBookings.filter(b => b.status === 'completed').length;
-
             document.getElementById('total-bookings').textContent = total;
             document.getElementById('pending-bookings').textContent = pending;
             document.getElementById('confirmed-bookings').textContent = confirmed;
             document.getElementById('completed-bookings').textContent = completed;
-
-            console.log('Stats updated - Total:', total, 'Pending:', pending, 'Confirmed:', confirmed, 'Completed:', completed);
         }
 
-        // Display bookings (ALL ORIGINAL LOGIC)
         function displayBookings() {
             displayBookingsByStatus('all', 'all-bookings-list');
             displayBookingsByStatus('pending', 'pending-bookings-list');
@@ -515,138 +174,71 @@
             displayBookingsByStatus('completed', 'completed-bookings-list');
         }
 
-        // Display bookings by status (ALL ORIGINAL LOGIC)
         function displayBookingsByStatus(status, containerId) {
             const container = document.getElementById(containerId);
-            let bookings = filteredBookings;
-
-            if (status !== 'all') {
-                bookings = filteredBookings.filter(b => b.status === status);
-            }
+            let bookings = status === 'all' ? filteredBookings : filteredBookings.filter(b => b.status === status);
 
             if (bookings.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <h3>No bookings found</h3>
-                        <p>There are no ${status === 'all' ? '' : status} bookings to display.</p>
-                    </div>
-                `;
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><h3>No bookings found</h3></div>';
                 return;
             }
 
-            container.innerHTML = bookings.map(booking => {
-                return `
-                    <div class="booking-card ${booking.status}">
-                        <div class="booking-header">
-                            <div class="booking-patient">Patient ID: ${booking.userid ? booking.userid.substring(0, 8) : 'Unknown'}</div>
-                            <span class="booking-status status-${booking.status}">${booking.status}</span>
-                        </div>
-                        <div class="booking-date">${formatDate(booking.sessiondate)}</div>
-                        <div class="booking-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Time Slot</span>
-                                <span class="detail-value">${booking.starttime || 'N/A'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Booking ID</span>
-                                <span class="detail-value">${booking.id ? booking.id.substring(0, 8) : 'N/A'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Created</span>
-                                <span class="detail-value">${new Date(booking.createdat).toLocaleDateString()}</span>
-                            </div>
-                        </div>
-                        ${booking.status === 'pending' ? `
-                            <div class="booking-actions">
-                                <input type="text" id="meeting-link-${booking.id}" class="meeting-link-input" 
-                                    placeholder="Enter meeting link (Google Meet, Zoom, etc.)" 
-                                    value="${booking.meetinglink || ''}">
-                                <button class="action-btn confirm-btn" onclick="confirmBooking('${booking.id}')">Confirm</button>
-                                <button class="action-btn reject-btn" onclick="rejectBooking('${booking.id}')">Reject</button>
-                            </div>
-                        ` : ''}
-                        ${booking.status === 'confirmed' && booking.meetinglink ? `
-                            <div class="detail-item" style="margin-top: 10px;">
-                                <span class="detail-label">Meeting Link</span>
-                                <span class="detail-value"><a href="${booking.meetinglink}" target="_blank" style="color:#5A9B8E;">${booking.meetinglink}</a></span>
-                            </div>
-                        ` : ''}
+            container.innerHTML = bookings.map(booking => `
+                <div class="booking-card ${booking.status}">
+                    <div class="booking-header">
+                        <div class="booking-patient">Patient ID: ${booking.userid ? booking.userid.substring(0, 8) : 'Unknown'}</div>
+                        <span class="booking-status status-${booking.status}">${booking.status}</span>
                     </div>
-                `;
-            }).join('');
+                    <div class="booking-date">${formatDate(booking.sessiondate)}</div>
+                    <div class="booking-details">
+                        <div class="detail-item"><span class="detail-label">Time</span><span class="detail-value">${booking.starttime || 'N/A'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Booking ID</span><span class="detail-value">${booking.id ? booking.id.substring(0, 8) : 'N/A'}</span></div>
+                    </div>
+                    ${booking.status === 'pending' ? `
+                        <div class="booking-actions">
+                            <input type="text" id="meeting-link-${booking.id}" class="meeting-link-input" placeholder="Enter meeting link" value="${booking.meetinglink || ''}">
+                            <button class="action-btn confirm-btn" onclick="confirmBooking('${booking.id}')">Confirm</button>
+                            <button class="action-btn reject-btn" onclick="rejectBooking('${booking.id}')">Reject</button>
+                        </div>
+                    ` : ''}
+                    ${booking.status === 'confirmed' && booking.meetinglink ? `<div class="detail-item" style="margin-top:10px;"><span class="detail-label">Meeting Link</span><span class="detail-value"><a href="${booking.meetinglink}" target="_blank">${booking.meetinglink}</a></span></div>` : ''}
+                </div>
+            `).join('');
         }
 
-        // Format date (ALL ORIGINAL LOGIC)
         function formatDate(dateString) {
-            const date = new Date(dateString);
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('en-US', options);
+            return new Date(dateString).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
 
-        // Confirm booking (ALL ORIGINAL LOGIC)
         async function confirmBooking(bookingId) {
             const meetingLink = document.getElementById(`meeting-link-${bookingId}`).value.trim();
-
-            if (!meetingLink) {
-                alert('Please enter a meeting link');
-                return;
-            }
-
-            const { data, error } = await supabaseClient
-                .from('Bookings')
-                .update({ status: 'confirmed', meetinglink: meetingLink })
-                .eq('id', bookingId);
-
-            if (error) {
-                alert('Error confirming booking: ' + error.message);
-                return;
-            }
-
-            alert('Booking confirmed successfully! ✓');
+            if (!meetingLink) { alert('Please enter a meeting link'); return; }
+            const { error } = await supabaseClient.from('Bookings').update({ status: 'confirmed', meetinglink: meetingLink }).eq('id', bookingId);
+            if (error) { alert('Error: ' + error.message); return; }
+            alert('Booking confirmed! ✓');
             await loadBookings();
         }
 
-        // Reject booking (ALL ORIGINAL LOGIC)
         async function rejectBooking(bookingId) {
-            if (!confirm('Are you sure you want to reject this booking?')) {
-                return;
-            }
-
-            const { data, error } = await supabaseClient
-                .from('Bookings')
-                .delete()
-                .eq('id', bookingId);
-
-            if (error) {
-                alert('Error rejecting booking: ' + error.message);
-                return;
-            }
-
-            alert('Booking rejected successfully');
+            if (!confirm('Reject this booking?')) return;
+            const { error } = await supabaseClient.from('Bookings').delete().eq('id', bookingId);
+            if (error) { alert('Error: ' + error.message); return; }
+            alert('Booking rejected');
             await loadBookings();
         }
 
-        // Apply date filter (ALL ORIGINAL LOGIC)
         function applyFilter() {
             const fromDate = document.getElementById('filter-from-date').value;
             const toDate = document.getElementById('filter-to-date').value;
-
-            if (!fromDate || !toDate) {
-                alert('Please select both from and to dates');
-                return;
-            }
-
-            filteredBookings = allBookings.filter(booking => {
-                const bookingDate = new Date(booking.sessiondate);
-                return bookingDate >= new Date(fromDate) && bookingDate <= new Date(toDate);
+            if (!fromDate || !toDate) { alert('Please select both dates'); return; }
+            filteredBookings = allBookings.filter(b => {
+                const d = new Date(b.sessiondate);
+                return d >= new Date(fromDate) && d <= new Date(toDate);
             });
-
             updateStats();
             displayBookings();
         }
 
-        // Clear filter (ALL ORIGINAL LOGIC)
         function clearFilter() {
             document.getElementById('filter-from-date').value = '';
             document.getElementById('filter-to-date').value = '';
@@ -655,32 +247,19 @@
             displayBookings();
         }
 
-        // Switch tab
         function switchTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-
-            // Update content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.style.display = 'none';
-            });
-            document.getElementById(`${tab}${tab === 'all' ? '-bookings' : ''}-content`).style.display = 'block';
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+            document.getElementById(`${tab}-content`).style.display = 'block';
         }
 
-        // Logout (ALL ORIGINAL LOGIC)
         async function handleLogout() {
             await supabaseClient.auth.signOut();
             window.location.href = 'login.html';
         }
 
-        // Initialize on page load
-        window.addEventListener('load', function() {
-            console.log('Dashboard initializing...');
-            checkAuth();
-        });
+        window.addEventListener('load', checkAuth);
     </script>
 </body>
 </html>
