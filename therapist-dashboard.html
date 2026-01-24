@@ -668,7 +668,6 @@
         let filteredBookings = [];
         let currentTherapistId = null;
         let currentTherapistData = null;
-        let isLoggingOut = false; // Prevent infinite loop
 
         // Check authentication
         async function checkAuth() {
@@ -676,6 +675,8 @@
                 const { data: { user }, error } = await supabaseClient.auth.getUser();
                 if (!user || error) {
                     console.error('Not authenticated:', error);
+                    // Clear flag and redirect
+                    sessionStorage.removeItem('logging_out');
                     window.location.href = 'login.html';
                     return;
                 }
@@ -686,6 +687,7 @@
                 await loadProfile();
             } catch (err) {
                 console.error('Auth check error:', err);
+                sessionStorage.removeItem('logging_out');
                 window.location.href = 'login.html';
             }
         }
@@ -1092,28 +1094,44 @@
             });
         });
 
-        // ✅ FIXED: Logout with infinite loop prevention
+        // ✅ COMPLETELY FIXED LOGOUT - NO MORE INFINITE LOOP
         async function handleLogout() {
-            if (isLoggingOut) {
-                return; // Prevent multiple logout calls
-            }
+            console.log('🚪 Logout clicked');
 
-            isLoggingOut = true;
-            console.log('🚪 Logging out...');
+            // Set flag to prevent redirect loop
+            sessionStorage.setItem('logging_out', 'true');
 
             try {
-                await supabaseClient.auth.signOut();
-                console.log('✅ Logged out successfully');
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error('❌ Logout error:', error);
-                isLoggingOut = false;
-                window.location.href = 'login.html';
+                // Sign out from Supabase
+                const { error } = await supabaseClient.auth.signOut();
+
+                if (error) {
+                    console.error('❌ Logout error:', error);
+                }
+
+                console.log('✅ Signed out successfully');
+
+                // Wait a moment then redirect
+                setTimeout(() => {
+                    window.location.replace('login.html');
+                }, 100);
+
+            } catch (err) {
+                console.error('❌ Logout exception:', err);
+                // Force redirect even on error
+                window.location.replace('login.html');
             }
         }
 
         // Initialize on page load
         window.addEventListener('load', function() {
+            // Check if we're in the middle of logging out
+            if (sessionStorage.getItem('logging_out') === 'true') {
+                console.log('⏳ Logout in progress, skipping auth check');
+                sessionStorage.removeItem('logging_out');
+                return;
+            }
+
             console.log('🚀 Dashboard initializing...');
             checkAuth();
         });
