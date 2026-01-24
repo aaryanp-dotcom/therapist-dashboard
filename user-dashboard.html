@@ -10,7 +10,7 @@
     <style>
         .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 40px 50px; }
         .dashboard-header { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-        .dashboard-header h1 { color: #5A9B8E; font-size: 32px; }
+        .dashboard-header h1 { color: #5A9B8E; font-size: 32px; margin: 0; }
         .dashboard-header .user-info { color: #6B7280; font-size: 16px; }
         .btn-logout { background: #dc3545; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
         .btn-logout:hover { background: #c82333; }
@@ -100,7 +100,7 @@
 
                 const { data: profile } = await client.from('profiles').select('*').eq('id', currentUserId).single();
                 if (profile) {
-                    document.getElementById('userInfo').textContent = profile.fullname || profile.email;
+                    document.getElementById('userInfo').textContent = profile.full_name || profile.email;
                 }
 
                 await loadTherapists();
@@ -113,7 +113,7 @@
 
         async function loadTherapists() {
             try {
-                const { data: therapists, error } = await client.from('Therapists').select('*').eq('Active', true).eq('approvalstatus', 'approved');
+                const { data: therapists, error } = await client.from('Therapists').select('*').eq('Active', true).eq('approval_status', 'approved');
 
                 if (error) {
                     console.error('Error loading therapists:', error);
@@ -185,10 +185,10 @@
 
             try {
                 const bookingData = {
-                    userid: currentUserId,
-                    therapistid: therapistId,
-                    sessiondate: sessionDate,
-                    starttime: startTime,
+                    user_id: currentUserId,
+                    therapist_id: therapistId,
+                    session_date: sessionDate,
+                    start_time: startTime,
                     status: 'pending'
                 };
 
@@ -216,7 +216,7 @@
 
         async function loadBookings() {
             try {
-                const { data: bookings, error } = await client.from('Bookings').select('*, Therapists(*)').eq('userid', currentUserId).order('sessiondate', { ascending: true });
+                const { data: bookings, error } = await client.from('Bookings').select('*, Therapists(*)').eq('user_id', currentUserId).order('session_date', { ascending: true });
 
                 if (error) {
                     console.error('Error loading bookings:', error);
@@ -232,7 +232,7 @@
                 let html = '';
                 bookings.forEach(booking => {
                     const therapistName = booking.Therapists ? booking.Therapists.Name : 'Unknown';
-                    const date = new Date(booking.sessiondate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    const date = new Date(booking.session_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
                     html += `
                         <div class="booking-card">
@@ -247,17 +247,17 @@
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">Time</span>
-                                    <span class="detail-value">${booking.starttime}</span>
+                                    <span class="detail-value">${booking.start_time}</span>
                                 </div>
                                 <div class="detail-item">
                                     <span class="detail-label">Status</span>
                                     <span class="detail-value">${booking.status}</span>
                                 </div>
                             </div>
-                            ${booking.meetinglink ? `
+                            ${booking.meeting_link ? `
                                 <div class="meeting-link-box">
                                     <strong>Meeting Link:</strong><br>
-                                    <a href="${booking.meetinglink}" target="_blank">${booking.meetinglink}</a>
+                                    <a href="${booking.meeting_link}" target="_blank">${booking.meeting_link}</a>
                                 </div>
                             ` : ''}
                             ${booking.status === 'pending' ? `
