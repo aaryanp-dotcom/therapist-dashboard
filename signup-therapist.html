@@ -1,128 +1,123 @@
+
+7-signup-therapist.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up - Therapist</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .signup-container {
-      max-width: 600px;
-      margin: 60px auto;
-      background: white;
-      padding: 40px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .signup-container h1 {
-      text-align: center;
-      margin-bottom: 15px;
-      color: #333;
-    }
-    .info-text {
-      text-align: center;
-      color: #666;
-      margin-bottom: 30px;
-      font-size: 14px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #555;
-      font-weight: bold;
-    }
-    .form-group input, .form-group textarea {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
-      font-family: inherit;
-    }
-    .form-group textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-    .btn-signup {
-      width: 100%;
-      padding: 15px;
-      background: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 18px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .btn-signup:hover {
-      background: #0b7dda;
-    }
-    .back-link {
-      text-align: center;
-      margin-top: 20px;
-    }
-    .back-link a {
-      color: #2196F3;
-      text-decoration: none;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply as Therapist - MindSpace</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="signup-container">
-    <h1>Apply as Therapist</h1>
-    <p class="info-text">Your application will be reviewed by an admin before approval</p>
+<body class="auth-page">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">🧠 MindSpace</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html" class="btn-nav-login">Login</a></li>
+            </ul>
+        </div>
+    </nav>
 
-    <div class="form-group">
-      <label>Full Name:</label>
-      <input type="text" id="fullName" placeholder="Enter your full name" required>
-    </div>
+    <!-- Signup Form -->
+    <section class="auth-section">
+        <div class="auth-container">
+            <div class="auth-card" style="max-width: 650px;">
+                <h1>Apply as Therapist</h1>
+                <p class="auth-subtitle">Your application will be reviewed by our team within 24-48 hours</p>
 
-    <div class="form-group">
-      <label>Email:</label>
-      <input type="email" id="email" placeholder="Enter your email" required>
-    </div>
+                <form id="therapistForm" class="auth-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input type="text" id="fullName" placeholder="Dr. John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="email" placeholder="your@email.com" required>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-      <label>Phone:</label>
-      <input type="tel" id="phone" placeholder="Enter your phone number" required>
-    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone *</label>
+                            <input type="tel" id="phone" placeholder="+91 9876543210" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Specialization *</label>
+                            <input type="text" id="specialization" placeholder="e.g., Anxiety, Depression" required>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-      <label>Specialization:</label>
-      <input type="text" id="specialization" placeholder="e.g., Anxiety, Depression, Career Stress" required>
-    </div>
+                    <div class="form-group">
+                        <label>Qualifications *</label>
+                        <textarea id="qualifications" rows="3" placeholder="List your degrees, certifications, and years of experience" required></textarea>
+                    </div>
 
-    <div class="form-group">
-      <label>Qualifications:</label>
-      <textarea id="qualifications" placeholder="List your degrees, certifications, years of experience" required></textarea>
-    </div>
+                    <div class="form-group">
+                        <label>Bio *</label>
+                        <textarea id="bio" rows="4" placeholder="Tell us about your approach to therapy and your experience" required></textarea>
+                    </div>
 
-    <div class="form-group">
-      <label>Bio:</label>
-      <textarea id="bio" placeholder="Tell us about yourself and your approach to therapy"></textarea>
-    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Password *</label>
+                            <input type="password" id="password" placeholder="Minimum 6 characters" minlength="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password *</label>
+                            <input type="password" id="confirmPassword" placeholder="Re-enter password" minlength="6" required>
+                        </div>
+                    </div>
 
-    <div class="form-group">
-      <label>Password:</label>
-      <input type="password" id="password" placeholder="Create a password (min 6 characters)" required>
-    </div>
+                    <button type="submit" class="btn-primary btn-full">Submit Application</button>
+                </form>
 
-    <div class="form-group">
-      <label>Confirm Password:</label>
-      <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
-    </div>
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="login.html">Login</a></p>
+                    <p>Looking for therapy? <a href="signup-user.html">Sign up as patient</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <button onclick="signupTherapist()" class="btn-signup">Submit Application</button>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./auth.js"></script>
+    <script>
+        document.getElementById('therapistForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-    <div class="back-link">
-      <a href="index.html">← Back to Home</a>
-    </div>
-  </div>
+            const name = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const specialization = document.getElementById('specialization').value.trim();
+            const qualifications = document.getElementById('qualifications').value.trim();
+            const bio = document.getElementById('bio').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./auth.js"></script>
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+
+            // Disable button
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            await signupTherapist(email, password, name, phone, specialization, qualifications, bio);
+
+            // Re-enable if failed
+            btn.disabled = false;
+            btn.textContent = 'Submit Application';
+        });
+    </script>
 </body>
 </html>
