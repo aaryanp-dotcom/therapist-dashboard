@@ -1,18 +1,11 @@
 
-// ═══════════════════════════════════════════════════════════════
-// MINDSPACE - AUTHENTICATION LOGIC
-// All Supabase authentication functions preserved from original
-// ═══════════════════════════════════════════════════════════════
-
-// Supabase Configuration
+// auth.js - FIXED WITH EXACT COLUMN NAMES
 const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ═══════════════════════════════════════════════════════════════
-// LOGIN FUNCTION (ALL ORIGINAL LOGIC)
-// ═══════════════════════════════════════════════════════════════
+// Login Function
 async function login(email, password) {
     try {
         console.log('Attempting login for:', email);
@@ -96,9 +89,7 @@ async function login(email, password) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SIGNUP USER FUNCTION (ALL ORIGINAL LOGIC)
-// ═══════════════════════════════════════════════════════════════
+// Signup User Function
 async function signupUser(email, password, fullName, phone) {
     try {
         // Step 1: Create auth user
@@ -131,7 +122,7 @@ async function signupUser(email, password, fullName, phone) {
             return;
         }
 
-        alert('Account created successfully! ✓ Please login.');
+        alert('Account created successfully! Please login.');
         window.location.href = 'login.html';
 
     } catch (error) {
@@ -140,9 +131,7 @@ async function signupUser(email, password, fullName, phone) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SIGNUP THERAPIST FUNCTION (ALL ORIGINAL LOGIC)
-// ═══════════════════════════════════════════════════════════════
+// Signup Therapist Function
 async function signupTherapist(email, password, name, phone, specialization, qualifications, bio) {
     try {
         // Step 1: Create auth user
@@ -196,7 +185,7 @@ async function signupTherapist(email, password, name, phone, specialization, qua
             return;
         }
 
-        alert('Therapist account created! ✓ Please wait for admin approval before logging in.');
+        alert('Therapist account created! Please wait for admin approval before logging in.');
         window.location.href = 'login.html';
 
     } catch (error) {
@@ -205,29 +194,7 @@ async function signupTherapist(email, password, name, phone, specialization, qua
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// CHECK IF USER IS ALREADY LOGGED IN
-// ═══════════════════════════════════════════════════════════════
-function checkAuth() {
-    const user = localStorage.getItem('user');
-
-    if (user) {
-        const userData = JSON.parse(user);
-
-        // Redirect to appropriate dashboard
-        if (userData.role === 'admin') {
-            window.location.href = 'admin-dashboard.html';
-        } else if (userData.role === 'therapist') {
-            window.location.href = 'therapist-dashboard.html';
-        } else if (userData.role === 'user') {
-            window.location.href = 'user-dashboard.html';
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// LOGOUT FUNCTION (ALL ORIGINAL LOGIC)
-// ═══════════════════════════════════════════════════════════════
+// Logout Function
 function logout() {
     localStorage.removeItem('user');
     supabaseClient.auth.signOut();
