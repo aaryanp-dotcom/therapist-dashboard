@@ -10,7 +10,7 @@
     <style>
         .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 40px 50px; }
         .dashboard-header { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
-        .dashboard-header h1 { color: #5A9B8E; font-size: 32px; }
+        .dashboard-header h1 { color: #5A9B8E; font-size: 32px; margin: 0; }
         .btn-logout { background: #dc3545; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
         .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
@@ -131,7 +131,7 @@
         async function loadTherapistData() {
             try {
                 const { data: { user } } = await supabaseClient.auth.getUser();
-                const { data, error } = await supabaseClient.from('Therapists').select('*').eq('userid', user.id).single();
+                const { data, error } = await supabaseClient.from('Therapists').select('*').eq('user_id', user.id).single();
                 if (error) { console.error('Error loading therapist:', error); return; }
                 if (data) {
                     currentTherapistId = data.id;
@@ -145,7 +145,7 @@
         async function loadBookings() {
             try {
                 if (!currentTherapistId) { console.error('No therapist ID found'); return; }
-                const { data, error } = await supabaseClient.from('Bookings').select('*').eq('therapistid', currentTherapistId).order('createdat', { ascending: false });
+                const { data, error } = await supabaseClient.from('Bookings').select('*').eq('therapist_id', currentTherapistId).order('created_at', { ascending: false });
                 if (error) { console.error('Error loading bookings:', error); return; }
                 allBookings = data || [];
                 filteredBookings = allBookings;
@@ -186,22 +186,22 @@
             container.innerHTML = bookings.map(booking => `
                 <div class="booking-card ${booking.status}">
                     <div class="booking-header">
-                        <div class="booking-patient">Patient ID: ${booking.userid ? booking.userid.substring(0, 8) : 'Unknown'}</div>
+                        <div class="booking-patient">Patient ID: ${booking.user_id ? booking.user_id.substring(0, 8) : 'Unknown'}</div>
                         <span class="booking-status status-${booking.status}">${booking.status}</span>
                     </div>
-                    <div class="booking-date">${formatDate(booking.sessiondate)}</div>
+                    <div class="booking-date">${formatDate(booking.session_date)}</div>
                     <div class="booking-details">
-                        <div class="detail-item"><span class="detail-label">Time</span><span class="detail-value">${booking.starttime || 'N/A'}</span></div>
+                        <div class="detail-item"><span class="detail-label">Time</span><span class="detail-value">${booking.start_time || 'N/A'}</span></div>
                         <div class="detail-item"><span class="detail-label">Booking ID</span><span class="detail-value">${booking.id ? booking.id.substring(0, 8) : 'N/A'}</span></div>
                     </div>
                     ${booking.status === 'pending' ? `
                         <div class="booking-actions">
-                            <input type="text" id="meeting-link-${booking.id}" class="meeting-link-input" placeholder="Enter meeting link" value="${booking.meetinglink || ''}">
+                            <input type="text" id="meeting-link-${booking.id}" class="meeting-link-input" placeholder="Enter meeting link" value="${booking.meeting_link || ''}">
                             <button class="action-btn confirm-btn" onclick="confirmBooking('${booking.id}')">Confirm</button>
                             <button class="action-btn reject-btn" onclick="rejectBooking('${booking.id}')">Reject</button>
                         </div>
                     ` : ''}
-                    ${booking.status === 'confirmed' && booking.meetinglink ? `<div class="detail-item" style="margin-top:10px;"><span class="detail-label">Meeting Link</span><span class="detail-value"><a href="${booking.meetinglink}" target="_blank">${booking.meetinglink}</a></span></div>` : ''}
+                    ${booking.status === 'confirmed' && booking.meeting_link ? `<div class="detail-item" style="margin-top:10px;"><span class="detail-label">Meeting Link</span><span class="detail-value"><a href="${booking.meeting_link}" target="_blank">${booking.meeting_link}</a></span></div>` : ''}
                 </div>
             `).join('');
         }
@@ -213,7 +213,7 @@
         async function confirmBooking(bookingId) {
             const meetingLink = document.getElementById(`meeting-link-${bookingId}`).value.trim();
             if (!meetingLink) { alert('Please enter a meeting link'); return; }
-            const { error } = await supabaseClient.from('Bookings').update({ status: 'confirmed', meetinglink: meetingLink }).eq('id', bookingId);
+            const { error } = await supabaseClient.from('Bookings').update({ status: 'confirmed', meeting_link: meetingLink }).eq('id', bookingId);
             if (error) { alert('Error: ' + error.message); return; }
             alert('Booking confirmed! ✓');
             await loadBookings();
@@ -232,7 +232,7 @@
             const toDate = document.getElementById('filter-to-date').value;
             if (!fromDate || !toDate) { alert('Please select both dates'); return; }
             filteredBookings = allBookings.filter(b => {
-                const d = new Date(b.sessiondate);
+                const d = new Date(b.session_date);
                 return d >= new Date(fromDate) && d <= new Date(toDate);
             });
             updateStats();
