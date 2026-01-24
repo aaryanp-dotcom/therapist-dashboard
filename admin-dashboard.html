@@ -8,245 +8,42 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Dashboard-specific styles */
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 50px;
-        }
-
-        .dashboard-header {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .dashboard-header h1 {
-            color: #5A9B8E;
-            font-size: 32px;
-        }
-
-        .btn-logout {
-            background: #dc3545;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 36px;
-            font-weight: bold;
-            color: #5A9B8E;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            color: #6B7280;
-            font-size: 14px;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .content-section {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            color: #2C3E50;
-            font-size: 24px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #C9E4DE;
-            padding-bottom: 10px;
-        }
-
-        .application-card {
-            background: #F5F9F8;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border-left: 4px solid #5A9B8E;
-        }
-
-        .application-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .therapist-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2C3E50;
-        }
-
-        .therapist-specialization {
-            color: #5A9B8E;
-            font-weight: 600;
-            margin-top: 5px;
-        }
-
-        .application-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .detail-label {
-            color: #6B7280;
-            font-size: 12px;
-            margin-bottom: 3px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .detail-value {
-            color: #2C3E50;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .application-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn-approve {
-            background: #4caf50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-approve:hover {
-            background: #45a049;
-        }
-
-        .btn-reject {
-            background: #f44336;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-reject:hover {
-            background: #d32f2f;
-        }
-
-        .booking-card {
-            background: #F5F9F8;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border-left: 4px solid #5A9B8E;
-        }
-
-        .booking-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-pending {
-            background: #FFF3CD;
-            color: #856404;
-        }
-
-        .status-approved {
-            background: #D4EDDA;
-            color: #155724;
-        }
-
-        .status-rejected {
-            background: #F8D7DA;
-            color: #721C24;
-        }
-
-        .status-confirmed {
-            background: #D4EDDA;
-            color: #155724;
-        }
-
-        .status-completed {
-            background: #D1ECF1;
-            color: #0C5460;
-        }
-
-        .status-cancelled {
-            background: #F8D7DA;
-            color: #721C24;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6B7280;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        .dashboard-container { max-width: 1400px; margin: 0 auto; padding: 40px 50px; }
+        .dashboard-header { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .dashboard-header h1 { color: #5A9B8E; font-size: 32px; }
+        .btn-logout { background: #dc3545; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+        .stat-number { font-size: 36px; font-weight: bold; color: #5A9B8E; margin-bottom: 10px; }
+        .stat-label { color: #6B7280; font-size: 14px; text-transform: uppercase; font-weight: 600; }
+        .content-section { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        .section-title { color: #2C3E50; font-size: 24px; margin-bottom: 20px; border-bottom: 2px solid #C9E4DE; padding-bottom: 10px; }
+        .application-card { background: #F5F9F8; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #5A9B8E; }
+        .application-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .therapist-name { font-size: 18px; font-weight: bold; color: #2C3E50; }
+        .therapist-specialization { color: #5A9B8E; font-weight: 600; margin-top: 5px; }
+        .application-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .detail-item { display: flex; flex-direction: column; }
+        .detail-label { color: #6B7280; font-size: 12px; margin-bottom: 3px; font-weight: 600; text-transform: uppercase; }
+        .detail-value { color: #2C3E50; font-weight: 600; font-size: 14px; }
+        .application-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-approve { background: #4caf50; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .btn-approve:hover { background: #45a049; }
+        .btn-reject { background: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
+        .btn-reject:hover { background: #d32f2f; }
+        .booking-card { background: #F5F9F8; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #5A9B8E; }
+        .booking-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .status-pending { background: #FFF3CD; color: #856404; }
+        .status-approved { background: #D4EDDA; color: #155724; }
+        .status-rejected { background: #F8D7DA; color: #721C24; }
+        .status-confirmed { background: #D4EDDA; color: #155724; }
+        .status-completed { background: #D1ECF1; color: #0C5460; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #6B7280; }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.html" class="logo">🧠 MindSpace</a>
@@ -258,38 +55,20 @@
     </nav>
 
     <div class="dashboard-container">
-        <!-- Header -->
-        <div class="dashboard-header">
-            <h1>Admin Dashboard</h1>
-        </div>
+        <div class="dashboard-header"><h1>Admin Dashboard</h1></div>
 
-        <!-- Statistics Cards -->
         <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="totalUsers">0</div>
-                <div class="stat-label">Total Users</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalTherapists">0</div>
-                <div class="stat-label">Total Therapists</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="pendingApplications">0</div>
-                <div class="stat-label">Pending Applications</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalBookings">0</div>
-                <div class="stat-label">Total Bookings</div>
-            </div>
+            <div class="stat-card"><div class="stat-number" id="totalUsers">0</div><div class="stat-label">Total Users</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalTherapists">0</div><div class="stat-label">Total Therapists</div></div>
+            <div class="stat-card"><div class="stat-number" id="pendingApplications">0</div><div class="stat-label">Pending Applications</div></div>
+            <div class="stat-card"><div class="stat-number" id="totalBookings">0</div><div class="stat-label">Total Bookings</div></div>
         </div>
 
-        <!-- Pending Applications Section -->
         <div class="content-section">
             <h2 class="section-title">🔍 Pending Therapist Applications</h2>
             <div id="applicationsList"></div>
         </div>
 
-        <!-- All Bookings Section -->
         <div class="content-section">
             <h2 class="section-title">📅 All Bookings</h2>
             <div id="bookingsList"></div>
@@ -297,99 +76,53 @@
     </div>
 
     <script>
-        // Supabase Configuration (ALL ORIGINAL)
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentUser = null;
-
-        // Initialize (ALL ORIGINAL LOGIC)
         async function init() {
             const user = JSON.parse(localStorage.getItem('user'));
-
             if (!user || user.role !== 'admin') {
                 alert('Access denied. Admin role required.');
                 window.location.href = 'login.html';
                 return;
             }
-
-            currentUser = user;
-
             await loadStatistics();
             await loadPendingApplications();
             await loadAllBookings();
-
-            // Setup logout button
-            document.getElementById('logoutBtn')?.addEventListener('click', logout);
         }
 
-        // Load Statistics (ALL ORIGINAL LOGIC)
         async function loadStatistics() {
             try {
-                // Count total users
-                const { count: usersCount, error: usersError } = await supabaseClient
-                    .from('profiles')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('role', 'user');
-
-                if (usersError) throw usersError;
+                const { count: usersCount } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'user');
                 document.getElementById('totalUsers').textContent = usersCount || 0;
 
-                // Count total therapists
-                const { count: therapistsCount, error: therapistsError } = await supabaseClient
-                    .from('Therapists')
-                    .select('*', { count: 'exact', head: true });
-
-                if (therapistsError) throw therapistsError;
+                const { count: therapistsCount } = await supabaseClient.from('Therapists').select('*', { count: 'exact', head: true });
                 document.getElementById('totalTherapists').textContent = therapistsCount || 0;
 
-                // Count pending applications
-                const { count: pendingCount, error: pendingError } = await supabaseClient
-                    .from('Therapists')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('approvalstatus', 'pending');
-
-                if (pendingError) throw pendingError;
+                const { count: pendingCount } = await supabaseClient.from('Therapists').select('*', { count: 'exact', head: true }).eq('approvalstatus', 'pending');
                 document.getElementById('pendingApplications').textContent = pendingCount || 0;
 
-                // Count total bookings
-                const { count: bookingsCount, error: bookingsError } = await supabaseClient
-                    .from('Bookings')
-                    .select('*', { count: 'exact', head: true });
-
-                if (bookingsError) throw bookingsError;
+                const { count: bookingsCount } = await supabaseClient.from('Bookings').select('*', { count: 'exact', head: true });
                 document.getElementById('totalBookings').textContent = bookingsCount || 0;
-
             } catch (error) {
                 console.error('Error loading statistics:', error);
             }
         }
 
-        // Load Pending Applications (ALL ORIGINAL LOGIC)
         async function loadPendingApplications() {
             try {
-                const { data, error } = await supabaseClient
-                    .from('Therapists')
-                    .select('*')
-                    .eq('approvalstatus', 'pending')
-                    .order('createdat', { ascending: false });
-
+                const { data, error } = await supabaseClient.from('Therapists').select('*').eq('approvalstatus', 'pending').order('createdat', { ascending: false });
                 if (error) throw error;
-
                 displayApplications(data);
             } catch (error) {
                 console.error('Error loading applications:', error);
-                document.getElementById('applicationsList').innerHTML = `
-                    <div class="empty-state">Error loading applications</div>
-                `;
+                document.getElementById('applicationsList').innerHTML = '<div class="empty-state">Error loading applications</div>';
             }
         }
 
-        // Display Applications (ALL ORIGINAL LOGIC)
         function displayApplications(applications) {
             const container = document.getElementById('applicationsList');
-
             if (applications.length === 0) {
                 container.innerHTML = '<div class="empty-state">No pending applications</div>';
                 return;
@@ -405,23 +138,11 @@
                         <span class="status-badge status-pending">${app.approvalstatus.toUpperCase()}</span>
                     </div>
                     <div class="application-details">
-                        <div class="detail-item">
-                            <span class="detail-label">Email</span>
-                            <span class="detail-value">${app.email}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Phone</span>
-                            <span class="detail-value">${app.phone}</span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Qualifications</span>
-                            <span class="detail-value">${app.qualifications}</span>
-                        </div>
+                        <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">${app.email}</span></div>
+                        <div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">${app.phone}</span></div>
+                        <div class="detail-item"><span class="detail-label">Qualifications</span><span class="detail-value">${app.qualifications}</span></div>
                     </div>
-                    <div class="detail-item" style="margin-bottom: 15px;">
-                        <span class="detail-label">Bio</span>
-                        <span class="detail-value">${app.bio}</span>
-                    </div>
+                    <div class="detail-item" style="margin-bottom: 15px;"><span class="detail-label">Bio</span><span class="detail-value">${app.bio}</span></div>
                     <div class="application-actions">
                         <button class="btn-approve" onclick="approveApplication('${app.id}')">Approve</button>
                         <button class="btn-reject" onclick="rejectApplication('${app.id}')">Reject</button>
@@ -430,183 +151,93 @@
             `).join('');
         }
 
-        // Approve Application (ALL ORIGINAL LOGIC)
         async function approveApplication(therapistId) {
             if (!confirm('Approve this therapist application?')) return;
-
             try {
-                const { error } = await supabaseClient
-                    .from('Therapists')
-                    .update({ approvalstatus: 'approved', Active: true })
-                    .eq('id', therapistId);
-
+                const { error } = await supabaseClient.from('Therapists').update({ approvalstatus: 'approved', Active: true }).eq('id', therapistId);
                 if (error) throw error;
-
                 alert('Therapist approved successfully! ✓');
                 await loadStatistics();
                 await loadPendingApplications();
             } catch (error) {
-                console.error('Error approving application:', error);
+                console.error('Error approving:', error);
                 alert('Error approving application');
             }
         }
 
-        // Reject Application (ALL ORIGINAL LOGIC)
         async function rejectApplication(therapistId) {
             if (!confirm('Reject this therapist application?')) return;
-
             try {
-                const { error } = await supabaseClient
-                    .from('Therapists')
-                    .update({ approvalstatus: 'rejected', Active: false })
-                    .eq('id', therapistId);
-
+                const { error } = await supabaseClient.from('Therapists').update({ approvalstatus: 'rejected', Active: false }).eq('id', therapistId);
                 if (error) throw error;
-
                 alert('Application rejected');
                 await loadStatistics();
                 await loadPendingApplications();
             } catch (error) {
-                console.error('Error rejecting application:', error);
+                console.error('Error rejecting:', error);
                 alert('Error rejecting application');
             }
         }
 
-        // Load All Bookings - FIXED (ALL ORIGINAL LOGIC)
         async function loadAllBookings() {
             try {
-                console.log('Loading bookings...');
-
-                // First, get all bookings
-                const { data: bookingsData, error: bookingsError } = await supabaseClient
-                    .from('Bookings')
-                    .select('*')
-                    .order('sessiondate', { ascending: false })
-                    .order('starttime', { ascending: false });
-
-                if (bookingsError) {
-                    console.error('Bookings error:', bookingsError);
-                    throw bookingsError;
-                }
-
-                console.log('Bookings loaded:', bookingsData);
+                const { data: bookingsData, error: bookingsError } = await supabaseClient.from('Bookings').select('*').order('sessiondate', { ascending: false });
+                if (bookingsError) throw bookingsError;
 
                 if (!bookingsData || bookingsData.length === 0) {
                     displayBookings([]);
                     return;
                 }
 
-                // Get unique therapist IDs and user IDs
                 const therapistIds = [...new Set(bookingsData.map(b => b.therapistid))];
                 const userIds = [...new Set(bookingsData.map(b => b.userid))];
 
-                // Fetch therapists data
-                const { data: therapistsData, error: therapistsError } = await supabaseClient
-                    .from('Therapists')
-                    .select('id, Name')
-                    .in('id', therapistIds);
+                const { data: therapistsData } = await supabaseClient.from('Therapists').select('id, Name').in('id', therapistIds);
+                const { data: profilesData } = await supabaseClient.from('profiles').select('id, fullname').in('id', userIds);
 
-                if (therapistsError) console.error('Therapists error:', therapistsError);
-
-                // Fetch user profiles data
-                const { data: profilesData, error: profilesError } = await supabaseClient
-                    .from('profiles')
-                    .select('id, fullname')
-                    .in('id', userIds);
-
-                if (profilesError) console.error('Profiles error:', profilesError);
-
-                console.log('Therapists:', therapistsData);
-                console.log('Profiles:', profilesData);
-
-                // Merge the data
                 const bookingsWithDetails = bookingsData.map(booking => {
                     const therapist = therapistsData?.find(t => t.id === booking.therapistid);
                     const user = profilesData?.find(p => p.id === booking.userid);
-
-                    return {
-                        ...booking,
-                        therapistname: therapist?.Name || 'Unknown',
-                        username: user?.fullname || 'Unknown'
-                    };
+                    return { ...booking, therapistname: therapist?.Name || 'Unknown', username: user?.fullname || 'Unknown' };
                 });
 
-                console.log('Final bookings with details:', bookingsWithDetails);
                 displayBookings(bookingsWithDetails);
-
             } catch (error) {
                 console.error('Error loading bookings:', error);
-                document.getElementById('bookingsList').innerHTML = `
-                    <div class="empty-state">Error loading bookings. Check console for details.</div>
-                `;
+                document.getElementById('bookingsList').innerHTML = '<div class="empty-state">Error loading bookings</div>';
             }
         }
 
-        // Display Bookings (ALL ORIGINAL LOGIC)
         function displayBookings(bookings) {
             const container = document.getElementById('bookingsList');
-
             if (bookings.length === 0) {
                 container.innerHTML = '<div class="empty-state">No bookings yet</div>';
                 return;
             }
 
             container.innerHTML = bookings.map(booking => {
-                const date = new Date(booking.sessiondate).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric'
-                });
-                const startTime = convertTo12Hour(booking.starttime);
-                const endTime = convertTo12Hour(booking.endtime);
-
+                const date = new Date(booking.sessiondate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
                 return `
                     <div class="booking-card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <div style="font-weight: bold; font-size: 16px; color: #2C3E50;">
-                                ${booking.username} → Dr. ${booking.therapistname}
-                            </div>
+                            <div style="font-weight: bold; font-size: 16px; color: #2C3E50;">${booking.username} → Dr. ${booking.therapistname}</div>
                             <span class="status-badge status-${booking.status}">${booking.status.toUpperCase()}</span>
                         </div>
                         <div class="booking-info">
-                            <div class="detail-item">
-                                <span class="detail-label">Date</span>
-                                <span class="detail-value">${date}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Time</span>
-                                <span class="detail-value">${startTime}${endTime ? ' - ' + endTime : ''}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Booking ID</span>
-                                <span class="detail-value">${booking.id}</span>
-                            </div>
+                            <div class="detail-item"><span class="detail-label">Date</span><span class="detail-value">${date}</span></div>
+                            <div class="detail-item"><span class="detail-label">Time</span><span class="detail-value">${booking.starttime}</span></div>
+                            <div class="detail-item"><span class="detail-label">Booking ID</span><span class="detail-value">${booking.id}</span></div>
                         </div>
-                        ${booking.notes ? `<div style="margin-top: 10px; color: #6B7280; font-size: 14px;">${booking.notes}</div>` : ''}
                     </div>
                 `;
             }).join('');
         }
 
-        // Convert 24-hour to 12-hour format (ALL ORIGINAL LOGIC)
-        function convertTo12Hour(time) {
-            if (!time) return '';
-            const parts = time.split(':');
-            const hours = parts[0];
-            const minutes = parts[1];
-            const h = parseInt(hours);
-            const period = h >= 12 ? 'PM' : 'AM';
-            const hour12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
-            return `${hour12}:${minutes} ${period}`;
-        }
-
-        // Logout Function (ALL ORIGINAL LOGIC)
         function logout() {
             localStorage.removeItem('user');
             window.location.href = 'login.html';
         }
 
-        // Initialize on page load
         init();
     </script>
 </body>
