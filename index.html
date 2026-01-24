@@ -1,92 +1,166 @@
+
+1-index.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Therapist Booking Platform</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .landing-container {
-      max-width: 800px;
-      margin: 100px auto;
-      text-align: center;
-      padding: 40px;
-    }
-    .landing-container h1 {
-      font-size: 2.5em;
-      margin-bottom: 20px;
-      color: #333;
-    }
-    .landing-container p {
-      font-size: 1.2em;
-      color: #666;
-      margin-bottom: 40px;
-    }
-    .button-group {
-      display: flex;
-      gap: 20px;
-      justify-content: center;
-      margin-bottom: 40px;
-    }
-    .btn-large {
-      padding: 15px 40px;
-      font-size: 18px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-      display: inline-block;
-    }
-    .btn-primary {
-      background: #4CAF50;
-      color: white;
-    }
-    .btn-primary:hover {
-      background: #45a049;
-    }
-    .btn-secondary {
-      background: #2196F3;
-      color: white;
-    }
-    .btn-secondary:hover {
-      background: #0b7dda;
-    }
-    .divider {
-      margin: 40px 0;
-      color: #999;
-      font-size: 16px;
-    }
-    .signup-section {
-      background: #f9f9f9;
-      padding: 30px;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-    .signup-section h2 {
-      margin-bottom: 20px;
-      color: #555;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindSpace - Your Mental Wellness Journey</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="landing-container">
-    <h1>Welcome to Therapist Booking Platform</h1>
-    <p>Book therapy sessions with certified professionals</p>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">🧠 MindSpace</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="how-it-works.html">How It Works</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="login.html" class="btn-nav-login">Login</a></li>
+            </ul>
+        </div>
+    </nav>
 
-    <div class="button-group">
-      <a href="login.html" class="btn-large btn-primary">Login</a>
-    </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Your journey to <span class="highlight">inner peace</span> starts here</h1>
+                <p class="hero-subtitle">Connect with certified therapists who understand you. Take the first step towards better mental health today.</p>
+                <div class="hero-buttons">
+                    <a href="signup-user.html" class="btn-primary">
+                        Get Started
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 10h12m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                    <a href="signup-therapist.html" class="btn-secondary">Join as Therapist</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="floating-card">
+                    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="80" fill="#5A9B8E" opacity="0.2"/>
+                        <circle cx="100" cy="100" r="60" fill="#5A9B8E" opacity="0.3"/>
+                        <circle cx="100" cy="100" r="40" fill="#5A9B8E" opacity="0.5"/>
+                        <text x="100" y="115" font-size="50" text-anchor="middle" fill="#2C3E50">🌱</text>
+                    </svg>
+                    <p class="card-text">Grow at your own pace</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="divider">── Don't have an account? ──</div>
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Certified Therapists</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">10k+</div>
+                    <div class="stat-label">Sessions Completed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">4.8★</div>
+                    <div class="stat-label">Average Rating</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="signup-section">
-      <h2>Sign Up As:</h2>
-      <div class="button-group">
-        <a href="signup-user.html" class="btn-large btn-secondary">User / Patient</a>
-        <a href="signup-therapist.html" class="btn-large btn-secondary">Therapist</a>
-      </div>
-    </div>
-  </div>
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why choose MindSpace?</h2>
+                <p>We make mental wellness accessible, affordable, and judgment-free for everyone</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>100% Confidential</h3>
+                    <p>Your privacy matters. All sessions are encrypted and completely confidential.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Personalized Match</h3>
+                    <p>We match you with therapists based on your needs, preferences, and goals.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Flexible Sessions</h3>
+                    <p>Book sessions at your convenience. Video, audio, or chat - your choice.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3>Licensed Experts</h3>
+                    <p>All therapists are verified, certified, and experienced professionals.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Affordable Care</h3>
+                    <p>Quality mental health support shouldn't break the bank. Transparent pricing.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Easy Access</h3>
+                    <p>Connect from anywhere. No waiting rooms, no commute, no hassle.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to take the first step?</h2>
+                <p>Join thousands who've found peace and clarity through MindSpace</p>
+                <a href="signup-user.html" class="btn-primary btn-large">Start Your Journey Today</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4 class="logo">🧠 MindSpace</h4>
+                    <p>Your trusted partner in mental wellness</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="how-it-works.html">How It Works</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>For Professionals</h4>
+                    <ul>
+                        <li><a href="signup-therapist.html">Join as Therapist</a></li>
+                        <li><a href="login.html">Therapist Login</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 MindSpace. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
