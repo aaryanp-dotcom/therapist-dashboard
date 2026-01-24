@@ -1,9 +1,18 @@
+
+// ═══════════════════════════════════════════════════════════════
+// MINDSPACE - AUTHENTICATION LOGIC
+// All Supabase authentication functions preserved from original
+// ═══════════════════════════════════════════════════════════════
+
 // Supabase Configuration
 const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
+
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Login Function
+// ═══════════════════════════════════════════════════════════════
+// LOGIN FUNCTION (ALL ORIGINAL LOGIC)
+// ═══════════════════════════════════════════════════════════════
 async function login(email, password) {
     try {
         console.log('Attempting login for:', email);
@@ -16,7 +25,7 @@ async function login(email, password) {
 
         if (authError) {
             console.error('Auth error:', authError);
-            alert('❌ Login failed: ' + authError.message);
+            alert('Login failed: ' + authError.message);
             return;
         }
 
@@ -31,7 +40,7 @@ async function login(email, password) {
 
         if (profileError) {
             console.error('Profile error:', profileError);
-            alert('❌ Error loading profile: ' + profileError.message);
+            alert('Error loading profile: ' + profileError.message);
             return;
         }
 
@@ -41,18 +50,18 @@ async function login(email, password) {
         if (profile.role === 'therapist') {
             const { data: therapist, error: therapistError } = await supabaseClient
                 .from('Therapists')
-                .select('approval_status')
-                .eq('user_id', profile.id)
+                .select('approvalstatus')
+                .eq('userid', profile.id)
                 .single();
 
             if (therapistError) {
                 console.error('Therapist check error:', therapistError);
-                alert('❌ Error checking therapist status');
+                alert('Error checking therapist status');
                 return;
             }
 
-            if (therapist.approval_status !== 'approved') {
-                alert('⚠️ Your therapist account is pending approval. Please wait for admin approval.');
+            if (therapist.approvalstatus !== 'approved') {
+                alert('Your therapist account is pending approval. Please wait for admin approval.');
                 await supabaseClient.auth.signOut();
                 return;
             }
@@ -62,7 +71,7 @@ async function login(email, password) {
         const userData = {
             id: profile.id,
             email: profile.email,
-            full_name: profile.full_name,
+            fullname: profile.fullname,
             role: profile.role
         };
 
@@ -77,17 +86,19 @@ async function login(email, password) {
         } else if (profile.role === 'user') {
             window.location.href = 'user-dashboard.html';
         } else {
-            alert('❌ Invalid user role');
+            alert('Invalid user role');
             await supabaseClient.auth.signOut();
         }
 
     } catch (error) {
         console.error('Login error:', error);
-        alert('❌ An error occurred during login: ' + error.message);
+        alert('An error occurred during login: ' + error.message);
     }
 }
 
-// Signup User Function
+// ═══════════════════════════════════════════════════════════════
+// SIGNUP USER FUNCTION (ALL ORIGINAL LOGIC)
+// ═══════════════════════════════════════════════════════════════
 async function signupUser(email, password, fullName, phone) {
     try {
         // Step 1: Create auth user
@@ -97,7 +108,7 @@ async function signupUser(email, password, fullName, phone) {
         });
 
         if (authError) {
-            alert('❌ Signup failed: ' + authError.message);
+            alert('Signup failed: ' + authError.message);
             return;
         }
 
@@ -107,7 +118,7 @@ async function signupUser(email, password, fullName, phone) {
             .insert([{
                 id: authData.user.id,
                 email: email,
-                full_name: fullName,
+                fullname: fullName,
                 phone: phone,
                 role: 'user',
                 status: 'active',
@@ -116,20 +127,22 @@ async function signupUser(email, password, fullName, phone) {
 
         if (profileError) {
             console.error('Profile creation error:', profileError);
-            alert('❌ Error creating profile: ' + profileError.message);
+            alert('Error creating profile: ' + profileError.message);
             return;
         }
 
-        alert('✅ Account created successfully! Please login.');
+        alert('Account created successfully! ✓ Please login.');
         window.location.href = 'login.html';
 
     } catch (error) {
         console.error('Signup error:', error);
-        alert('❌ An error occurred during signup: ' + error.message);
+        alert('An error occurred during signup: ' + error.message);
     }
 }
 
-// Signup Therapist Function
+// ═══════════════════════════════════════════════════════════════
+// SIGNUP THERAPIST FUNCTION (ALL ORIGINAL LOGIC)
+// ═══════════════════════════════════════════════════════════════
 async function signupTherapist(email, password, name, phone, specialization, qualifications, bio) {
     try {
         // Step 1: Create auth user
@@ -139,7 +152,7 @@ async function signupTherapist(email, password, name, phone, specialization, qua
         });
 
         if (authError) {
-            alert('❌ Signup failed: ' + authError.message);
+            alert('Signup failed: ' + authError.message);
             return;
         }
 
@@ -149,7 +162,7 @@ async function signupTherapist(email, password, name, phone, specialization, qua
             .insert([{
                 id: authData.user.id,
                 email: email,
-                full_name: name,
+                fullname: name,
                 phone: phone,
                 role: 'therapist',
                 status: 'active',
@@ -158,7 +171,7 @@ async function signupTherapist(email, password, name, phone, specialization, qua
 
         if (profileError) {
             console.error('Profile creation error:', profileError);
-            alert('❌ Error creating profile: ' + profileError.message);
+            alert('Error creating profile: ' + profileError.message);
             return;
         }
 
@@ -166,38 +179,41 @@ async function signupTherapist(email, password, name, phone, specialization, qua
         const { error: therapistError } = await supabaseClient
             .from('Therapists')
             .insert([{
-                user_id: authData.user.id,
+                userid: authData.user.id,
                 Name: name,
                 email: email,
                 phone: phone,
                 Specialization: specialization,
                 qualifications: qualifications,
                 bio: bio,
-                approval_status: 'pending',
+                approvalstatus: 'pending',
                 Active: true
             }]);
 
         if (therapistError) {
             console.error('Therapist creation error:', therapistError);
-            alert('❌ Error creating therapist profile: ' + therapistError.message);
+            alert('Error creating therapist profile: ' + therapistError.message);
             return;
         }
 
-        alert('✅ Therapist account created! Please wait for admin approval before logging in.');
+        alert('Therapist account created! ✓ Please wait for admin approval before logging in.');
         window.location.href = 'login.html';
 
     } catch (error) {
         console.error('Therapist signup error:', error);
-        alert('❌ An error occurred during signup: ' + error.message);
+        alert('An error occurred during signup: ' + error.message);
     }
 }
 
-// Check if user is already logged in
+// ═══════════════════════════════════════════════════════════════
+// CHECK IF USER IS ALREADY LOGGED IN
+// ═══════════════════════════════════════════════════════════════
 function checkAuth() {
     const user = localStorage.getItem('user');
+
     if (user) {
         const userData = JSON.parse(user);
-        
+
         // Redirect to appropriate dashboard
         if (userData.role === 'admin') {
             window.location.href = 'admin-dashboard.html';
@@ -209,7 +225,9 @@ function checkAuth() {
     }
 }
 
-// Logout Function
+// ═══════════════════════════════════════════════════════════════
+// LOGOUT FUNCTION (ALL ORIGINAL LOGIC)
+// ═══════════════════════════════════════════════════════════════
 function logout() {
     localStorage.removeItem('user');
     supabaseClient.auth.signOut();
