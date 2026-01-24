@@ -100,7 +100,7 @@
                 const { count: therapistsCount } = await supabaseClient.from('Therapists').select('*', { count: 'exact', head: true });
                 document.getElementById('totalTherapists').textContent = therapistsCount || 0;
 
-                const { count: pendingCount } = await supabaseClient.from('Therapists').select('*', { count: 'exact', head: true }).eq('approvalstatus', 'pending');
+                const { count: pendingCount } = await supabaseClient.from('Therapists').select('*', { count: 'exact', head: true }).eq('approval_status', 'pending');
                 document.getElementById('pendingApplications').textContent = pendingCount || 0;
 
                 const { count: bookingsCount } = await supabaseClient.from('Bookings').select('*', { count: 'exact', head: true });
@@ -112,7 +112,7 @@
 
         async function loadPendingApplications() {
             try {
-                const { data, error } = await supabaseClient.from('Therapists').select('*').eq('approvalstatus', 'pending').order('createdat', { ascending: false });
+                const { data, error } = await supabaseClient.from('Therapists').select('*').eq('approval_status', 'pending').order('created_at', { ascending: false });
                 if (error) throw error;
                 displayApplications(data);
             } catch (error) {
@@ -135,7 +135,7 @@
                             <div class="therapist-name">Dr. ${app.Name}</div>
                             <div class="therapist-specialization">${app.Specialization}</div>
                         </div>
-                        <span class="status-badge status-pending">${app.approvalstatus.toUpperCase()}</span>
+                        <span class="status-badge status-pending">${app.approval_status.toUpperCase()}</span>
                     </div>
                     <div class="application-details">
                         <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">${app.email}</span></div>
@@ -154,7 +154,7 @@
         async function approveApplication(therapistId) {
             if (!confirm('Approve this therapist application?')) return;
             try {
-                const { error } = await supabaseClient.from('Therapists').update({ approvalstatus: 'approved', Active: true }).eq('id', therapistId);
+                const { error } = await supabaseClient.from('Therapists').update({ approval_status: 'approved', Active: true }).eq('id', therapistId);
                 if (error) throw error;
                 alert('Therapist approved successfully! ✓');
                 await loadStatistics();
@@ -168,7 +168,7 @@
         async function rejectApplication(therapistId) {
             if (!confirm('Reject this therapist application?')) return;
             try {
-                const { error } = await supabaseClient.from('Therapists').update({ approvalstatus: 'rejected', Active: false }).eq('id', therapistId);
+                const { error } = await supabaseClient.from('Therapists').update({ approval_status: 'rejected', Active: false }).eq('id', therapistId);
                 if (error) throw error;
                 alert('Application rejected');
                 await loadStatistics();
@@ -181,7 +181,7 @@
 
         async function loadAllBookings() {
             try {
-                const { data: bookingsData, error: bookingsError } = await supabaseClient.from('Bookings').select('*').order('sessiondate', { ascending: false });
+                const { data: bookingsData, error: bookingsError } = await supabaseClient.from('Bookings').select('*').order('session_date', { ascending: false });
                 if (bookingsError) throw bookingsError;
 
                 if (!bookingsData || bookingsData.length === 0) {
@@ -189,16 +189,16 @@
                     return;
                 }
 
-                const therapistIds = [...new Set(bookingsData.map(b => b.therapistid))];
-                const userIds = [...new Set(bookingsData.map(b => b.userid))];
+                const therapistIds = [...new Set(bookingsData.map(b => b.therapist_id))];
+                const userIds = [...new Set(bookingsData.map(b => b.user_id))];
 
                 const { data: therapistsData } = await supabaseClient.from('Therapists').select('id, Name').in('id', therapistIds);
-                const { data: profilesData } = await supabaseClient.from('profiles').select('id, fullname').in('id', userIds);
+                const { data: profilesData } = await supabaseClient.from('profiles').select('id, full_name').in('id', userIds);
 
                 const bookingsWithDetails = bookingsData.map(booking => {
-                    const therapist = therapistsData?.find(t => t.id === booking.therapistid);
-                    const user = profilesData?.find(p => p.id === booking.userid);
-                    return { ...booking, therapistname: therapist?.Name || 'Unknown', username: user?.fullname || 'Unknown' };
+                    const therapist = therapistsData?.find(t => t.id === booking.therapist_id);
+                    const user = profilesData?.find(p => p.id === booking.user_id);
+                    return { ...booking, therapist_name: therapist?.Name || 'Unknown', user_name: user?.full_name || 'Unknown' };
                 });
 
                 displayBookings(bookingsWithDetails);
@@ -216,16 +216,16 @@
             }
 
             container.innerHTML = bookings.map(booking => {
-                const date = new Date(booking.sessiondate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                const date = new Date(booking.session_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
                 return `
                     <div class="booking-card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <div style="font-weight: bold; font-size: 16px; color: #2C3E50;">${booking.username} → Dr. ${booking.therapistname}</div>
+                            <div style="font-weight: bold; font-size: 16px; color: #2C3E50;">${booking.user_name} → Dr. ${booking.therapist_name}</div>
                             <span class="status-badge status-${booking.status}">${booking.status.toUpperCase()}</span>
                         </div>
                         <div class="booking-info">
                             <div class="detail-item"><span class="detail-label">Date</span><span class="detail-value">${date}</span></div>
-                            <div class="detail-item"><span class="detail-label">Time</span><span class="detail-value">${booking.starttime}</span></div>
+                            <div class="detail-item"><span class="detail-label">Time</span><span class="detail-value">${booking.start_time}</span></div>
                             <div class="detail-item"><span class="detail-label">Booking ID</span><span class="detail-value">${booking.id}</span></div>
                         </div>
                     </div>
