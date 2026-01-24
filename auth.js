@@ -1,16 +1,14 @@
 
-// auth.js - FIXED WITH EXACT COLUMN NAMES
+// auth.js - FINAL CORRECT VERSION
 const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Login Function
 async function login(email, password) {
     try {
         console.log('Attempting login for:', email);
 
-        // Step 1: Authenticate with Supabase
         const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({
             email: email,
             password: password
@@ -24,7 +22,6 @@ async function login(email, password) {
 
         console.log('Auth successful:', authData);
 
-        // Step 2: Get user profile from profiles table
         const { data: profile, error: profileError } = await supabaseClient
             .from('profiles')
             .select('*')
@@ -39,12 +36,11 @@ async function login(email, password) {
 
         console.log('Profile loaded:', profile);
 
-        // Step 3: Check if therapist is approved
         if (profile.role === 'therapist') {
             const { data: therapist, error: therapistError } = await supabaseClient
                 .from('Therapists')
-                .select('approvalstatus')
-                .eq('userid', profile.id)
+                .select('approval_status')
+                .eq('user_id', profile.id)
                 .single();
 
             if (therapistError) {
@@ -53,25 +49,23 @@ async function login(email, password) {
                 return;
             }
 
-            if (therapist.approvalstatus !== 'approved') {
+            if (therapist.approval_status !== 'approved') {
                 alert('Your therapist account is pending approval. Please wait for admin approval.');
                 await supabaseClient.auth.signOut();
                 return;
             }
         }
 
-        // Step 4: Store user data in localStorage
         const userData = {
             id: profile.id,
             email: profile.email,
-            fullname: profile.fullname,
+            full_name: profile.full_name,
             role: profile.role
         };
 
         localStorage.setItem('user', JSON.stringify(userData));
         console.log('User stored in localStorage:', userData);
 
-        // Step 5: Redirect based on role
         if (profile.role === 'admin') {
             window.location.href = 'admin-dashboard.html';
         } else if (profile.role === 'therapist') {
@@ -89,10 +83,8 @@ async function login(email, password) {
     }
 }
 
-// Signup User Function
 async function signupUser(email, password, fullName, phone) {
     try {
-        // Step 1: Create auth user
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
             password: password
@@ -103,13 +95,12 @@ async function signupUser(email, password, fullName, phone) {
             return;
         }
 
-        // Step 2: Create profile
         const { error: profileError } = await supabaseClient
             .from('profiles')
             .insert([{
                 id: authData.user.id,
                 email: email,
-                fullname: fullName,
+                full_name: fullName,
                 phone: phone,
                 role: 'user',
                 status: 'active',
@@ -131,10 +122,8 @@ async function signupUser(email, password, fullName, phone) {
     }
 }
 
-// Signup Therapist Function
 async function signupTherapist(email, password, name, phone, specialization, qualifications, bio) {
     try {
-        // Step 1: Create auth user
         const { data: authData, error: authError } = await supabaseClient.auth.signUp({
             email: email,
             password: password
@@ -145,13 +134,12 @@ async function signupTherapist(email, password, name, phone, specialization, qua
             return;
         }
 
-        // Step 2: Create profile
         const { error: profileError } = await supabaseClient
             .from('profiles')
             .insert([{
                 id: authData.user.id,
                 email: email,
-                fullname: name,
+                full_name: name,
                 phone: phone,
                 role: 'therapist',
                 status: 'active',
@@ -164,18 +152,17 @@ async function signupTherapist(email, password, name, phone, specialization, qua
             return;
         }
 
-        // Step 3: Create therapist record
         const { error: therapistError } = await supabaseClient
             .from('Therapists')
             .insert([{
-                userid: authData.user.id,
+                user_id: authData.user.id,
                 Name: name,
                 email: email,
                 phone: phone,
                 Specialization: specialization,
                 qualifications: qualifications,
                 bio: bio,
-                approvalstatus: 'pending',
+                approval_status: 'pending',
                 Active: true
             }]);
 
@@ -194,7 +181,6 @@ async function signupTherapist(email, password, name, phone, specialization, qua
     }
 }
 
-// Logout Function
 function logout() {
     localStorage.removeItem('user');
     supabaseClient.auth.signOut();
