@@ -80,6 +80,7 @@
         </div>
     </div>
 
+    <script src="auth.js"></script>
     <script>
         const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
@@ -290,12 +291,6 @@
             } catch (err) {
                 console.error('Cancel booking error:', err);
             }
-        }
-
-        async function logout() {
-            await client.auth.signOut();
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
         }
 
         window.addEventListener('load', init);
