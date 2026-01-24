@@ -1,5 +1,5 @@
 
-// auth.js - FINAL CORRECT VERSION
+// auth.js - LOGOUT REDIRECTS TO HOME
 const SUPABASE_URL = 'https://hviqxpfnvjsqbdjfbttm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2aXF4cGZudmpzcWJkamZidHRtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4NDM0NzIsImV4cCI6MjA4NDQxOTQ3Mn0.P3UWgbYx4MLMJktsXjFsAEtsNpTjqPnO31s2Oyy0BFs';
 
@@ -181,8 +181,9 @@ async function signupTherapist(email, password, name, phone, specialization, qua
     }
 }
 
+// FIXED: Logout redirects to index.html (home page)
 function logout() {
     localStorage.removeItem('user');
     supabaseClient.auth.signOut();
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
 }
